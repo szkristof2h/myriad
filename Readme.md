@@ -4,7 +4,7 @@
 
 ## About
 **Myriad** is a website for browsing user submitted content that are sorted by popularity: users can share images, websites, etc., and the Myriad will sort them to three tiers depending on the number of upvotes/downvotes they get. The first tier is the most popular (visitors can browse by tags, users or without any filter).
- - The single most popular post is loaded from the first tier, in the center of the page
+ - A single post is loaded from the first tier, in the center of the page
  - The second tier posts surround the first tier post
  - Similarly, the third tier posts are frame the second tier ones
 This means that, although each of the more popular posts fill up a larger area by themselves, the overall number of less popular posts will always be higher. This hopefully creates better balance between the tiers.
@@ -15,7 +15,7 @@ This means that, although each of the more popular posts fill up a larger area b
  - MongoDB
  - Passport for authentication (currently only for google)
  - Webpack 4
- - React (16.7 alpha for hooks)
+ - React (16.8 alpha, mostly for hooks)
 
 ## Goal
 I started working on this project to learn, experiment and practice with new features of various frameworks, libraries, etc., I use. I felt that I have neglected actual practice with some of them --like React-- so I decided to create a smaller project where practice is a lot easier. This also means that I might use alpha or beta versions of dependencies.
