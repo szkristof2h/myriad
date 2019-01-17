@@ -1,0 +1,37 @@
+$s1: 0.75em;
+$s2: 0.5em;
+$h1: 1em;
+$h2: 1.25em;
+$h3: 1.5em;
+$h4: 1.75em;
+$h5: 2em;
+$h6: 2.5em;
+
+.tags {
+  display: grid;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  grid-column-gap: 6px;
+  justify-content: start;
+  background: #111;
+  margin-top: -1px;
+  font-size: 1rem;
+  padding: 0 5px;
+  .tag {
+    font-size: 0.8em;
+    padding-bottom: 1px;
+    &__link {
+      font-size: 1em;
+      color: white;
+      &:visited, &:active {
+        color: white;
+      }
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

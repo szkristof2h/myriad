@@ -1,0 +1,35 @@
+.comments {
+  display: grid;
+  grid-auto-flow: row;
+  align-content: start;
+  overflow-y: auto;
+  grid-template-columns: 1fr auto;
+  grid-column-gap: 5px;
+  &__input {
+    grid-column: 1 / span 2;
+    margin-top: 5px;
+    resize: vertical;
+    padding: 3px;
+    border: none;
+    border-bottom: 1px solid black;
+    margin-bottom: 10px;
+    resize: vertical;
+    &:focus {
+      outline: none;
+    }
+  }
+  &__warning {
+    grid-column: 1 / span 2;
+    margin-top: 5px;
+  }
+  &__button {
+    grid-column: 1 / span 2;
+    margin-top: 5px;
+  }
+  &__submit {
+    grid-column: 1 / span 2;
+  }
+  &--messages {
+  }
+  .comment__user { font-weight: bold; }
+}

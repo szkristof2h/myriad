@@ -1,0 +1,99 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  list-style: none;
+}
+
+body {
+  background: #555;
+  overflow-y: hidden;
+}
+
+*::-webkit-scrollbar {
+    width: 0.5em;
+}
+ 
+*::-webkit-scrollbar-track {
+  
+}
+ 
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(169, 169, 169, .8);
+}
+
+#root {
+  display: grid;
+  overflow-y: auto;
+  max-height: fit-content;
+}
+
+a {
+  color: black;
+  text-decoration: inherit;
+  &:visited, &:active {
+    color: black;
+    text-decoration: inherit;
+  }
+}
+
+.box {
+  padding: 10px;
+  border-radius: 20px;
+  margin: 5px 0;
+  max-width: 550px;
+  min-width: 100px;
+  overflow-y: hidden;
+  &--basic {
+    background: white;
+  }
+  &--login {
+    min-width: 300px;
+  }
+  &--warn {
+    background: rgb(206, 37, 37);
+    color: white;
+  }
+}
+
+.button {
+  padding: 5px;
+  background-color: rgb(177, 175, 101);
+  text-align: center;
+  color: white;
+  font-family: 'Artifika';
+  &:visited, &:active {
+    color: white;
+  }
+  &:hover {
+    background: rgb(210, 207, 118);
+  }
+  &--transparent {
+    background: transparent;
+    &:hover {
+      background: transparent;
+      text-decoration: underline;
+    }
+  }
+  &--google {
+    background: #DD4B39;
+    color: white;
+    &:hover {
+      background: rgb(243, 84, 63);
+    }
+  }
+  &--ok {
+    background: rgb(47, 228, 41);
+    &:hover {
+      background: rgb(47, 228, 41);
+    }
+  }
+  &--warn {
+    background: rgb(206, 37, 37);
+    &:hover {
+      background: rgb(236, 43, 43);
+    }
+  }
+}

@@ -1,0 +1,22 @@
+$s1: 0.75em;
+$s2: 0.5em;
+$h1: 1em;
+$h2: 1.25em;
+$h3: 1.5em;
+$h4: 1.75em;
+$h5: 2em;
+$h6: 2.5em;
+
+.comment {
+  grid-column: 1 / span 2;
+  text-align: left;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  &__user {
+    font-weight: bold;
+  }
+  &__date {
+    font-style: italic;
+    color: gray;
+    font-size: $s1;
+  }
+}

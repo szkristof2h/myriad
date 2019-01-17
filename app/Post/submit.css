@@ -1,0 +1,65 @@
+$s1: 0.75em;
+$s2: 0.5em;
+$h1: 1em;
+$h2: 1.25em;
+$h3: 1.5em;
+$h4: 1.75em;
+$h5: 2em;
+$h6: 2.5em;
+
+.submit {
+  display: grid;
+  width: 500px;
+  font-size: 1rem;
+  grid-column-gap: 3px;
+  grid-row-gap: 3px;
+  grid-template-columns: 1fr 1fr 1fr;
+  justify-self: center;
+  &__header {
+    grid-column: 1 / span 3;
+    font-size: $h3;
+    text-align: center;
+    font-family: 'Artifika';
+    padding: 0 0 10px 0;
+  }
+  &__label {
+    grid-column: 1 / span 3;
+    font-size: $h2;
+    text-align: center;
+    font-family: 'Artifika';
+  }
+  &__input {
+    grid-column: 1 / span 3;
+    border: none;
+    border-bottom: 1px solid black;
+    margin-bottom: 10px;
+    &:focus {
+      outline: none;
+    }
+  }
+  &__image-container {
+    max-width: 100%;
+    height: fit-content;
+    &--active {
+      border: 3px solid black;
+    }
+  }
+  &__image {
+    display: block;
+    max-width: inherit;
+  }
+  &__button {
+    grid-column: 1 / span 3;
+    width: 100%;
+    margin-top: 3px;
+    color: white;
+    text-align: center;
+    font-size: $h2;
+    font-family: 'Artifika';
+    padding: 3px;
+    .submit__error {
+      text-align: center;
+      font-family: 'Artifika';
+    }
+  }
+}

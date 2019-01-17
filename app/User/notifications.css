@@ -1,0 +1,33 @@
+$s1: 0.75em;
+$s2: 0.5em;
+$h1: 1em;
+$h2: 1.25em;
+$h3: 1.5em;
+$h4: 1.75em;
+$h5: 2em;
+$h6: 2.5em;
+
+.notifications {
+  display: grid;
+  justify-self: center;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 3px;
+  grid-row-gap: 3px;
+  margin-bottom: 5px;
+  font-size: 1rem;
+  .posts__header {
+    grid-column: 1 / span 3;
+    font-size: $h3;
+    text-align: center;
+    font-family: 'Artifika';
+    margin-bottom: 4px;
+  }
+  .notifications__button, .notifications__info {
+    grid-column: 1 / span 3;
+    margin-top: 4px;
+  }
+  .post {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
