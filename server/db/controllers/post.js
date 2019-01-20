@@ -30,7 +30,7 @@ export function getPosts(req, res) {
   const userId = res.locals && res.locals.user ? res.locals.user.id : null;
   let posts = {};
   let offset = 0;// offset is used for filling in above tier posts if there weren't enough
-  let criteria = req.params ? req.params.userId ? { postedBy: req.params.userId } : req.params.tags ?
+  let criteria = req.params ? req.params.userId ? { postedByName: req.params.userId } : req.params.tags ?
     { tags: { $in: isArray(req.params.tags) ? req.params.tags : [req.params.tags] } } : null : null;
 
   getDBPosts(criteria, 0, [], offset)

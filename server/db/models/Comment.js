@@ -15,7 +15,8 @@ const commentSchema = new Schema({
   postedOn: ObjectId,
   poster: ObjectId,
   postedById: { type: [ObjectId], index: true, required: [true, 'Invalid poster or target user!'] },
-  postedByName: { type: [String], index: true, required: [true, 'Invalid poster or target user!'] }
+  postedByName: { type: [String], index: true, required: [true, 'Invalid poster or target user!'] },
+  type: String
 });
 
 const Comment = mongoose.model('Comment', commentSchema);
