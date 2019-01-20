@@ -70,6 +70,9 @@ a {
   &:hover {
     background: rgb(210, 207, 118);
   }
+  &--active {
+    background: rgb(151, 149, 87);
+  }
   &--transparent {
     background: transparent;
     &:hover {

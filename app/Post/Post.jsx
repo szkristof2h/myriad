@@ -93,7 +93,7 @@ export default function Post({ _id, col, description, dismiss, downs, image, lin
     }}>
       <div className="post__details">
         <div className="post__personal">
-          <h2 className={"post__title ellipsis"}>{title}</h2>
+          <h2 className={"post__title ellipsis"} onClick={e => handleClick(e)}>{title}</h2>
           <h2 className={"post__user ellipsis"}>@ {currentPostedBy}</h2>
         </div>
         {currentTitle !== 'Submit a post!' && <RateButton

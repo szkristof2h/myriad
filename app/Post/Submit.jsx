@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import Proptypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import isURL from 'validator/lib/isURL';
 import { ErrorContext } from '../contexts/ErrorContext.jsx';
@@ -8,7 +9,7 @@ import './submit.css';
 
 const siteUrl = config.url;
 
-export default function Submit() {
+export default function Submit({ history }) {
   const [description, setDescription] = useState('');
   const [images, setImages] = useState([]);// list of available images
   const [selected, setSelected] = useState('');
@@ -57,6 +58,7 @@ export default function Submit() {
           setTags('');
           setTitle('');
           setUrl('');
+          history.push("/");
         }
       })
       .catch(e => setErrors(errors => [...errors, e.response.data]));
@@ -111,7 +113,10 @@ export default function Submit() {
       <input className="submit__input submit__input--text" onChange={e => handleInput(e, setDescription)} value={description} />
       <div className="submit__label">Link (to the original post)</div>
       <input className="submit__input submit__input--text" onChange={e => handleInput(e, setUrl)} placeholder="Will automatically load images from the url to choose from" value={url} />
-      {images.length != 0 && <div className="submit__label">Choose an image</div>}
+      {(images.length != 0 || url) && <div className="submit__label">Choose an image</div>}
+      {images.length == 0 && url && <div className="submit__image-text">
+        Couldn't find any images on the url (you can instead add your own choice of url below)
+      </div>}
       {images.map(i =>
         <Link
           key={i}
@@ -141,4 +146,8 @@ export default function Submit() {
       }
     </div>
   );
+}
+
+Submit.propTypes = {
+  history: Proptypes.object.isRequired
 }

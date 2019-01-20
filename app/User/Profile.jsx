@@ -119,7 +119,7 @@ export default function Profile({ params }) {
           <div className="profile__bio">
             {profile.bio}
           </div>
-          {profile._id !== user._id && <Link className={`profile__button${profile.followed ? ' post__button--active' : ''} button`}
+          {profile._id !== user._id && <Link className={`profile__button${profile.followed ? ' button--active' : ''} button`}
             to={`/post/user/${profile.followed ? 'un' : ''}follow`}
             onClick={e => handleClick(e)}>
             {(profile.followed ? 'Unf' : 'F') + 'ollow!'}
@@ -153,7 +153,7 @@ export default function Profile({ params }) {
                 available !== null ? ' button--warn' : ''}`}
               onClick={e => handleCheck(e)}
               to="check/displayName">
-              Check availability
+              {available ? "Available" : available === false ? "Already in use" : "Check availability"}
             </Link>
             <div className="submit__label">Avatar</div>
             <img className="profile__avatar" src={avatar} />

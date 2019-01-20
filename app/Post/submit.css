@@ -37,6 +37,10 @@ $h6: 2.5em;
       outline: none;
     }
   }
+  &__image-text {
+    grid-column: 1 / span 3;
+    color: red;
+  }
   &__image-container {
     max-width: 100%;
     height: fit-content;
