@@ -109,8 +109,8 @@ export default function Submit() {
       <input className="submit__input submit__input--text" onChange={e => handleInput(e, setTitle)} value={title} />
       <div className="submit__label">Description</div>
       <input className="submit__input submit__input--text" onChange={e => handleInput(e, setDescription)} value={description} />
-      <div className="submit__label">Link</div>
-      <input className="submit__input submit__input--text" onChange={e => handleInput(e, setUrl)} placeholder="Link to the original post (images will be automatically loaded)" value={url} />
+      <div className="submit__label">Link (to the original post)</div>
+      <input className="submit__input submit__input--text" onChange={e => handleInput(e, setUrl)} placeholder="Will automatically load images from the url to choose from" value={url} />
       {images.length != 0 && <div className="submit__label">Choose an image</div>}
       {images.map(i =>
         <Link
@@ -120,15 +120,15 @@ export default function Submit() {
           to="" >
           <img className="submit__image" src={i} />
         </Link>)}
-      <div className="submit__label">Image (url)</div>
-      <input className="submit__input submit__input--text" onChange={e => handleInput(e, setSelected)} placeholder="Add a custom image or choose from above (after filling link)" value={selected} />
+      {url && <div className="submit__label">Image (url)</div>}
+      {url && <input className="submit__input submit__input--text" onChange={e => handleInput(e, setSelected)} placeholder="Add a custom image or choose from above (after filling link)" value={selected} />}
       <div className="submit__label">Tags</div>
       <input className="submit__input submit__input--text" onChange={e => handleInput(e, setTags)} value={tags} />
       {Object.keys(validation).filter(k => validation[k]).length != 0 ?
         <ul className="submit__button button--warn">
           {validation.title && validation.title.map(e => <li key={e} className="submit__error">{e}</li>)}
           {validation.description && validation.description.map(e => <li key={e} className="submit__error">{e}</li>)}
-          {validation.image && validation.image.map(e => <li key={e} className="submit__error">{e}</li>)}
+          {url && validation.image && validation.image.map(e => <li key={e} className="submit__error">{e}</li>)}
           {validation.url && validation.url.map(e => <li key={e} className="submit__error">{e}</li>)}
           {validation.tags && validation.tags.map(e => <li key={e} className="submit__error">{e}</li>)}
         </ul> :
