@@ -8,7 +8,7 @@ const postSchema = new Schema({
   date: { type: Date, default: Date.now },
   description: {
     type: String,
-    maxlength: [200, 'The description can\'t be longer than 200 characters!'],
+    maxlength: [300, 'The description can\'t be longer than 300 characters!'],
     minlength: [3, 'The description should be at least 3 characters!'],
     required: [true, 'Your post should have a description!'],
     set: v => sanitize(v)

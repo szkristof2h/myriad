@@ -73,7 +73,7 @@ export default function Submit() {
     let error = [];
     if (!description) error.push('You must give your post a description!');
     if (description.length < 3) error.push('The description should be at least 3 characters long!');
-    if (description.length > 200) error.push('The description shouldn\'t be more than 200 characters long!');
+    if (description.length > 300) error.push('The description shouldn\'t be more than 300 characters long!');
     error.length > 0 ? setValidation(v => ({ ...v, description: error })) : setValidation(v => ({ ...v, description: '' }));
   }, [description]);
 
@@ -98,7 +98,7 @@ export default function Submit() {
     let error = [];
     if (!title) error.push('You must give your post a title!');
     if (title.length < 3) error.push('The title should be at least 3 characters long!');
-    if (title.length > 20) error.push('The title shouldn\'t be more than 20 characters long!');
+    if (title.length > 50) error.push('The title shouldn\'t be more than 50 characters long!');
     error.length > 0 ? setValidation(v => ({ ...v, title: error })) : setValidation(v => ({ ...v, title: '' }));
   }, [title]);
 
