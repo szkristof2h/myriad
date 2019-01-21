@@ -9,8 +9,6 @@ import config from '../config';
 import './notifications.css';
 
 const siteUrl = config.url;
-const CancelToken = axios.CancelToken;
-const source = CancelToken.source();
 
 const Post = lazy(() => import('../Post/Post.jsx' /* webpackChunkName: "Post" */));
 
@@ -20,6 +18,8 @@ export default function Notifications({ history }) {
   const { setErrors } = useContext(ErrorContext);
   const { refresh } = useContext(NavigationContext);
   const { setFocused } = useContext(PostsContext);
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
 
   const openPost = id => {
     setFocused(id);

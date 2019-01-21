@@ -10,8 +10,6 @@ import Comment from './Comment.jsx';
 import './comments.css';
 
 const siteUrl = config.url;
-const CancelToken = axios.CancelToken;
-const source = CancelToken.source();
 
 export default function Comments({ closePost, count, id, type }) {
   const [comments, setComments] = useState({});
@@ -22,6 +20,8 @@ export default function Comments({ closePost, count, id, type }) {
   const { setErrors } = useContext(ErrorContext);
   const { setShowLogin } = useContext(NavigationContext);
   const { user } = useContext(UserContext);
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
 
   const getComments = () => {
     axios
