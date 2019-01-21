@@ -47,6 +47,9 @@ $r2: 5;
     .post__title {
       grid-row: 1;
       font-family: 'Artifika';
+      &:hover {
+        cursor: pointer;
+      }
     }
     .post__user {
       grid-row: 2;

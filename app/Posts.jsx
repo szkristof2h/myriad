@@ -1,24 +1,14 @@
 import React, { lazy, Suspense, useContext, useEffect, useState } from 'react';
 import { Route } from 'react-router-dom';
 import Proptypes from 'prop-types';
-import axios from 'axios';
-import { ErrorContext } from './contexts/ErrorContext.jsx';
 import { NavigationContext } from './contexts/NavigationContext.jsx';
+import { PostsContext } from './contexts/PostsContext.jsx';
 import { UserContext } from './contexts/UserContext.jsx';
 import Loader from './Loader.jsx';
 import Tags from './Tags.jsx';
-import config from './config';
 import './posts.css';
 
 const Post = lazy(() => import('./Post/Post.jsx' /* webpackChunkName: "Post" */));
-
-
-const samplePost = {
-  description: '',
-  image: 'sample',
-  rated: 0,
-  title: 'Submit a post!'
-}
 
 const setPos = () => {
   const ratio = [18, 6, 5];
@@ -48,58 +38,66 @@ const setPos = () => {
   return [positions, offset];
 }
 
-const siteUrl = config.url;
-
-export default function Posts({ history, tag, url, userName }) {
-  const [focused, setFocused] = useState();
-  const [location, setLocation] = useState();
+export default function Posts({ fullUrl, history, tag, url, userName }) {
+  const [mounted, setMounted] = useState(true);
   const [offset, setOffset] = useState(0);
+  const { refresh, setRefresh } = useContext(NavigationContext);
+  const { focused, getPosts, ids, posts, previousUrl, setFocused, setPreviousUrl } = useContext(PostsContext);
   const [positions, setPositions] = useState([]);
-  const [posts, setPosts] = useState({});
-  const { refresh } = useContext(NavigationContext);
-  const { setErrors } = useContext(ErrorContext);
+  const [loading, setLoading] = useState('');
   const { user } = useContext(UserContext);
-
+  
   const openPost = (i, id) => {
     setFocused(id);
-    setLocation(url);
     history.push(id.length != 20 ? `/post/${id}` : user.logged ? user.displayName ? '/add' : '/profile' : '/login');
   }
 
   const closePost = () => {
     setFocused();
-    setLocation();
-    history.push(focused ? location : '/');
+    history.push(previousUrl ? previousUrl : '/');
   }
 
   useEffect(() => {
+    setMounted(true);
+    // Initialized post positions
     const p = setPos();
     setOffset(p[1]);
     setPositions(p[0]);
+    return () => {
+      setFocused();
+      setMounted(false);
+      setRefresh(false);
+    }
   }, []);
 
   useEffect(() => {
-    const type = tag ? tag : userName ? userName : "";
-
-    axios
-      .get(`${siteUrl}/get/posts${userName ? '/user' : ''}${tag ? '/' + tag.trim() : userName ? '/' + userName : ''}`)
-      .then(res => {
-        if (res.data.errors) setErrors(errors => [...errors, res.data]);
-        else {
-          const loaded = {};
-          res.data.ids.forEach(id => loaded[id] = id.length == 20 ? { _id: id, postedByName: type, ...samplePost }
-            : res.data[id]);
-          setPosts({ ...loaded, ids: res.data.ids });
-        }
-      })
-      .catch(e => setErrors(errors => [...errors, e.response.data]));
+    const type = fullUrl && fullUrl.split("/").length == 3 && fullUrl.split("/")[1] === "post" ?
+      "post" : tag ? tag : userName ? userName : "";
+      `posts${userName ? '/user' : ''}${tag ? '/' + tag.trim() : userName ? '/' + userName : ''}`;
+    
+    // Checks if url was the previous one (and is not refreshing) to avoid loading unnecessarily
+    if ((type !== "post" || !previousUrl) && (previousUrl !== url || refresh)) {
+      setPositions([]);// reset position
+      setLoading(true);
+        getPosts(`posts${userName ? '/user' : ''}${tag ? '/' + tag.trim() : userName ? '/' + userName : ''}`, type)
+          .then(() => {
+            if (mounted) {
+              const p = setPos();
+              setOffset(p[1]);
+              setPositions(p[0]);
+              setLoading(false);
+              setPreviousUrl(url)
+              setRefresh(false);
+            }
+          });
+    }
   }, [refresh, tag, userName]);
 
   return (
     <>
-      {<div className="main">
+      <div className="main">
         <Suspense fallback={<Loader />}>
-          {posts.ids && posts.ids.map((id, i) => <Post
+          {loading ? <Loader /> : ids.map((id, i) => positions.length > i && <Post
             key={id}
             col={positions[i][0] + offset}
             row={positions[i][1] + offset}
@@ -108,7 +106,7 @@ export default function Posts({ history, tag, url, userName }) {
             {...posts[id]} />
           )}
         </Suspense>
-      </div>}
+      </div>
       <Route exact path="/post/:postId" render={({ match }) =>
         <Suspense fallback={<Loader />}>
           <Post
@@ -125,6 +123,7 @@ export default function Posts({ history, tag, url, userName }) {
 }
 
 Posts.propTypes = {
+  fullUrl: Proptypes.string,
   history: Proptypes.object,
   tag: Proptypes.string,
   url: Proptypes.string,

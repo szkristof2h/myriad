@@ -3,9 +3,10 @@ import React, { Suspense, lazy } from 'react';
 import Navigation from './Navigation.jsx';
 import Loader from './Loader.jsx';
 import Error from './Error.jsx';
-import { UserProvider } from './contexts/UserContext.jsx';
-import { NavigationProvider } from './contexts/NavigationContext.jsx';
 import { ErrorProvider } from './contexts/ErrorContext.jsx';
+import { NavigationProvider } from './contexts/NavigationContext.jsx';
+import { PostsProvider } from './contexts/PostsContext.jsx';
+import { UserProvider } from './contexts/UserContext.jsx';
 import './main.css';
 
 const Login = lazy(() => import('./User/Login.jsx' /* webpackChunkName: "Login" */));
@@ -23,20 +24,28 @@ export default function App() {
         <ErrorProvider>
           <NavigationProvider>
             <UserProvider>
-              <Switch>
-                <Route path="/add" render={({ history }) => <Submit history={history} />} />
-                <Route path="/login" render={() => < Login />} />
-                <Route path="/message/:name" render={({ match }) => <Message params={match.params} />} />
-                <Route path="/messages" render={() => <Messages />} />
-                <Route path="/profile" render={({ match }) => <Profile params={match.params} />} />
-                <Route path="/user/:name" render={({ match }) => <Profile params={match.params} />} />
-                <Route path="/tag/:tag" render={({ history, match }) => <Posts history={history} url={match.url} tag={match.params.tag} />} />
-                <Route path="/posts/:user" render={({ history, match }) => <Posts history={history} url={match.url} userName={match.params.user} />} />
-                <Route path="/notifications" render={({ history }) => <Notifications history={history} />} />
-                <Route path="/" render={({ history, match }) => <Posts history={history} url={match.url} />} />
-              </Switch>
-              <Navigation />
-              <Error />
+              <PostsProvider>
+                <Switch>
+                  <Route path="/add" render={({ history }) => <Submit history={history} />} />
+                  <Route path="/login" render={() => < Login />} />
+                  <Route path="/message/:name" render={({ match }) => <Message params={match.params} />} />
+                  <Route path="/messages" render={() => <Messages />} />
+                  <Route path="/profile" render={({ match }) => <Profile params={match.params} />} />
+                  <Route path="/user/:name" render={({ match }) => <Profile params={match.params} />} />
+                  <Route path="/tag/:tag" render={({ history, location, match }) =>
+                    <Posts fullUrl={location.pathname} history={history} url={match.url} tag={match.params.tag} />}
+                  />
+                  <Route path="/posts/:user" render={({ history, location, match }) =>
+                    <Posts fullUrl={location.pathname} history={history} url={match.url} userName={match.params.user} />}
+                  />
+                  <Route path="/notifications" render={({ history }) => <Notifications history={history} />} />
+                  <Route path="/" render={({ history, location, match }) =>
+                    <Posts fullUrl={location.pathname} history={history} url={match.url} />}
+                  />
+                </Switch>
+                <Navigation />
+                <Error />
+              </PostsProvider>
             </UserProvider>
           </NavigationProvider>
         </ErrorProvider>

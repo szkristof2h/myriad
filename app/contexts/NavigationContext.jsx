@@ -8,7 +8,7 @@ const NavigationContext = createContext({
 
 const NavigationProvider = ({ children }) => {
   const [focused, setFocused] = useState();
-  const [refresh, setRefresh] = useState(true);
+  const [refresh, setRefresh] = useState(false);
 
   return (
     <NavigationContext.Provider value={{ focused, refresh, setFocused, setRefresh }}>

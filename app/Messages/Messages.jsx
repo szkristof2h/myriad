@@ -13,10 +13,12 @@ export default function Messages() {
   const [ids, setIds] = useState([]);
   const { user } = useContext(UserContext);
   const { setErrors } = useContext(ErrorContext);
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
 
   const getMessages = () => {
     axios
-      .get(`${siteUrl}/get/messages/${ids.length}/20`)
+      .get(`${siteUrl}/get/messages/${ids.length}/20`, { cancelToken: source.token })
       .then(res => {
         if (res.data.errors) setErrors(errors => [...errors, res.data]);
         else {
@@ -24,10 +26,15 @@ export default function Messages() {
           setIds([...ids, ...res.data.ids]);
         }
       })
-      .catch(e => setErrors(errors => [...errors, e.response.data]))
+      .catch(e => !axios.isCancel(e) && setErrors(errors => [...errors, e.response.data]))
   };
 
-  useEffect(() => {getMessages()}, []);
+  useEffect(() => {
+    getMessages();
+    return () => {
+      source.cancel();// cancel axios request
+    }
+  }, []);
 
   return (
     <div className="messages box box--basic">

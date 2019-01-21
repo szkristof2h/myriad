@@ -27,7 +27,7 @@ const UserProvider = ({ children }) => {
 }
 
 UserProvider.propTypes = {
-  children: Proptypes.array
+  children: Proptypes.object
 }
 
 export { UserProvider, UserContext };
