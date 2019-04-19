@@ -16,19 +16,19 @@ This means that, although each of the more popular posts fill up a larger area b
  - MongoDB
  - Passport for authentication (currently only for google)
  - Webpack 4
- - React (16.8 alpha, mostly for hooks)
+ - React
 
 ## Goal
 I started working on this project to learn, experiment and practice with new features of various frameworks, libraries, etc., I use. I felt that I have neglected actual practice with some of them --like React-- so I decided to create a smaller project where practice is a lot easier. This also means that I might use alpha or beta versions of dependencies.
 
 ## Roadmap (mostly in order of importance)
- 1. Implementing facebook and twitter social login
- 2. Adding option to embed youtube videos
- 1. Fixing the css mess and making the site responsive
- 2. Making tags better and creating some kind of browsing component
- 2. Creating better loader component(s) to use with suspense
- 3. Implementing unit testing
- 4. Experimenting with webpack for better performance
+ 1. Implement facebook and twitter social login
+ 2. Add option to embed youtube videos
+ 1. Fix the css mess and making the site responsive
+ 2. Make tags better and creating some kind of browsing component
+ 2. Create better loader component(s) to use with suspense
+ 3. Implement unit testing
+ 4. Experiment with webpack for better performance
 
 ## Known issues
  1. The site is not responsive yet, and is currently only working good for 1366*768 resolutions
