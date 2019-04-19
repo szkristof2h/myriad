@@ -1,6 +1,5 @@
 node_modules
 npm-debug.log
 dist
-server/db/config.js
-server/secret.js
 .vscode
+.env

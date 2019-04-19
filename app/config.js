@@ -1,3 +1,3 @@
 export default {
-  url: `https://myriad-demo.herokuapp.com`
+  url: `${process.env.SITE_URL}${process.env.NODE_ENV !== 'production' ? ':' + process.env.PORT : ''}`
 }

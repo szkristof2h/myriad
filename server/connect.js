@@ -13,7 +13,7 @@ export default app => {
     resave: false,
     cookie: { maxAge: 7 * 24 * 60 * 60000 },
     saveUninitialized: false,
-    secret: 'foo',// change
+    secret: process.env.SESSION_SECRET,
     store: new MongoStore({ mongooseConnection: mongoose.connection })
   }));
 }

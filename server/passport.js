@@ -1,6 +1,5 @@
 import passport from 'passport';
 import User from './db/models/User';
-// import { clientId, clientSecret } from './secret';
 
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
@@ -24,8 +23,9 @@ export default app => {
   passport.use(new GoogleStrategy({
     clientID: clientId,
     clientSecret: clientSecret,
-    callbackURL: process.env.SITE_URL ? `${process.env.SITE_URL}auth/google/callback`
-      : "http://localhost:8080/auth/google/callback"
+    callbackURL: `${process.env.SITE_URL}${
+      process.env.NODE_ENV !== 'production' ? ':' + process.env.PORT : ''
+    }/auth/google/callback`
   },
     (token, refreshToken, profile, done) => {
       User.findOne({ googleId: profile.id })

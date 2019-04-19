@@ -1,3 +1,4 @@
+import dotenv from 'dotenv/config'
 import path from 'path';
 import express from 'express';
 import sanitizeHtml from 'sanitize-html';
