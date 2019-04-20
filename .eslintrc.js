@@ -25,5 +25,10 @@ module.exports = {
     "no-console": "off",
     "max-len": ["error", { "code": 99 }]
     //"react/display-name": [0]
+  },
+  settings: {
+    react: {
+      version: "detect"
+    } 
   }
 };
