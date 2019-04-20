@@ -1,16 +1,16 @@
 {
   "name": "myriad",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "-",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack/webpack.prod.js",
-    "build-server": "npm run clean && babel ./server --experimental --source-maps-inline -d ./dist",
-    "clean": "rimraf dist",
-    "dev": "set NODE_ENV=development&&npm run build-server && node dist/server.js",
+    "build": "webpack --config src/webpack/webpack.prod.js",
+    "build-server": "npm run clean && babel ./src/server --experimental --source-maps-inline -d ./src/dist",
+    "clean": "rimraf src/dist",
+    "dev": "set NODE_ENV=development&&npm run build-server && node src/dist/server.js",
     "lint": "eslint",
     "precommit": "set NODE_ENV=production lint-staged",
-    "start": "set NODE_ENV=production&&npm run build-server && npm run build && node dist/server.js"
+    "start": "set NODE_ENV=production&&npm run build-server && npm run build && node src/dist/server.js"
   },
   "lint-staged": {
     "*.{js,jsx}": [

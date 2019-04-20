@@ -5,7 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 module.exports = devMode => {
   return {
     entry: {
-      app: './app/index.js'
+      app: './src/app/index.js'
     },
     module: {
       rules: [
@@ -46,8 +46,8 @@ module.exports = devMode => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        template: './public/index.html',
-        filename: './index.html'
+        template: './src/public/index.html',
+        filename: './src/index.html'
       }),
       new MiniCssExtractPlugin({
         filename: devMode ? '[name].css' : '[name].[hash].css',
