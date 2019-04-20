@@ -22,7 +22,8 @@ module.exports = {
     "comma-dangle": ["error", "never"],
     "no-confusing-arrow": "off",
     "import/no-extraneous-dependencies": ["error", { devDependencies: true }],
-    "no-console": "off"
+    "no-console": "off",
+    "max-len": ["error", { "code": 99 }]
     //"react/display-name": [0]
   }
 };
