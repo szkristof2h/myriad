@@ -16,7 +16,6 @@ $r2: 5;
 .post {
   border: 1px solid black;
   display: grid;
-  width: $width;
   background: beige;
   grid-template-rows: 4fr 1fr;
   font-size: 1rem;
@@ -58,8 +57,6 @@ $r2: 5;
     }
   }
   &--main {
-    width: calc($r0*$w);
-    height: calc($r0*$h);
     .post__title {
       font-size: $h3;
     }
@@ -68,15 +65,11 @@ $r2: 5;
     }
   }
   &--sub1 {
-    width: calc($r1*$w);
-    height: calc($r1*$h);
     .post__title {
       font-size: $h1;
     }
   }
   &--sub2 {
-    width: calc($r2*$w);
-    height: calc($r2*$h);
     .post__title {
       font-size: $s1;
     }
