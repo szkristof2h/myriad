@@ -24,11 +24,11 @@ I started working on this project to learn, experiment and practice with new fea
 ## Roadmap (mostly in order of importance)
  1. Implement facebook and twitter social login
  2. Add option to embed youtube videos
- 1. Fix the css mess and making the site responsive
+ 1. Fix the css mess ~~and make the site responsive~~ (current plan is to gradually change from PostCSS to CSS-in-JS)
  2. Make tags better and creating some kind of browsing component
  2. Create better loader component(s) to use with suspense
  3. Implement unit testing
  4. Experiment with webpack for better performance
 
 ## Known issues
- 1. The site is not responsive yet, and is currently only working good for 1366*768 resolutions
+ 1. ~~The site is not responsive yet, and is currently only working good for 1366*768 resolutions~~
