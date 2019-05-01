@@ -9,11 +9,10 @@
 
 body {
   background: #555;
-  overflow-y: hidden;
 }
 
 *::-webkit-scrollbar {
-    width: 0.5em;
+  width: 0.5em;
 }
  
 *::-webkit-scrollbar-track {
@@ -26,8 +25,6 @@ body {
 
 #root {
   display: grid;
-  overflow-y: auto;
-  max-height: fit-content;
 }
 
 a {
@@ -55,48 +52,5 @@ a {
   &--warn {
     background: rgb(206, 37, 37);
     color: white;
-  }
-}
-
-.button {
-  padding: 5px;
-  background-color: rgb(177, 175, 101);
-  text-align: center;
-  color: white;
-  font-family: 'Artifika';
-  &:visited, &:active {
-    color: white;
-  }
-  &:hover {
-    background: rgb(210, 207, 118);
-  }
-  &--active {
-    background: rgb(151, 149, 87);
-  }
-  &--transparent {
-    background: transparent;
-    &:hover {
-      background: transparent;
-      text-decoration: underline;
-    }
-  }
-  &--google {
-    background: #DD4B39;
-    color: white;
-    &:hover {
-      background: rgb(243, 84, 63);
-    }
-  }
-  &--ok {
-    background: rgb(47, 228, 41);
-    &:hover {
-      background: rgb(47, 228, 41);
-    }
-  }
-  &--warn {
-    background: rgb(206, 37, 37);
-    &:hover {
-      background: rgb(236, 43, 43);
-    }
   }
 }
