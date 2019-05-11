@@ -7,7 +7,8 @@ const color = {
   redHighHover: "rgb(236, 43, 43)",
   green: "green",
   greenHigh: "rgb(47, 228, 41)",
-  greenHighHover: "rgb(47, 228, 41)"
+  greenHighHover: "rgb(47, 228, 41)",
+  yellow: "yellow"
 };
 
 export default {
@@ -29,6 +30,7 @@ export default {
     error: color.redHigh,
     errorHover: color.redHighHover,
     ok: color.greenHigh,
-    okHover: color.greenHighHover
+    okHover: color.greenHighHover,
+    warn: color.yellow
   }
 };

@@ -9,13 +9,14 @@ import StyledSubmit from "./Submit.style"
 import { Box } from "../components/Box.style"
 import { Input } from "../components/Input.style"
 import { Button, ButtonError } from "../components/Button.style";
-import { Header, Error } from "../Typography/Typography.style"
+import { Header, Error, Warning } from "../Typography/Typography.style"
 
 const siteUrl = config.url;
 
 export default function Submit({ history }) {
   const [description, setDescription] = useState("");
   const [images, setImages] = useState([]); // list of available images
+  const [imageLoading, setImageLoading] = useState(false);
   const [selected, setSelected] = useState("");
   const [tags, setTags] = useState("");
   const [title, setTitle] = useState("");
@@ -24,20 +25,25 @@ export default function Submit({ history }) {
   const { setErrors } = useContext(ErrorContext);
 
   useEffect(() => {
-    isURL(url)
-      ? axios
-          .post(`${siteUrl}/get/images`, { url })
-          .then(res => {
-            const html = res.data;
-            const parser = new DOMParser();
-            const wrapper = parser.parseFromString(html, "text/html");
-            const imgs = [...wrapper.getElementsByTagName("img")].map(
-              a => a.src
-            );
-            setImages(imgs);
-          })
-          .catch(e => setErrors(errors => [...errors, e.response.data]))
-      : setImages([]);
+    if(isURL(url)) {
+      setImageLoading(true);
+      axios
+        .post(`${siteUrl}/get/images`, { url })
+        .then(res => {
+          const html = res.data;
+          const parser = new DOMParser();
+          const wrapper = parser.parseFromString(html, "text/html");
+          const imgs = [...wrapper.getElementsByTagName("img")]
+            .map(a => a.src)
+            .filter((img, i, self) => self.indexOf(img) === i);
+          setImages(imgs);
+          setImageLoading(false);
+        })
+        .catch(e => {
+          setErrors(errors => [...errors, e.response.data]);
+          setImageLoading(false);
+        })
+      } else setImages([]);
 
     let error = [];
     if (!isURL(url)) error.push("You must give your post a valid url!");
@@ -85,6 +91,14 @@ export default function Submit({ history }) {
     e.preventDefault();
     setSelected(selected => (selected === img ? "" : img));
   };
+
+  const handleOnImageLoad = ({ target: image }, index) => {
+    if (image.naturalWidth < 500 || image.naturalHeight < 500)
+      setImages(images => images.filter(img => img !== index));
+  }
+  
+  const handleOnImageError = image =>
+    setImages(images => images.filter(img => img !== image));
 
   useEffect(() => {
     let error = [];
@@ -171,26 +185,36 @@ export default function Submit({ history }) {
           value={url}
         />
         {images.length != 0 && (
-          <Header className="label" centered>
+          <Header className="label" size={1} centered>
             Choose an image
           </Header>
         )}
-        {images.length == 0 && url && (
+        {images.length == 0 && url && !imageLoading && (
           <Error className="image-text">
             Couldn't find any images on the url (you can instead add your own
-            choice of url below)
+            choice of url below).<br /> Only images bigger than 500*500 px are valid.
           </Error>
         )}
-        {images.map(i => (
+        {imageLoading && (
+          <Warning className="label" size={1} centered>
+            Loading images from {url}...
+          </Warning>
+        )}
+        {images.map(image => (
           <Link
-            key={i}
-            className={`submit__image-container ${
-              selected === i ? "submit__image-container--active" : ""
+            key={image}
+            className={`image-container ${
+              selected === image ? "image-container--active" : ""
             }`}
-            onClick={e => handleSelect(e, i)}
+            onClick={e => handleSelect(e, image)}
             to=""
           >
-            <img className="submit__image" src={i} />
+            <img
+              onError={() => handleOnImageError(image)}
+              onLoad={e => handleOnImageLoad(e, image)}
+              className="image"
+              src={image}
+            />
           </Link>
         ))}
         {url && (
