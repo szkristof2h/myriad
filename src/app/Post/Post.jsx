@@ -116,7 +116,7 @@ export default function Post({
       onClick={e => handleClick(e)}
       style={{
         background: `gray url('${
-          _id.length != 20 ? image : sample
+          _id.length != 20 ? image[0] : sample
         }') no-repeat center`,
         backgroundSize:
           _id.length == 20 ? `70px 70px` : !type ? "cover" : "auto auto",
@@ -169,7 +169,7 @@ export default function Post({
     <Popup show={true} dismiss={dismiss} dismissible={true} modifier="post">
       <div className="post--stand-alone">
         <div className="post__image-container">
-          <img className="post__image" src={image} />
+          <img className="post__image" src={image[0]} />
         </div>
         <a className={"post__title ellipsis"} href={link} target="_blank">
           {title}
@@ -264,7 +264,7 @@ Post.propTypes = {
   description: Proptypes.string,
   dismiss: Proptypes.func,
   downs: Proptypes.number,
-  image: Proptypes.string,
+  image: Proptypes.array,
   link: Proptypes.string,
   openPost: Proptypes.func,
   postedByName: Proptypes.string,

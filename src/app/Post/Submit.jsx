@@ -17,7 +17,8 @@ export default function Submit({ history }) {
   const [description, setDescription] = useState("");
   const [images, setImages] = useState([]); // list of available images
   const [imageLoading, setImageLoading] = useState(false);
-  const [selected, setSelected] = useState("");
+  const [customImage, setCustomImage] = useState("");
+  const [selectedImages, setSelectedImages] = useState([]);
   const [tags, setTags] = useState("");
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
@@ -50,7 +51,7 @@ export default function Submit({ history }) {
     error.length > 0
       ? setValidation(v => ({ ...v, url: error }))
       : setValidation(v => ({ ...v, url: "" }));
-    setSelected("");
+    setSelectedImages([]);
   }, [url]);
 
   const handleSubmit = e => {
@@ -62,7 +63,7 @@ export default function Submit({ history }) {
 
     const data = {
       description,
-      image: selected,
+      image: selectedImages,
       link: url,
       title,
       tags
@@ -75,7 +76,7 @@ export default function Submit({ history }) {
         else {
           setDescription("");
           setImages([]);
-          setSelected("");
+          setSelectedImages([]);
           setTags("");
           setTitle("");
           setUrl("");
@@ -87,9 +88,49 @@ export default function Submit({ history }) {
 
   const handleInput = (e, change) => change(e.currentTarget.value);
 
-  const handleSelect = (e, img) => {
+  const handleImageInput = e => {
+    const newImage = e.currentTarget.value;
+    if (isURL(newImage)) {
+      if (images.includes(newImage)) {
+        setCustomImage("");
+        setErrors(errors => [
+          ...errors,
+          {
+            type: "Error",
+            errors: "Image is already on the list."
+          }
+        ]);
+      } else if (selectedImages.length > 9) {
+        setCustomImage("");
+        setErrors(errors => [
+          ...errors,
+          {
+            type: "Error",
+            errors: "You can only have 10 images for your post."
+          }
+        ]);
+      } else {
+        setCustomImage("Image added.");
+        setImages(images => [...images, newImage]);
+        setSelectedImages(images => [...images, newImage]);
+      }
+    } else setCustomImage(newImage);
+  };
+
+  const handleSelect = (e, clickedImage) => {
     e.preventDefault();
-    setSelected(selected => (selected === img ? "" : img));
+    if (selectedImages.length < 10 || selectedImages.includes(clickedImage))
+      setSelectedImages(images =>
+        images.includes(clickedImage)
+          ? images.filter(image => image !== clickedImage)
+          : [...images, clickedImage]
+      );
+    else {
+      setErrors(errors => [
+        ...errors,
+        { type: "Error", errors: "You can't select more than 10 images!" }
+      ]);
+    }
   };
 
   const handleOnImageLoad = ({ target: image }, index) => {
@@ -97,8 +138,10 @@ export default function Submit({ history }) {
       setImages(images => images.filter(img => img !== index));
   }
   
-  const handleOnImageError = image =>
+  const handleOnImageError = image => {
     setImages(images => images.filter(img => img !== image));
+    setSelectedImages(images => images.filter(img => img !== image));
+  }
 
   useEffect(() => {
     let error = [];
@@ -113,17 +156,21 @@ export default function Submit({ history }) {
   }, [description]);
 
   useEffect(() => {
-    let error = [];
-    if (!selected || !isURL(selected))
-      error.push("Your  image (url) is invalid!");
-    error.length > 0
-      ? setValidation(v => ({ ...v, image: error }))
-      : setValidation(v => ({ ...v, image: "" }));
+    if (selectedImages.length === 0)
+      setValidation(v => ({
+        ...v,
+        image: ["Your post needs at least 1 image."]
+      }));
+    else {
+      setValidation(v => ({ ...v, image: "" }));
 
-    if (error.length == 0 && !images.includes(selected)) {
-      setImages(images => [...images, selected]);
+      const newImages = selectedImages.filter(
+        image => !images.includes(image)
+      );
+
+      newImages.length > 0 && setImages(images => [...images, ...newImages]);
     }
-  }, [selected]);
+  }, [selectedImages, images]);
 
   useEffect(() => {
     let error = [];
@@ -204,7 +251,7 @@ export default function Submit({ history }) {
           <Link
             key={image}
             className={`image-container ${
-              selected === image ? "image-container--active" : ""
+              selectedImages.includes(image) ? "image-container--active" : ""
             }`}
             onClick={e => handleSelect(e, image)}
             to=""
@@ -225,9 +272,9 @@ export default function Submit({ history }) {
         {url && (
           <Input
             className="input input--text"
-            onChange={e => handleInput(e, setSelected)}
+            onChange={e => handleImageInput(e)}
             placeholder="Add a custom image or choose from above (after filling link)"
-            value={selected}
+            value={customImage}
           />
         )}
         <Header className="label" size={1} centered>
