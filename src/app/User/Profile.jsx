@@ -5,9 +5,11 @@ import axios from 'axios';
 import { ErrorContext } from '../contexts/ErrorContext.jsx';
 import { UserContext } from '../contexts/UserContext.jsx';
 import config from '../config';
-import Popup from '../Popup.jsx';
 import Loader from '../Loader.jsx';
-import './profile.css';
+import { Header, Base } from "../Typography/Typography.style";
+import StyledProfile from "./Profile.style"
+import { Button, ButtonError } from "../components/Button.style";
+import EditProfile from "./EditProfile.jsx";
 
 const siteUrl = config.url;
 
@@ -78,8 +80,6 @@ export default function Profile({ params }) {
       .catch(e => setErrors(errors => [...errors, e.response.data])) : '';
   }
 
-  const handleInput = (e, change) => change(e.currentTarget.value);
-
   const handleSubmit = e => {
     e.preventDefault();
 
@@ -103,68 +103,89 @@ export default function Profile({ params }) {
       .catch(e => setErrors(errors => [...errors, e.response.data]));
   }
 
-  const changeDisplayName = () => displayName === profile.displayName ? new Promise(res => res(false)) : axios
-    .put(`${siteUrl}/put/user/displayName`, { displayName })
+  const changeDisplayName = () =>
+    displayName === profile.displayName
+      ? new Promise(res => res(false))
+      : axios.put(`${siteUrl}/put/user/displayName`, { displayName });
 
-  return (
-    !loading ?
-      !edit ?
-        <div className="profile box box--basic">
-          <div className="profile__avatar">
-            <img className="profile__image" src={profile.avatar ? profile.avatar : 'asd'} alt="avatar" />
-          </div>
-          <div className="profile__title">
-            {profile.displayName}
-          </div>
-          <div className="profile__bio">
-            {profile.bio}
-          </div>
-          {profile._id !== user._id && <Link className={`profile__button${profile.followed ? ' button--active' : ''} button`}
-            to={`/post/user/${profile.followed ? 'un' : ''}follow`}
-            onClick={e => handleClick(e)}>
-            {(profile.followed ? 'Unf' : 'F') + 'ollow!'}
-          </Link>}
-          <Link className="profile__button button" to={`/posts/${profile.displayName}`}>
-            Posts
-            </Link>
-          {profile._id !== user._id && <Link className="profile__button button" to={`/message/${params.name}`}>
+  return !loading ? (
+    !edit ? (
+      <StyledProfile>
+        <div className="avatar">
+          <img
+            className="image"
+            src={profile.avatar ? profile.avatar : ""}
+            alt="avatar"
+          />
+        </div>
+        <Header centered className="title">{profile.displayName}</Header>
+        <Base className="bio">{profile.bio}</Base>
+        {profile._id !== user._id && (
+          <Button
+            as={Link}
+            active={profile.followed}
+            className={`button`}
+            to={`/post/user/${profile.followed ? "un" : ""}follow`}
+            onClick={e => handleClick(e)}
+          >
+            {(profile.followed ? "Unf" : "F") + "ollow!"}
+          </Button>
+        )}
+        <Button
+          as={Link}
+          className="button"
+          to={`/posts/${profile.displayName}`}
+        >
+          Posts
+        </Button>
+        {profile._id !== user._id && (
+          <Button as={Link} className="button" to={`/message/${params.name}`}>
             Send a message
-            </Link >}
-          {profile._id === user._id && <Link className="profile__button button" onClick={e => clickEdit(e)} to={`/profile/edit`}>
+          </Button>
+        )}
+        {profile._id === user._id && (
+          <Button
+            as={Link}
+            className="button"
+            onClick={e => clickEdit(e)}
+            to={`/profile/edit`}
+          >
             Edit profile
-            </Link >}
-          {profile._id !== user._id && <Link className={`profile__button button button--warn${profile.blocked ? ' button--active' : ''}`}
-            to={`/post/user/${profile.blocked ? 'un' : ''}block`}
-            onClick={e => handleClick(e)}>
-            {(profile.blocked ? 'Unb' : 'B') + 'lock!'}
-          </Link>}
-          {profile._id === user._id && <Link className={`profile__button button button--warn`}
-            to="/logout">
+          </Button>
+        )}
+        {profile._id !== user._id && (
+          <ButtonError
+            as={Link}
+            active={profile.blocked}
+            className={`button`}
+            to={`/post/user/${profile.blocked ? "un" : ""}block`}
+            onClick={e => handleClick(e)}
+          >
+            {(profile.blocked ? "Unb" : "B") + "lock!"}
+          </ButtonError>
+        )}
+        {profile._id === user._id && (
+          <ButtonError as={Link} className={`button`} to="/logout">
             Logout
-            </Link>}
-        </div> :
-        <Popup dismissible={profile.displayName ? true : false} dismiss={() => setEdit(false)} modifier="profile" show={true}>
-          <div className="profile profile__edit box box--basic">
-            <div className="submit__header">Edit your profile</div>
-            <div className="submit__label">Display Name (can only set once)*</div>
-            <input className="submit__input submit__input--text" onChange={e => handleInput(e, setDisplayName)} value={displayName} />
-            <Link
-              className={`submit__button button${available ? ' button--ok' :
-                available !== null ? ' button--warn' : ''}`}
-              onClick={e => handleCheck(e)}
-              to="check/displayName">
-              {available ? "Available" : available === false ? "Already in use" : "Check availability"}
-            </Link>
-            <div className="submit__label">Avatar</div>
-            <img className="profile__avatar" src={avatar} />
-            <input className="submit__input submit__input--text" onChange={e => handleInput(e, setAvatar)} value={avatar} />
-            <div className="submit__label">Bio</div>
-            <textarea className="submit__input submit__input--text" onChange={e => handleInput(e, setBio)} rows="1" value={bio} />
-            <Link className="submit__button button" onClick={e => handleSubmit(e)} to="check/displayName">Save</Link>
-          </div>
-        </Popup>
-      : <Loader />
-  )
+          </ButtonError>
+        )}
+      </StyledProfile>
+    ) : (
+      <EditProfile
+        available={available}
+        avatar={avatar}
+        bio={bio}
+        displayName={displayName}
+        handleCheck={handleCheck}
+        handleSubmit={handleSubmit}
+        setAvatarsetAvatar
+        setBio={setBio}
+        setDisplayName={setDisplayName}
+      />
+    )
+  ) : (
+    <Loader />
+  );
 }
 
 Profile.propTypes = {
