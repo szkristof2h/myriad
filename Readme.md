@@ -17,6 +17,7 @@ This means that, although each of the more popular posts fill up a larger area b
  - Passport for authentication (currently only for google)
  - Webpack 4
  - React
+ - CSS-in-JS (emotion)
 
 ## Goal
 I started working on this project to learn, experiment and practice with new features of various frameworks, libraries, etc., I use. I felt that I have neglected actual practice with some of them --like React-- so I decided to create a smaller project where practice is a lot easier. This also means that I might use alpha or beta versions of dependencies.
@@ -32,3 +33,4 @@ I started working on this project to learn, experiment and practice with new fea
 
 ## Known issues
  1. ~~The site is not responsive yet, and is currently only working good for 1366*768 resolutions~~
+ 2. Some pages are really slow to load: investigate what causes the performance issues
