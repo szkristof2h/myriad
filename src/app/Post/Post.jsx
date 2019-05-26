@@ -12,6 +12,7 @@ import Popup from '../Popup.jsx';
 import RateButton from '../RateButton.jsx';
 import './post.css';
 import sample from '../images/add.svg';
+import { ButtonArrow } from '../components/Button.style';
 
 const Comments = lazy(() => import('../Comments/Comments.jsx' /* webpackChunkName: "Comments" */));
 
@@ -24,7 +25,7 @@ export default function Post({
   description,
   dismiss,
   downs,
-  image,
+  images,
   link,
   openPost,
   postedByName,
@@ -37,6 +38,7 @@ export default function Post({
 }) {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState();
+  const [imageIndex, setImageIndex] = useState(0);
   const { setErrors } = useContext(ErrorContext);
   const { getPost, setPosts } = useContext(PostsContext);
   const url = `${siteUrl}/${_id}`;
@@ -85,6 +87,11 @@ export default function Post({
 
   const handleClick = e => e.target === e.currentTarget && openPost();
 
+  const handleImageStep = (e, step) => {
+    e.preventDefault();
+    setImageIndex(index => index + step);
+  }
+
   useEffect(() => {
     setMounted(true);
     return () => {
@@ -110,13 +117,13 @@ export default function Post({
       : "main"
   }`;
 
-  const postTemplate = (
+  const renderGridPost = () => (
     <div
       className={classType}
       onClick={e => handleClick(e)}
       style={{
         background: `gray url('${
-          _id.length != 20 ? image[0] : sample
+          _id.length != 20 ? images[0] : sample
         }') no-repeat center`,
         backgroundSize:
           _id.length == 20 ? `70px 70px` : !type ? "cover" : "auto auto",
@@ -126,14 +133,19 @@ export default function Post({
     >
       <div className="post__details">
         <div className="post__personal">
-          <h2 className={"post__title ellipsis"} onClick={e => handleClick(e)}>
+          <h2
+            className={"post__title ellipsis"}
+            onClick={e => handleClick(e)}
+          >
             {title}
           </h2>
           <h2 className={"post__user ellipsis"}>@ {postedByName}</h2>
         </div>
         {title !== "Submit a post!" && (
           <RateButton
-            className={`post__button post__button${rated > 0 ? "--rated" : ""}`}
+            className={`post__button post__button${
+              rated > 0 ? "--rated" : ""
+            }`}
             icon={
               <Star
                 strokeWidth="1.5px"
@@ -164,12 +176,35 @@ export default function Post({
   );
 
   return !type || type === "notification" ? (
-    postTemplate
+    renderGridPost()
   ) : (
     <Popup show={true} dismiss={dismiss} dismissible={true} modifier="post">
       <div className="post--stand-alone">
         <div className="post__image-container">
-          <img className="post__image" src={image[0]} />
+          {images && imageIndex > 0 && (
+            <ButtonArrow
+              as={Link}
+              to="/"
+              className="button--previous"
+              onClick={e => handleImageStep(e, -1)}
+            >
+              {"<"}
+            </ButtonArrow>
+          )}
+          <img
+            className="post__image"
+            src={images ? images[imageIndex] : ""}
+          />
+          {images && imageIndex < images.length - 1 && (
+            <ButtonArrow
+              as={Link}
+              to="/"
+              className="button--next"
+              onClick={e => handleImageStep(e, 1)}
+            >
+              {">"}
+            </ButtonArrow>
+          )}
         </div>
         <a className={"post__title ellipsis"} href={link} target="_blank">
           {title}
@@ -264,7 +299,7 @@ Post.propTypes = {
   description: Proptypes.string,
   dismiss: Proptypes.func,
   downs: Proptypes.number,
-  image: Proptypes.array,
+  images: Proptypes.array,
   link: Proptypes.string,
   openPost: Proptypes.func,
   postedByName: Proptypes.string,
