@@ -6,6 +6,7 @@ const Box = styled.div`
   padding: ${theme.base.gutter}px;
   border-radius: ${theme.base.borderRadius}px;
   margin: ${theme.base.gutter}px 0;
+  font-size: 1rem;
   max-width: 550px;
   min-width: ${({ type }) =>
     !type ? "100px" : type === "login" ? "300px" : "initial"};
