@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import theme from "../theme";
 
-const Button = styled.input`
+const Button = styled.div`
   padding: ${theme.base.gutter / 2}px;
-  background-color: ${theme.color.brown};
+  background-color: ${({ active }) => !active ? theme.color.brown : theme.color.brownLight};
   text-align: center;
   color: white;
   font-family: "Artifika";
@@ -17,14 +17,28 @@ const Button = styled.input`
 `;
 
 const ButtonError = styled(Button)`
-  background: ${theme.color.error};
+  background: ${({ active }) =>
+    !active ? theme.color.error : theme.color.errorActive};
   &:hover {
     background: ${theme.color.errorHover};
   }
 `;
 
+// TODO: change to image
+const ButtonArrow = styled(Button)`
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  margin: 0;
+  padding: 5px;
+  width: 2em;
+  height: 2em;
+  &:hover {
+    background: rgba(0, 0, 0, 0.6);
+  }
+`;
+
 const ButtonOk = styled(Button)`
-  background: ${theme.color.ok};
+  background: ${({ active }) => !active ? theme.color.ok : theme.color.okActive};
   &:hover {
     background: ${theme.color.okHover};
   }
@@ -50,4 +64,12 @@ const ButtonActive = styled(Button)`
   background: rgb(151, 149, 87);
 `;
 
-export { Button, ButtonError, ButtonOk, ButtonGoogle, ButtonTransparent };
+export {
+  Button,
+  ButtonError,
+  ButtonOk,
+  ButtonGoogle,
+  ButtonTransparent,
+  ButtonActive,
+  ButtonArrow
+};
