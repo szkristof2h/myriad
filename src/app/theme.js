@@ -29,8 +29,10 @@ export default {
     ...color,
     error: color.redHigh,
     errorHover: color.redHighHover,
+    errorActive: color.redHighHover,
     ok: color.greenHigh,
     okHover: color.greenHighHover,
+    okActive: color.greenHighHover,
     warn: color.yellow
   }
 };
