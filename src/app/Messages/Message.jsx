@@ -1,17 +1,18 @@
 import React from 'react';
 import Proptypes from 'prop-types';
 import Comments from '../Comments/Comments.jsx';
-import './message.css';
+import { Box } from "../components/Box.style";
+import { Header } from "../Typography/Typography.style";
 
 
 export default function Message({ params }) {
   return (
-    <div className="message box box--basic">
-      <div className="message__header">
+    <Box>
+      <Header centered size={2}>
         Conversation with {params.name}
-      </div>
+      </Header>
       <Comments type="messages" id={params.name} />
-    </div>
+    </Box>
   )
 }
 
