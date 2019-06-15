@@ -4,7 +4,8 @@ import axios from 'axios';
 import { ErrorContext } from '../contexts/ErrorContext.jsx';
 import { UserContext } from '../contexts/UserContext.jsx';
 import config from '../config';
-import './messages.css';
+import StyledMessages from "./Messages.style"
+import { Header, Base } from "../Typography/Typography.style";
 
 const siteUrl = config.url;
 
@@ -37,23 +38,36 @@ export default function Messages() {
   }, []);
 
   return (
-    <div className="messages box box--basic">
-      <div className="message__header">
+    <StyledMessages>
+      <Header size={2} centered>
         Inbox
-      </div>
-      {ids && ids.map(id => (
-        <div className="message" key={id}>
-          <Link to={`message/${messages[id].postedByName.filter(n => n != user.displayName)}`} className="message__text">
-            {messages[id].text}
-          </Link>
-          <Link to={`user/${messages[id].postedByName.filter(n => n != user.displayName)}`} className="message__user">
-            {messages[id].postedByName.filter(n => n !== user.displayName)}
-          </Link>
-          <div className="message__date">
-            {messages[id].date && (messages[id].date + "").slice(0, 10)}
+      </Header>
+      {ids &&
+        ids.map(id => (
+          <div className="message" key={id}>
+            <Base
+              as={Link}
+              to={`message/${messages[id].postedByName.filter(
+                n => n != user.displayName
+              )}`}
+              className="text"
+            >
+              {messages[id].text}
+            </Base>
+            <Base
+              as={Link}
+              to={`user/${messages[id].postedByName.filter(
+                n => n != user.displayName
+              )}`}
+              className="user"
+            >
+              {messages[id].postedByName.filter(n => n !== user.displayName)}
+            </Base>
+            <Base className="date">
+              {messages[id].date && (messages[id].date + "").slice(0, 10)}
+            </Base>
           </div>
-        </div>
-      ))}
-    </div>
-  )
+        ))}
+    </StyledMessages>
+  );
 }
