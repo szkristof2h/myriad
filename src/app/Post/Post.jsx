@@ -156,7 +156,7 @@ export default function Post({
             </UserHeader>
           )}
         </div>
-        {title !== "Submit a post!" && (
+        {title !== "Submit a post!" && type !== "notification" && (
           <ButtonRate
             className={`button`}
             as={Link}
@@ -173,7 +173,7 @@ export default function Post({
             <Header size={styleSize}>{ups}</Header>
           </ButtonRate>
         )}
-        {title !== "Submit a post!" && (
+        {title !== "Submit a post!" && type !== "notification" && (
           <ButtonRate
             className={`button`}
             as={Link}
