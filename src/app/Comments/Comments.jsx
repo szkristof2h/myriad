@@ -25,7 +25,6 @@ export default function Comments({ closePost, count, id, type }) {
   const [mounted, setMounted] = useState(true);
   const [newComment, setNewComment] = useState('');
   const { setErrors } = useContext(ErrorContext);
-  const { setShowLogin } = useContext(NavigationContext);
   const { user } = useContext(UserContext);
   const CancelToken = axios.CancelToken;
   const source = CancelToken.source();
@@ -49,25 +48,25 @@ export default function Comments({ closePost, count, id, type }) {
     getComments();
   };
 
-  const handleShowLogin = e => {
-    if (user.logged) return;
-    e.preventDefault();
-    setShowLogin(true);
-    closePost();
-  };
-
   const handleSubmit = e => {
     e.preventDefault();
 
     axios
-      .post(`${siteUrl}/post/${type === 'post' ? 'comment' : 'message'}`, { [type === 'post' ? 'postedOn' : 'postedByName']: id, text: newComment })
+      .post(`${siteUrl}/post/${type === "post" ? "comment" : "message"}`, {
+        [type === "post" ? "postedOn" : "postedByName"]: id,
+        text: newComment
+      })
       .then(res => {
         if (res.data.errors) setErrors(errors => [...errors, res.data]);
         else if (mounted) {
-          setComments(comments => ({ ...comments, [res.data.ids]: res.data.comments[res.data.ids] }))
+          setComments(comments => ({
+            ...comments,
+            [res.data.ids]: res.data.comments[res.data.ids]
+          }));
           setIds(ids => [...ids, res.data.ids]);
-          setNewComment('');
-          type === 'post' && setCommentCount(commentCount => commentCount + 1);
+          setNewComment("");
+          type === "post" &&
+            setCommentCount(commentCount => commentCount + 1);
         }
       })
       .catch(e => setErrors(errors => [...errors, e.response.data]));
@@ -135,7 +134,6 @@ export default function Comments({ closePost, count, id, type }) {
       {!user.logged && (
         <ButtonError
           as={Link}
-          onClick={e => handleShowLogin(e)}
           to="/login"
         >
           You have to be logged in to post a comment
