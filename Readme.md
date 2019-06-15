@@ -1,5 +1,7 @@
 # Myriad
 
+https://david-dm.org/szkristof2h/myriad.svg
+
 > [Myriad Demo](https://myriad-demo.herokuapp.com) hosted on Heroku (gets memory issues sometimes, but haven't found any good alternative yet)
 
 ## About
