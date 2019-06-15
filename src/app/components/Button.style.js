@@ -111,6 +111,7 @@ const ButtonRateBig = styled(Button)`
     background: none;
     & > ${Header} {
       color: ${({ rated }) => (!rated ? "black" : "gray")};
+      text-decoration: none;
     }
     & > .icon {
       stroke: ${({ rated, type }) =>
