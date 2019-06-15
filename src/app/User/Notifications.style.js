@@ -13,11 +13,11 @@ const StyledNotifications = styled(Box)`
   margin-bottom: ${theme.base.gutter / 2}px;
   font-size: 1rem;
   width: 100%;
-  ${Header} {
+  > ${Header} {
     grid-column: 1 / span 3;
     margin-bottom: ${theme.base.gutter}px;
   }
-  ${Button}, ${Error} {
+  > ${Button}, ${Error} {
     grid-column: 1 / span 3;
     margin-top: ${theme.base.gutter}px;
   }

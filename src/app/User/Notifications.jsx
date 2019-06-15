@@ -35,16 +35,32 @@ export default function Notifications({ history }) {
 
   const loadPosts = () => {
     axios
-      .get(`${siteUrl}/get/notifications/${posts.ids ? posts.ids.length : 0}/0`, { cancelToken: source.token })
+      .get(
+        `${siteUrl}/get/notifications/${
+          posts.ids ? posts.ids.length : 0
+        }/0`,
+        { cancelToken: source.token }
+      )
       .then(res => {
         if (res.data.errors) setErrors(errors => [...errors, res.data]);
         else {
-          setPosts(posts => (posts.ids ? { ...posts, ...res.data, ids: [...posts.ids, ...res.data.ids] }
-            : { ...res.data, ids: res.data.ids }));
+          setPosts(posts =>
+            posts.ids
+              ? {
+                  ...posts,
+                  ...res.data,
+                  ids: [...posts.ids, ...res.data.ids]
+                }
+              : { ...res.data, ids: res.data.ids }
+          );
           setLoading(false);
         }
       })
-      .catch(e => !axios.isCancel(e) && setErrors(errors => [...errors, e.response.data]));
+      .catch(
+        e =>
+          !axios.isCancel(e) &&
+          setErrors(errors => [...errors, e.response.data])
+      );
   }
 
   useEffect(() => {
