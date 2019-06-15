@@ -1,6 +1,9 @@
 # Myriad
 
-[![Dependency Status][https://david-dm.org/szkristof2h/myriad.svg]][https://david-dm.org/szkristof2h/myriad]
+[![Dependency Status][dep-status-img]][dep-status-link]
+
+[dep-status-img]: https://david-dm.org/szkristof2h/myriad.svg
+[dep-status-link]: https://david-dm.org/szkristof2h/myriad
 
 > [Myriad Demo](https://myriad-demo.herokuapp.com) hosted on Heroku (gets memory issues sometimes, but haven't found any good alternative yet)
 
