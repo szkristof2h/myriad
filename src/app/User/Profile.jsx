@@ -80,6 +80,8 @@ export default function Profile({ params }) {
       .catch(e => setErrors(errors => [...errors, e.response.data])) : '';
   }
 
+  const handleLogout = () => setUser({});
+
   const handleSubmit = e => {
     e.preventDefault();
 
@@ -165,7 +167,7 @@ export default function Profile({ params }) {
           </ButtonError>
         )}
         {profile._id === user._id && (
-          <ButtonError as={Link} className={`button`} to="/logout">
+          <ButtonError as={Link} onClick={handleLogout} className={`button`} to="/logout">
             Logout
           </ButtonError>
         )}
