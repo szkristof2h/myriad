@@ -1,21 +1,23 @@
 import React from 'react';
 import Proptypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import './comment.css';
+import { Base } from "../Typography/Typography.style";
+import { TextArea } from "../components/Input.style";
+import StyledComment from "./Comment.style";
 
 export default function Comment({ date, text, userName }) {
   return (
-    <div className="comment">
-      <Link className="comment__user" to={`/user/${userName}`}>
+    <StyledComment>
+      <Link className="user" to={`/user/${userName}`}>
         {userName}
       </Link>
-      <span className="comment__text">
+      <Base className="text">
         {': '+ text}
-      </span>
-      <span className="comment__date">
+      </Base>
+      <span className="date">
         {' on \'' + date.slice(2, 10)}
       </span>
-    </div>
+    </StyledComment>
   );
 }
 
