@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import { ErrorContext } from './contexts/ErrorContext.jsx';
 import Popup from './Popup.jsx';
-import './error.css';
+import { Base, Header } from "./Typography/Typography.style";
+import StyledError from "./Error.style";
 
 export default function Error() {
   const { errors, setErrors } = useContext(ErrorContext);
@@ -9,16 +10,16 @@ export default function Error() {
 
   return (
     <Popup show={errors.length > 0} dismiss={dismiss} dismissible={true} modifier="error">
-      <div className="errors box box--warn">
-        <div className="errors__header">
+      <StyledError className="errors box box--warn">
+        <Header centered size={2}>
           Error
-        </div>
+        </Header>
         {errors && errors.map(e => (
-          <div className="errors__message" key={`error${e.type}`}>
+          <Base key={`error${e.type}`}>
             {e.type}: {e.errors}
-          </div>
+          </Base>
         ))}
-      </div>
+      </StyledError>
     </Popup>
   )
 }
