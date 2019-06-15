@@ -71,16 +71,17 @@ const StyledPostOpen = styled.div`
     & > .button--previous {
       position: absolute;
       top: 50%;
-      left: ${theme.base.gutter*2}px;
+      left: ${theme.base.gutter * 2}px;
       transform: translate(0, -50%);
     }
     & > .button--next {
       position: absolute;
       top: 50%;
-      right: ${theme.base.gutter*2}px;
+      right: ${theme.base.gutter * 2}px;
       transform: translate(0, -50%);
     }
     & > .image {
+      object-fit: cover;
       max-width: 100%;
     }
   }
@@ -89,9 +90,6 @@ const StyledPostOpen = styled.div`
     grid-column: 2;
     grid-row: 1;
     padding-bottom: 0;
-    &:hover {
-      text-decoration: underline;
-    }
   }
   ${UserHeader} {
     grid-column: 2;
@@ -115,9 +113,9 @@ const StyledPostOpen = styled.div`
     display: grid;
     grid-column: 2;
     grid-row: 5;
-    grid-column-gap: ${theme.base.gutter/2}px;
+    grid-column-gap: ${theme.base.gutter / 2}px;
     grid-template-columns: auto auto 1fr auto auto;
-    padding: ${theme.base.gutter/2}px;
+    padding: ${theme.base.gutter / 2}px;
     .share-icon {
       &--facebook:hover {
         fill: #3b5998;
