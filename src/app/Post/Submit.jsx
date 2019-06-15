@@ -63,7 +63,7 @@ export default function Submit({ history }) {
 
     const data = {
       description,
-      image: selectedImages,
+      images: selectedImages,
       link: url,
       title,
       tags
@@ -134,8 +134,10 @@ export default function Submit({ history }) {
   };
 
   const handleOnImageLoad = ({ target: image }, index) => {
-    if (image.naturalWidth < 500 || image.naturalHeight < 500)
+    if (image.naturalWidth < 500 || image.naturalHeight < 500) {
       setImages(images => images.filter(img => img !== index));
+      setSelectedImages(images => images.filter(img => img !== index));
+    }
   }
   
   const handleOnImageError = image => {
@@ -159,10 +161,10 @@ export default function Submit({ history }) {
     if (selectedImages.length === 0)
       setValidation(v => ({
         ...v,
-        image: ["Your post needs at least 1 image."]
+        images: ["Your post needs at least 1 image."]
       }));
     else {
-      setValidation(v => ({ ...v, image: "" }));
+      setValidation(v => ({ ...v, images: "" }));
 
       const newImages = selectedImages.filter(
         image => !images.includes(image)
@@ -300,8 +302,8 @@ export default function Submit({ history }) {
                 </li>
               ))}
             {url &&
-              validation.image &&
-              validation.image.map(e => (
+              validation.images &&
+              validation.images.map(e => (
                 <li key={e} className="error">
                   {e}
                 </li>
@@ -320,7 +322,7 @@ export default function Submit({ history }) {
               ))}
           </ButtonError>
         ) : (
-          <Button as={Link} onClick={e => handleSubmit(e)} to="/add">
+          <Button as={Link} className={"button"} onClick={e => handleSubmit(e)} to="/add">
             Post
           </Button>
         )}
