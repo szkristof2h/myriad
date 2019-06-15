@@ -9,10 +9,14 @@ import { PostsContext } from '../contexts/PostsContext.jsx';
 import config from '../config';
 import Meh from '../images/Meh.jsx';
 import Popup from '../Popup.jsx';
-import RateButton from '../RateButton.jsx';
-import './post.css';
 import sample from '../images/add.svg';
-import { ButtonArrow } from '../components/Button.style';
+import {
+  ButtonArrow,
+  ButtonRate,
+  ButtonRateBig
+} from "../components/Button.style";
+import { Header, Base, UserHeader } from "../Typography/Typography.style";
+import { StyledPost, StyledPostOpen } from "./Post.style";
 
 const Comments = lazy(() => import('../Comments/Comments.jsx' /* webpackChunkName: "Comments" */));
 
@@ -82,7 +86,10 @@ export default function Post({
               }));
           }
         })
-        .catch(e => setErrors(errors => [...errors, e.response.data]));
+        .catch(e => {
+          setErrors(errors => [...errors, e.response.data]);
+          setLoading(false);
+        });
   };
 
   const handleClick = e => e.target === e.currentTarget && openPost();
@@ -107,7 +114,7 @@ export default function Post({
     }
   }, [mounted, _id]);
 
-  const classType = `post post--${
+  const classType = `post ${
     type && type !== "notification"
       ? "stand-alone"
       : size < 6
@@ -117,8 +124,10 @@ export default function Post({
       : "main"
   }`;
 
+  const styleSize = classType.includes("main") ? 2 : classType.includes("sub2") ? -1 : 1;
+
   const renderGridPost = () => (
-    <div
+    <StyledPost
       className={classType}
       onClick={e => handleClick(e)}
       style={{
@@ -131,56 +140,59 @@ export default function Post({
         gridRow: `${!type ? "" + row + " / span " + size : "initial"}`
       }}
     >
-      <div className="post__details">
-        <div className="post__personal">
-          <h2
-            className={"post__title ellipsis"}
+      <div className="details">
+        <div className="personal">
+          <Header
+            centered
+            size={styleSize}
+            className={"ellipsis"}
             onClick={e => handleClick(e)}
           >
             {title}
-          </h2>
-          <h2 className={"post__user ellipsis"}>@ {postedByName}</h2>
+          </Header>
+          {postedByName && (
+            <UserHeader centered size={1} className={"user ellipsis"}>
+              @ {postedByName}
+            </UserHeader>
+          )}
         </div>
         {title !== "Submit a post!" && (
-          <RateButton
-            className={`post__button post__button${
-              rated > 0 ? "--rated" : ""
-            }`}
-            icon={
-              <Star
-                strokeWidth="1.5px"
-                color="white"
-                fill={rated > 0 ? "white" : "none"}
-              />
-            }
-            handleClick={e => rate(1, e)}
-            prefix={"post"}
-            text={ups}
+          <ButtonRate
+            className={`button`}
+            as={Link}
+            type={rated > 0 ? "rateActive" : "impressed"}
+            onClick={e => rate(1, e)}
             to={"impressed"}
-          />
+          >
+            <Star
+              className={"icon"}
+              strokeWidth="1.5px"
+              color="white"
+              fill={rated > 0 ? "white" : "none"}
+            />
+            <Header size={styleSize}>{ups}</Header>
+          </ButtonRate>
         )}
         {title !== "Submit a post!" && (
-          <RateButton
-            className={`post__button post__button--meh post__button${
-              rated < 0 ? "--rated" : ""
-            }`}
-            icon={<Meh strokeWidth="1.5px" color="white" />}
-            handleClick={e => rate(-1, e)}
-            prefix={"post"}
-            text={downs}
+          <ButtonRate
+            className={`button`}
+            as={Link}
+            type={rated < 0 ? "rateActive" : "meh"}
+            onClick={e => rate(-1, e)}
             to={"meh"}
-          />
+          >
+            <Meh className={"icon"} strokeWidth="1.5px" color="white" />
+            <Header size={styleSize}>{downs}</Header>
+          </ButtonRate>
         )}
       </div>
-    </div>
+    </StyledPost>
   );
 
-  return !type || type === "notification" ? (
-    renderGridPost()
-  ) : (
+  const renderStandAlone = () => (
     <Popup show={true} dismiss={dismiss} dismissible={true} modifier="post">
-      <div className="post--stand-alone">
-        <div className="post__image-container">
+      <StyledPostOpen>
+        <div className="image-container">
           {images && imageIndex > 0 && (
             <ButtonArrow
               as={Link}
@@ -191,10 +203,7 @@ export default function Post({
               {"<"}
             </ButtonArrow>
           )}
-          <img
-            className="post__image"
-            src={images ? images[imageIndex] : ""}
-          />
+          <img className="image" src={images ? images[imageIndex] : ""} />
           {images && imageIndex < images.length - 1 && (
             <ButtonArrow
               as={Link}
@@ -206,73 +215,85 @@ export default function Post({
             </ButtonArrow>
           )}
         </div>
-        <a className={"post__title ellipsis"} href={link} target="_blank">
+        <Header
+          centered
+          size={3}
+          as="a"
+          className={"title ellipsis"}
+          href={link}
+          target="_blank"
+        >
           {title}
-        </a>
-        <Link className={"post__user ellipsis"} to={`/user/${postedByName}`}>
+        </Header>
+        <UserHeader
+          as={Link}
+          centered={1}
+          size={1}
+          className={"user ellipsis"}
+          to={`/user/${postedByName}`}
+        >
           @{postedByName}
-        </Link>
-        <div className="post__summary">{description}</div>
-        <div className="post__buttons">
-          <RateButton
-            className={`post__button post__button--main post__button${
-              rated > 0 ? "--rated" : ""
-            }`}
-            icon={
-              <Star
-                alt="Impressed!"
-                className="post__icon post__impressed"
-                fill={rated > 0 ? "yellow" : "none"}
-                placeholder="Impressed!"
-                size="40"
-                strokeWidth="1.5px"
-                color={rated > 0 ? "yellow" : "gray"}
-              />
-            }
-            handleClick={e => rate(1, e)}
-            prefix={"post"}
-            text={ups}
-            to={"impressed"}
-          />
-          <RateButton
-            className={`post__button post__button--main post__button--meh post__button${
-              rated < 0 ? "--rated" : ""
-            }`}
-            icon={
-              <Meh
-                alt="Meh..."
-                className="post__icon post__meh"
-                color={rated < 0 ? "black" : "gray"}
-                placeholder="Meh..."
-                size="40"
-                strokeWidth="1.5px"
-              />
-            }
-            handleClick={e => rate(-1, e)}
-            prefix={"post"}
-            text={downs}
+        </UserHeader>
+        <Base className="summary">{description}</Base>
+        <div className="buttons">
+          <ButtonRateBig
+            className={`button`}
+            as={Link}
+            type={"impressed"}
+            rated={rated > 0 ? 1 : 0}
+            onClick={e => rate(1, e)}
             to={"meh"}
-          />
-          <div className="palceholder" />
+          >
+            <Star
+              alt="Impressed!"
+              className="icon impressed"
+              fill={rated > 0 ? "yellow" : "none"}
+              placeholder="Impressed!"
+              size="40"
+              strokeWidth="1.5px"
+              color={rated > 0 ? "yellow" : "gray"}
+            />
+            <Header size={2} className={"text"}>
+              {ups}
+            </Header>
+          </ButtonRateBig>
+          <ButtonRateBig
+            className={`button`}
+            as={Link}
+            type={"meh"}
+            rated={rated < 0 ? 1 : 0}
+            onClick={e => rate(-1, e)}
+            to={"meh"}
+          >
+            <Meh
+              alt="Meh..."
+              className="icon meh"
+              color={rated < 0 ? "black" : "gray"}
+              placeholder="Meh..."
+              size="40"
+              strokeWidth="1.5px"
+            />
+            <Header size={2} className={"text"}>
+              {downs}
+            </Header>
+          </ButtonRateBig>
+          <div className="placeholder" />
           <a
-            className="post__button post__button--main"
+            className="button"
             href={`http://www.facebook.com/sharer.php?u=${url}[title]=${title}`}
           >
             <Facebook
               alt="share on facebook"
-              className="post__share-icon post__share-icon--facebook"
+              className="share-icon share-icon--facebook"
               strokeWidth="1.5px"
               color="#3b5998"
               size="40"
             />
           </a>
-          <a
-            className="post__button post__button--main"
-            href={`https://twitter.com/share?url=${url}`}
-          >
+          <a className="button" href={`https://twitter.com/share?url=${url}`}>
             <Twitter
               alt="share on twitter"
-              className="post__share-icon post__share-icon--twitter"
+              className="share-icon share-icon--twitter"
               strokeWidth="1.5px"
               color="#0084b4"
               size="40"
@@ -287,8 +308,14 @@ export default function Post({
             type={"post"}
           />
         </Suspense>
-      </div>
+      </StyledPostOpen>
     </Popup>
+  );
+
+  return !type || type === "notification" ? (
+    renderGridPost()
+  ) : (
+ renderStandAlone()
   );
 }
 
