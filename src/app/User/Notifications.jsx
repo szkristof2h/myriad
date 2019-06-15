@@ -6,7 +6,9 @@ import { ErrorContext } from '../contexts/ErrorContext.jsx';
 import { NavigationContext } from '../contexts/NavigationContext.jsx';
 import { PostsContext } from '../contexts/PostsContext.jsx';
 import config from '../config';
-import './notifications.css';
+import { Header, Error } from "../Typography/Typography.style";
+import { Button } from "../components/Button.style";
+import StyledNotifications from "./Notifications.style";
 
 const siteUrl = config.url;
 
@@ -55,24 +57,33 @@ export default function Notifications({ history }) {
   const loadMore = e => e.preventDefault() && loadPosts();
 
   return (
-    <div className={`notifications box box--basic`}>
-      <div className="posts__header">Updates</div>
+    <StyledNotifications>
+      <Header centered size={2} className="header">
+        Updates
+      </Header>
       <Suspense fallback={<div className="">Loading updates...</div>}>
-        {posts.ids && posts.ids.map(id =>
-          <Post
-            key={id}
-            openPost={() => openPost(id)}
-            type="notification"
-            size={5}
-            {...posts[id]} />
-        )}
+        {posts.ids &&
+          posts.ids.map(id => (
+            <Post
+              key={id}
+              openPost={() => openPost(id)}
+              type="notification"
+              size={5}
+              {...posts[id]}
+            />
+          ))}
       </Suspense>
-      {posts.ids && posts.ids.length != 0 ? <Link to="/notifications/load" className="notifications__button button" onClick={e => loadMore(e)}>
-        Load more...
-      </Link> : <div className="notifications__info">No updates!</div>
-      }
-    </div>
-  )
+      {posts.ids && posts.ids.length != 0 ? (
+        <Button as={Link} to="/notifications/load" onClick={e => loadMore(e)}>
+          Load more...
+        </Button>
+      ) : (
+        <Error centered size={1}>
+          No updates!
+        </Error>
+      )}
+    </StyledNotifications>
+  );
 }
 
 Notifications.propTypes = {
