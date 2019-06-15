@@ -7,7 +7,14 @@ import { NavigationContext } from '../contexts/NavigationContext.jsx';
 import { UserContext } from '../contexts/UserContext.jsx';
 import config from '../config';
 import Comment from './Comment.jsx';
-import './comments.css';
+import {
+  Button,
+  ButtonError,
+  ButtonTransparent
+} from "../components/Button.style";
+import { Base } from "../Typography/Typography.style";
+import { TextArea } from "../components/Input.style";
+import StyledComments from "./Comments.style";
 
 const siteUrl = config.url;
 
@@ -38,7 +45,6 @@ export default function Comments({ closePost, count, id, type }) {
   };
 
   const handleLoadMore = e => {
-    if (user.logged) return;
     e.preventDefault();
     getComments();
   };
@@ -78,29 +84,64 @@ export default function Comments({ closePost, count, id, type }) {
   }, []);
 
   return (
-    <div className={`comments comments--${type}`}>
-      {!ids || ids.length == 0 ? <div className="comments__warning">There are no comments yet!</div>
-        : ids.map(c =>
-          comments[c] ? <Comment key={c}
-            userName={type === 'messages' ? comments[c]['postedByName'].filter(u =>
-              comments[c].poster !== user._id ? u !== user.displayName : u === user.displayName)[0] :
-              comments[c].postedByName[0]} {...comments[c]} /> : null)}
-      {(!commentCount || ids.length < commentCount) &&
-        <Link className="comments__button button button--transparent" onClick={e => handleLoadMore(e)} to="" >
+    <StyledComments className={`comments comments--${type}`}>
+      {!ids || ids.length == 0 ? (
+        <Base className="warning">There are no comments yet!</Base>
+      ) : (
+        ids.map(c =>
+          comments[c] ? (
+            <Comment
+              key={c}
+              userName={
+                type === "messages"
+                  ? comments[c]["postedByName"].filter(u =>
+                      comments[c].poster !== user._id
+                        ? u !== user.displayName
+                        : u === user.displayName
+                    )[0]
+                  : comments[c].postedByName[0]
+              }
+              {...comments[c]}
+            />
+          ) : null
+        )
+      )}
+      {(commentCount !== 0 && ids.length < commentCount) && (
+        <ButtonTransparent
+          as={Link}
+          onClick={e => handleLoadMore(e)}
+          to=""
+        >
           Load more...
-        </Link>}
-      {user.logged && <textarea className="comments__input"
-        onChange={e => setNewComment(e.currentTarget.value)}
-        placeholder="Write a comment!"
-        rows="1"
-        value={newComment} />}
-      {user.logged && <Link className="comments__submit button" onClick={handleSubmit} to="">
-        {type === 'messages' ? 'Send Message' : 'Send'}
-      </Link>}
-      {!user.logged && <Link className="comments__warning" onClick={e => handleShowLogin(e)} to="/login">
-        You have to be logged in to post a comment
-      </Link>}
-    </div>
+        </ButtonTransparent>
+      )}
+      {user.logged && (
+        <TextArea
+          onChange={e => setNewComment(e.currentTarget.value)}
+          placeholder="Write a comment!"
+          rows="1"
+          value={newComment}
+        />
+      )}
+      {user.logged && (
+        <Button
+          as={Link}
+          onClick={handleSubmit}
+          to=""
+        >
+          {type === "messages" ? "Send Message" : "Send"}
+        </Button>
+      )}
+      {!user.logged && (
+        <ButtonError
+          as={Link}
+          onClick={e => handleShowLogin(e)}
+          to="/login"
+        >
+          You have to be logged in to post a comment
+        </ButtonError>
+      )}
+    </StyledComments>
   );
 }
 
