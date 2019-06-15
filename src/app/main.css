@@ -35,22 +35,3 @@ a {
     text-decoration: inherit;
   }
 }
-
-.box {
-  padding: 10px;
-  border-radius: 20px;
-  margin: 5px 0;
-  max-width: 550px;
-  min-width: 100px;
-  overflow-y: hidden;
-  &--basic {
-    background: white;
-  }
-  &--login {
-    min-width: 300px;
-  }
-  &--warn {
-    background: rgb(206, 37, 37);
-    color: white;
-  }
-}
