@@ -23,7 +23,7 @@ const postSchema = new Schema({
     },
     required: [true, "You should give your post a link!"]
   },
-  image: {
+  images: {
     type: [String],
     validate: {
       validator: images => images.filter(image => !isURL(image)).length === 0,
