@@ -1,6 +1,6 @@
 # Myriad
 
-[![Dependency Status][dep-status-img]][dep-status-link][![devDependency Status][dev-dep-status-img]][dev-dep-status-link]
+[![Dependency Status][dep-status-img]][dep-status-link] [![devDependency Status][dev-dep-status-img]][dev-dep-status-link]
 
 
 [dep-status-img]: https://david-dm.org/szkristof2h/myriad.svg
