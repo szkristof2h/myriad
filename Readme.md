@@ -41,3 +41,4 @@ I started working on this project to learn, experiment and practice with new fea
 
 ## Known issues
  1. Some pages are really slow to load: investigate what causes the performance issues
+ 2. Opened youtube video posts' main area isn't responsive

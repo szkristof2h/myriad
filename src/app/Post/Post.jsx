@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useContext, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useContext, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Proptypes from 'prop-types';
 import axios from 'axios';
@@ -17,6 +17,7 @@ import {
 } from "../components/Button.style";
 import { Header, Base, UserHeader } from "../Typography/Typography.style";
 import { StyledPost, StyledPostOpen } from "./Post.style";
+import getYoutubeId from "../../util/getYoutubeId"
 
 const Comments = lazy(() => import('../Comments/Comments.jsx' /* webpackChunkName: "Comments" */));
 
@@ -43,8 +44,11 @@ export default function Post({
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState();
   const [imageIndex, setImageIndex] = useState(0);
+  const [videoId, setVideoId] = useState(false);
+  const [videoSize, setVideoSize] = useState({});
   const { setErrors } = useContext(ErrorContext);
   const { getPost, setPosts } = useContext(PostsContext);
+  const ref = useRef(null);
   const url = `${siteUrl}/${_id}`;
 
   const rate = (val, e) => {
@@ -106,6 +110,12 @@ export default function Post({
       setLoading(false);
     };
   }, []);
+
+  useEffect(() => {
+    images && setVideoId(getYoutubeId(link))
+    images && ref && ref.current &&
+    setVideoSize({ width: ref.current.clientWidth, height: ref.current.clientHeight })
+  }, [images, imageIndex])
 
   useEffect(() => {
     if (!title && mounted) {
@@ -192,7 +202,7 @@ export default function Post({
   const renderStandAlone = () => (
     <Popup show={true} dismiss={dismiss} dismissible={true} modifier="post">
       <StyledPostOpen>
-        <div className="image-container">
+        <div className="image-container" ref={ref}>
           {images && imageIndex > 0 && (
             <ButtonArrow
               as={Link}
@@ -203,7 +213,19 @@ export default function Post({
               {"<"}
             </ButtonArrow>
           )}
-          <img className="image" src={images ? images[imageIndex] : ""} />
+          {videoId ? (
+            <iframe
+              width={videoSize.width}
+              height={videoSize.width/16*9}
+              className="image"
+              src={`https://www.youtube.com/embed/${videoId}`}
+              frameBorder="0"
+              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <img className="image" src={images ? images[imageIndex] : ""} />
+          )}
           {images && imageIndex < images.length - 1 && (
             <ButtonArrow
               as={Link}

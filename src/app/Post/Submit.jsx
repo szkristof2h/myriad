@@ -10,6 +10,7 @@ import { Box } from "../components/Box.style"
 import { Input } from "../components/Input.style"
 import { Button, ButtonError } from "../components/Button.style";
 import { Header, Error, Warning } from "../Typography/Typography.style"
+import getYoutubeId from "../../util/getYoutubeId";
 
 const siteUrl = config.url;
 
@@ -26,28 +27,37 @@ export default function Submit({ history }) {
   const { setErrors } = useContext(ErrorContext);
 
   useEffect(() => {
-    if(isURL(url)) {
-      setImageLoading(true);
-      axios
-        .post(`${siteUrl}/get/images`, { url })
-        .then(res => {
-          const html = res.data;
-          const parser = new DOMParser();
-          const wrapper = parser.parseFromString(html, "text/html");
-          const imgs = [...wrapper.getElementsByTagName("img")]
-            .map(a => a.src)
-            .filter((img, i, self) => self.indexOf(img) === i);
-          setImages(imgs);
-          setImageLoading(false);
-        })
-        .catch(e => {
-          setErrors(errors => [...errors, e.response.data]);
-          setImageLoading(false);
-        })
-      } else setImages([]);
-
     let error = [];
-    if (!isURL(url)) error.push("You must give your post a valid url!");
+    
+    if(isURL(url)) {
+      const videoId = getYoutubeId(url);
+      if (!videoId) {
+        setImageLoading(true);
+        axios
+          .post(`${siteUrl}/get/images`, { url })
+          .then(res => {
+            const html = res.data;
+            const parser = new DOMParser();
+            const wrapper = parser.parseFromString(html, "text/html");
+            const imgs = [...wrapper.getElementsByTagName("img")]
+              .map(a => a.src)
+              .filter((img, i, self) => self.indexOf(img) === i);
+            setImages(imgs);
+            setImageLoading(false);
+          })
+          .catch(e => {
+            setErrors(errors => [...errors, e.response.data]);
+            setImageLoading(false);
+          })
+      } else {
+        const imageTemplate = `https://img.youtube.com/vi/${videoId}/0.jpg`;
+        setImages([imageTemplate]);
+      }
+    } else {
+      setImages([]);
+      error.push("You must give your post a valid url!");
+    }
+
     error.length > 0
       ? setValidation(v => ({ ...v, url: error }))
       : setValidation(v => ({ ...v, url: "" }));
@@ -134,7 +144,10 @@ export default function Submit({ history }) {
   };
 
   const handleOnImageLoad = ({ target: image }, index) => {
-    if (image.naturalWidth < 500 || image.naturalHeight < 500) {
+    if (
+      !images[index].includes("https://img.youtube.com/vi/") &&
+      (image.naturalWidth < 500 || image.naturalHeight < 500)
+    ) {
       setImages(images => images.filter(img => img !== index));
       setSelectedImages(images => images.filter(img => img !== index));
     }

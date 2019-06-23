@@ -81,9 +81,11 @@ const StyledPostOpen = styled.div`
       transform: translate(0, -50%);
     }
     & > .image {
-      object-fit: cover;
-      max-width: 100%;
-      max-height: 100%;
+      object-fit: contain;
+      min-width: 1px;
+      min-height: 1px;
+      justify-self: stretch;
+      align-self: stretch;
     }
   }
   ${Header} {
