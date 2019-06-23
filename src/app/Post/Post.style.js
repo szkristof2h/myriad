@@ -83,6 +83,7 @@ const StyledPostOpen = styled.div`
     & > .image {
       object-fit: cover;
       max-width: 100%;
+      max-height: 100%;
     }
   }
   ${Header} {
