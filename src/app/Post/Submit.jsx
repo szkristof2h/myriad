@@ -209,11 +209,11 @@ export default function Submit({ history }) {
       error.push(
         'You must give at least 3 (non-empty) tags to your post (separated by ",")!'
       );
-    else if (tagInput.split(",").length > 5)
+    else if (tagInput.split(",").length > 30)
       error.push(
         `Your post can't have more than 30 tags: please remove ${tagInput.split(
           ","
-        ).length - 5} of them!`
+        ).length - 30} of them!`
       );
     error.length > 0
       ? setValidation(v => ({ ...v, tags: error }))
