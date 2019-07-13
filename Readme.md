@@ -32,12 +32,13 @@ I started working on this project to learn, experiment and practice with new fea
 
 ## Roadmap (mostly in order of importance)
  1. Implement facebook and twitter social login
- 2. Add option to embed youtube videos
+ 2. ~~Add option to embed youtube videos~~
  1. Fix the css mess (currently in the process of refactoring components to use CSS-in-JS)
  2. Make tags better and creating some kind of browsing component
  2. Create better loader component(s) to use with suspense
  3. Implement unit testing
  4. Experiment with webpack for better performance
+ 8. Fix eslint config
 
 ## Known issues
  1. Some pages are really slow to load: investigate what causes the performance issues
