@@ -40,7 +40,7 @@ export function getPosts(req, res) {
   const userId = res.locals && res.locals.user ? res.locals.user.id : null;
   let posts = {};
   let offset = 0; // offset is used for filling in above tier posts if there weren't enough
-  let criteria = req.params
+  const criteria = req.params
     ? req.params.userId
       ? { postedByName: req.params.userId }
       : req.params.tags
@@ -53,31 +53,33 @@ export function getPosts(req, res) {
     : null;
 
   getDBPosts(criteria, 0, [], offset)
-    .then(r => {
-      posts = { ids: r.map(p => p._id), ...toObject(r, "_id") };
-      offset = getOffset(r.length, offset, 0);
-
+    .then(postsFromDB => {
+      posts = {
+        ids: postsFromDB.map(p => p._id),
+        ...toObject(postsFromDB, "_id")
+      };
+      offset = getOffset(postsFromDB.length, offset, 0);
       return getDBPosts(criteria, 1, posts.ids, offset);
     })
-    .then(r => {
+    .then(postsFromDB => {
       posts = {
         ...posts,
-        ...toObject(r, "_id"),
-        ids: [...posts.ids, ...r.map(p => p._id)]
+        ...toObject(postsFromDB, "_id"),
+        ids: [...posts.ids, ...postsFromDB.map(post => post._id)]
       };
-      offset = getOffset(r.length, offset, 0);
+      offset = getOffset(postsFromDB.length, posts.ids, offset);
 
       return getDBPosts(criteria, 2, posts.ids, offset);
     })
-    .then(r => {
+    .then(postsFromDB => {
       posts = {
         ...posts,
-        ...toObject(r, "_id"),
+        ...toObject(postsFromDB, "_id"),
         ids: [
           ...posts.ids,
-          ...r.map(p => p._id),
+          ...postsFromDB.map(post => post._id),
           ...new Array(
-            limits.reduce((a, v) => a + v) - posts.ids.length - r.length
+            limits.reduce((a, v) => a + v) - posts.ids.length - postsFromDB.length
           )
             .fill("")
             .map(_ => makeId())
@@ -90,15 +92,15 @@ export function getPosts(req, res) {
           .exec();
       return;
     })
-    .then(r => {
-      if (r) r.forEach(r => (posts[r.post].rated = r.value));
+    .then(ratings => {
+      if (ratings) ratings.forEach(rating => (posts[rating.post].rated = rating.value));
 
       return res.json(posts);
     })
     .catch(e => res.json(handleErrors(GET_POSTS_ERROR, e)));
 }
 
-// Search the db for post that's in one of the 3 rating tiers and not already chosen,
+// Search the db for posts that's in one of the 3 rating tiers and not already chosen,
 // then choose randomly from them
 const getDBPosts = (c, t, ids, offset) => {
   let match = { _id: { $nin: ids }, ratio: { $gt: tiers[t] } };
@@ -112,7 +114,7 @@ const getDBPosts = (c, t, ids, offset) => {
     .catch(e => e);
 };
 
-const getOffset = (l, o, t) => o + limits[t] - l;
+const getOffset = (length, offset, tier) => offset + limits[tier] - length;
 
 export function getNotifications(req, res) {
   const { skip = 0 } = req.params;
