@@ -20,7 +20,8 @@ export default function Submit({ history }) {
   const [imageLoading, setImageLoading] = useState(false);
   const [customImage, setCustomImage] = useState("");
   const [selectedImages, setSelectedImages] = useState([]);
-  const [tags, setTags] = useState("");
+  const [tag, setTag] = useState("");
+  const [tagInput, setTagInput] = useState("");
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [validation, setValidation] = useState({});
@@ -28,8 +29,8 @@ export default function Submit({ history }) {
 
   useEffect(() => {
     let error = [];
-    
-    if(isURL(url)) {
+
+    if (isURL(url)) {
       const videoId = getYoutubeId(url);
       if (!videoId) {
         setImageLoading(true);
@@ -58,7 +59,7 @@ export default function Submit({ history }) {
       error.push("You must give your post a valid url!");
     }
 
-    error.length > 0
+    error.length
       ? setValidation(v => ({ ...v, url: error }))
       : setValidation(v => ({ ...v, url: "" }));
     setSelectedImages([]);
@@ -66,8 +67,7 @@ export default function Submit({ history }) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    const valid =
-      Object.keys(validation).filter(k => validation[k]).length == 0;
+    const valid = Object.keys(validation).filter(k => validation[k]).length === 0;
 
     if (!valid) return;
 
@@ -76,7 +76,7 @@ export default function Submit({ history }) {
       images: selectedImages,
       link: url,
       title,
-      tags
+      tagInput
     };
 
     axios
@@ -87,7 +87,7 @@ export default function Submit({ history }) {
           setDescription("");
           setImages([]);
           setSelectedImages([]);
-          setTags("");
+          setTagInput("");
           setTitle("");
           setUrl("");
           history.push("/");
@@ -152,6 +152,17 @@ export default function Submit({ history }) {
       setSelectedImages(images => images.filter(img => img !== index));
     }
   }
+
+  const handleTagRemove = tagToRemove =>
+    setTagInput(tags => tags.split(",").filter(tag => tag !== tagToRemove).join(","));
+
+  const handleTagInput = e => {
+    if (e.key === "," || e.key === "Enter") {
+      if (!tagInput.split(",").includes(tag) && tag)
+        setTagInput(tags => `${tags ? tags + "," : ""}${tag}`);
+      setTag("");
+    }
+  }
   
   const handleOnImageError = image => {
     setImages(images => images.filter(img => img !== image));
@@ -190,18 +201,24 @@ export default function Submit({ history }) {
   useEffect(() => {
     let error = [];
     if (
-      !tags ||
-      !tags.includes(",") ||
-      tags.split(",").length < 3 ||
-      tags.split(",").filter(t => t).length < 3
+      !tagInput ||
+      !tagInput.includes(",") ||
+      tagInput.split(",").length < 3 ||
+      tagInput.split(",").filter(t => t).length < 3
     )
       error.push(
         'You must give at least 3 (non-empty) tags to your post (separated by ",")!'
       );
+    else if (tagInput.split(",").length > 5)
+      error.push(
+        `Your post can't have more than 30 tags: please remove ${tagInput.split(
+          ","
+        ).length - 5} of them!`
+      );
     error.length > 0
       ? setValidation(v => ({ ...v, tags: error }))
       : setValidation(v => ({ ...v, tags: "" }));
-  }, [tags]);
+  }, [tagInput]);
 
   useEffect(() => {
     let error = [];
@@ -216,7 +233,7 @@ export default function Submit({ history }) {
   }, [title]);
 
   return (
-    <Box>
+    <Box style={{ width: "100%" }}>
       <StyledSubmit>
         <Header className="header" size={2} centered>
           Submit a post!
@@ -254,7 +271,8 @@ export default function Submit({ history }) {
         {images.length == 0 && url && !imageLoading && (
           <Error className="image-text">
             Couldn't find any images on the url (you can instead add your own
-            choice of url below).<br /> Only images bigger than 500*500 px are valid.
+            choice of url below).
+            <br /> Only images bigger than 500*500 px are valid.
           </Error>
         )}
         {imageLoading && (
@@ -295,10 +313,18 @@ export default function Submit({ history }) {
         <Header className="label" size={1} centered>
           Tags
         </Header>
+        {tagInput && <ul className="input input--text tag-list">
+          {tagInput.split(",").filter(tag => tag).map(tag => (
+            <li key={tag} className="tag" onClick={() => handleTagRemove(tag)}>
+              {tag}
+            </li>
+          ))}
+        </ul>}
         <Input
-          className="input input--text"
-          onChange={e => handleInput(e, setTags)}
-          value={tags}
+          className="input input--text input--tags"
+          onChange={e => e.currentTarget.value.slice(-1) !== "," && handleInput(e, setTag)}
+          onKeyPress={e => handleTagInput(e)}
+          value={tag}
         />
         {Object.keys(validation).filter(k => validation[k]).length != 0 ? (
           <ButtonError as="ul" className="button">
@@ -335,7 +361,12 @@ export default function Submit({ history }) {
               ))}
           </ButtonError>
         ) : (
-          <Button as={Link} className={"button"} onClick={e => handleSubmit(e)} to="/add">
+          <Button
+            as={Link}
+            className={"button"}
+            onClick={e => handleSubmit(e)}
+            to="/add"
+          >
             Post
           </Button>
         )}
