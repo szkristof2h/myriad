@@ -23,8 +23,20 @@ module.exports = {
     "linebreak-style": ["error", "windows"],
     quotes: ["warn", "double"],
     "arrow-parens": ["error", "as-needed"],
-    "no-unused-expressions": ["error", { allowShortCircuit: true, allowTernary: true }],
-    "curly": ["warn", "multi"]
+    "no-unused-expressions": [
+      "error",
+      { allowShortCircuit: true, allowTernary: true }
+    ],
+    curly: ["warn", "multi"],
+    "nonblock-statement-body-position": "off",
+    "implicit-arrow-linebreak": "off",
+    "no-shadow": "warn",
+    "operator-linebreak": [
+      "error",
+      "after", { overrides: { "?": "before", ":": "before" } }
+    ],
+    "no-nested-ternary": "off",
+    "function-paren-newline": ["error", "consistent"]
     //"react/display-name": [0]
   },
   settings: {

@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 import isURL from "validator/lib/isURL";
 import { ErrorContext } from "../contexts/ErrorContext.jsx";
 import config from "../config";
-import StyledSubmit from "./Submit.style"
-import { Box } from "../components/Box.style"
-import { Input } from "../components/Input.style"
+import StyledSubmit from "./Submit.style";
+import { Box } from "../components/Box.style";
+import { Input } from "../components/Input.style";
 import { Button, ButtonError } from "../components/Button.style";
-import { Header, Error, Warning } from "../Typography/Typography.style"
+import { Header, Error, Warning } from "../Typography/Typography.style";
 import getYoutubeId from "../../util/getYoutubeId";
 
 const siteUrl = config.url;
@@ -28,7 +28,7 @@ export default function Submit({ history }) {
   const { setErrors } = useContext(ErrorContext);
 
   useEffect(() => {
-    let error = [];
+    const error = [];
 
     if (isURL(url)) {
       const videoId = getYoutubeId(url);
@@ -49,7 +49,7 @@ export default function Submit({ history }) {
           .catch(e => {
             setErrors(errors => [...errors, e.response.data]);
             setImageLoading(false);
-          })
+          });
       } else {
         const imageTemplate = `https://img.youtube.com/vi/${videoId}/0.jpg`;
         setImages([imageTemplate]);
@@ -135,12 +135,11 @@ export default function Submit({ history }) {
           ? images.filter(image => image !== clickedImage)
           : [...images, clickedImage]
       );
-    else {
+    else
       setErrors(errors => [
         ...errors,
         { type: "Error", errors: "You can't select more than 10 images!" }
       ]);
-    }
   };
 
   const handleOnImageLoad = ({ target: image }, index) => {
@@ -151,7 +150,7 @@ export default function Submit({ history }) {
       setImages(images => images.filter(img => img !== index));
       setSelectedImages(images => images.filter(img => img !== index));
     }
-  }
+  };
 
   const handleTagRemove = tagToRemove =>
     setTagInput(tags => tags.split(",").filter(tag => tag !== tagToRemove).join(","));
@@ -159,18 +158,18 @@ export default function Submit({ history }) {
   const handleTagInput = e => {
     if (e.key === "," || e.key === "Enter") {
       if (!tagInput.split(",").includes(tag) && tag)
-        setTagInput(tags => `${tags ? tags + "," : ""}${tag}`);
+        setTagInput(tags => `${tags ? `${tags}","` : ""}${tag}`);
       setTag("");
     }
-  }
-  
+  };
+
   const handleOnImageError = image => {
     setImages(images => images.filter(img => img !== image));
     setSelectedImages(images => images.filter(img => img !== image));
-  }
+  };
 
   useEffect(() => {
-    let error = [];
+    const error = [];
     if (!description) error.push("You must give your post a description!");
     if (description.length < 3)
       error.push("The description should be at least 3 characters long!");
@@ -199,7 +198,7 @@ export default function Submit({ history }) {
   }, [selectedImages, images]);
 
   useEffect(() => {
-    let error = [];
+    const error = [];
     if (
       !tagInput ||
       !tagInput.includes(",") ||
@@ -221,7 +220,7 @@ export default function Submit({ history }) {
   }, [tagInput]);
 
   useEffect(() => {
-    let error = [];
+    const error = [];
     if (!title) error.push("You must give your post a title!");
     if (title.length < 3)
       error.push("The title should be at least 3 characters long!");
@@ -263,12 +262,12 @@ export default function Submit({ history }) {
           placeholder="Will automatically load images from the url to choose from"
           value={url}
         />
-        {images.length != 0 && (
+        {images.length !== 0 && (
           <Header className="label" size={1} centered>
             Choose an image
           </Header>
         )}
-        {images.length == 0 && url && !imageLoading && (
+        {images.length === 0 && url && !imageLoading && (
           <Error className="image-text">
             Couldn't find any images on the url (you can instead add your own
             choice of url below).
@@ -326,7 +325,7 @@ export default function Submit({ history }) {
           onKeyPress={e => handleTagInput(e)}
           value={tag}
         />
-        {Object.keys(validation).filter(k => validation[k]).length != 0 ? (
+        {Object.keys(validation).filter(k => validation[k]).length !== 0 ? (
           <ButtonError as="ul" className="button">
             {validation.title &&
               validation.title.map(e => (

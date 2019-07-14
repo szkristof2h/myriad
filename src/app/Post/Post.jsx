@@ -101,7 +101,7 @@ export default function Post({
   const handleImageStep = (e, step) => {
     e.preventDefault();
     setImageIndex(index => index + step);
-  }
+  };
 
   useEffect(() => {
     setMounted(true);
