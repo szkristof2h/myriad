@@ -9,6 +9,7 @@ import { PostsProvider } from "./contexts/PostsContext.jsx";
 import { UserProvider } from "./contexts/UserContext.jsx";
 import "./main.css";
 
+const Browse = lazy(() => import("./Browse.jsx" /* webpackChunkName: "Browse" */));
 const Login = lazy(() =>
   import("./User/Login.jsx" /* webpackChunkName: "Login" */)
 );
@@ -55,6 +56,10 @@ export default function App() {
                   <Route
                     path="/user/:name"
                     render={({ match }) => <Profile params={match.params} />}
+                  />
+                  <Route
+                    path="/browse"
+                    render={() => <Browse />}
                   />
                   <Route
                     path="/tag/:tag"
