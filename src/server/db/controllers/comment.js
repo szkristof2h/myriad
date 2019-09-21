@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { handleErrors, toObject } from '../../util/misc';
+import { handleErrors, toObject } from '../../util/utils';
 import { GET_COMMENTS_ERROR, POST_COMMENT_ERROR, GET_CONVERSATIONS_ERROR } from '../types';
 import BlockedList from '../models/BlockedList';
 import Comment from '../models/Comment';

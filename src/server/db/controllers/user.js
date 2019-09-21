@@ -1,5 +1,5 @@
 import isURL from 'validator/lib/isURL';
-import { handleErrors, sanitize } from '../../util/misc';
+import { handleErrors, sanitize } from '../../util/utils';
 import {
   BLOCK_USER_ERROR,
   CHECK_DISPLAY_NAME_ERROR,

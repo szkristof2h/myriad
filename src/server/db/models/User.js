@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { sanitize } from '../../util/misc';
+import { sanitize } from '../../util/utils';
 
 const { Schema } = mongoose;
 

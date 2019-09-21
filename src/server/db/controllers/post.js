@@ -1,6 +1,6 @@
 import { isArray } from "util";
 import Post from "../models/Post";
-import { handleErrors, toObject } from "../../util/misc";
+import { handleErrors, toObject } from "../../util/utils";
 import {
   GET_POST_ERROR,
   POST_NOT_FOUND,

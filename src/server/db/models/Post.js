@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import isURL from "validator/lib/isURL";
-import { sanitize } from "../../util/misc";
+import { sanitize } from "../../util/utils";
 
 const { ObjectId, Schema } = mongoose;
 
