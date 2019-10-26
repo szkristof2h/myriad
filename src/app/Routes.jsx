@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
 import Navigation from "./Navigation.jsx";
-import Loader from "./Loader.jsx";
+import Loader from "./Loader.tsx";
 import Error from "./Error.jsx";
 import { ErrorProvider } from "./contexts/ErrorContext.jsx";
 import { NavigationProvider } from "./contexts/NavigationContext.jsx";
@@ -22,7 +22,7 @@ const Notifications = lazy(() =>
 const Messages = lazy(() =>
   import("./Messages/Messages.jsx" /* webpackChunkName: "Messages" */)
 );
-const Posts = lazy(() => import("./Posts.jsx" /* webpackChunkName: "Posts" */));
+const Posts = lazy(() => import("./Posts.tsx" /* webpackChunkName: "Posts" */));
 const Profile = lazy(() =>
   import("./User/Profile.jsx" /* webpackChunkName: "Profile" */)
 );

@@ -1,26 +1,25 @@
-import React, { lazy, Suspense, useContext, useEffect, useState } from "react";
-import { Route } from "react-router-dom";
-import Proptypes from "prop-types";
+import React, { FC, lazy, Suspense, useContext, useEffect, useState } from "react";
+import { Route, History } from "react-router-dom";
 import { NavigationContext } from "./contexts/NavigationContext.jsx";
-import { PostsContext } from "./contexts/PostsContext.jsx";
+import { PostsContext } from "./contexts/PostsContext";
 import { UserContext } from "./contexts/UserContext.jsx";
 import useWindowSize from "./hooks/useWindowSize";
-import Loader from "./Loader.jsx";
+import Loader from "./Loader";
 import Tags from "./Tags.jsx";
 import "./posts.css";
 
 const Post = lazy(() =>
-  import("./Post/Post.jsx" /* webpackChunkName: "Post" */)
-);
+  import('./Post/Post.jsx' /* webpackChunkName: "Post" */)
+)
 
-const setPos = () => {
+const setPos = (): [number[][], number] => {
   const ratio = [18, 6, 5];
   let positions = [[0, 0, ratio[0]]];
   let offset = 0;
 
-  const surround = (r, index, a = 1) => {
-    const currentRatio = r[1];
-    const parentRatio = r[0];
+  const surround = (ratios: number[], index: number, a = 1) => {
+    const currentRatio = ratios[1];
+    const parentRatio = ratios[0];
     const length = Math.floor((parentRatio * a) / currentRatio) + 2;
 
     for (let i = 0; i < length; i++) {
@@ -58,8 +57,8 @@ const setPos = () => {
 
     index++;
     const newOffset = offset + currentRatio;
-    if (r.length !== index - 2) offset = newOffset;
-    r.length === index - 2 ? true : surround(r.slice(1), index, length);
+    if (ratios.length !== index - 2) offset = newOffset;
+    ratios.length === index - 2 ? true : surround(ratios.slice(1), index, length);
   };
 
   surround(ratio, 0);
@@ -67,7 +66,15 @@ const setPos = () => {
   return [positions, offset];
 };
 
-export default function Posts({ fullUrl, history, tag, url, userName }) {
+interface Props  {
+  history: History
+  fullUrl: string
+  tag: string
+  url: string
+  userName: string
+}
+
+const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
   const [mounted, setMounted] = useState(true);
   const [offset, setOffset] = useState(0);
   const { refresh, setRefresh } = useContext(NavigationContext);
@@ -80,12 +87,12 @@ export default function Posts({ fullUrl, history, tag, url, userName }) {
     setFocused,
     setPreviousUrl
   } = useContext(PostsContext);
-  const [positions, setPositions] = useState([]);
-  const [loading, setLoading] = useState("");
+  const [positions, setPositions] = useState();
+  const [loading, setLoading] = useState(true);
   const { user } = useContext(UserContext);
   const { width, height } = useWindowSize();
 
-  const openPost = (i, id) => {
+  const openPost = (id: string) => {
     setFocused(id);
     history.push(
       id.length != 20
@@ -99,18 +106,18 @@ export default function Posts({ fullUrl, history, tag, url, userName }) {
   };
 
   const closePost = () => {
-    setFocused();
+    setFocused('');
     history.push(previousUrl ? previousUrl : "/");
   };
 
   useEffect(() => {
     setMounted(true);
     // Initialized post positions
-    const p = setPos();
-    setOffset(p[1]);
-    setPositions(p[0]);
+    const positions = setPos();
+    setOffset(positions[1]);
+    setPositions(positions[0]);
     return () => {
-      setFocused();
+      setFocused('');
       setMounted(false);
       setRefresh(false);
     };
@@ -135,22 +142,28 @@ export default function Posts({ fullUrl, history, tag, url, userName }) {
     if ((type !== "post" || !previousUrl) && (previousUrl !== url || refresh)) {
       setPositions([]); // reset position
       setLoading(true);
+      
+      let cancel
+      
       getPosts(
-        `posts${userName ? "/user" : ""}${
-          tag ? "/" + tag.trim() : userName ? "/" + userName : ""
+        `posts${userName ? '/user' : ''}${
+          tag ? '/' + tag.trim() : userName ? '/' + userName : ''
         }`,
         type
-      ).then(() => {
-        if (mounted) {
-          const p = setPos();
-          setOffset(p[1]);
-          setPositions(p[0]);
-          setLoading(false);
-          setPreviousUrl(url);
-          setRefresh(false);
-        }
-      });
+      ).then(canceler => cancel = canceler)
+
+      if (mounted) {
+        const postion = setPos()
+        setOffset(postion[1])
+        setPositions(postion[0])
+        setLoading(false)
+        setPreviousUrl(url)
+        setRefresh(false)
+      }
+
+      return cancel
     }
+
   }, [refresh, tag, userName]);
 
   return (
@@ -175,7 +188,7 @@ export default function Posts({ fullUrl, history, tag, url, userName }) {
                     key={id}
                     col={positions[i][0] + 1 + offset}
                     row={positions[i][1] + 1 + offset}
-                    openPost={() => openPost(i, id)}
+                    openPost={() => openPost(id)}
                     size={positions[i][2]}
                     {...posts[id]}
                   />
@@ -203,10 +216,4 @@ export default function Posts({ fullUrl, history, tag, url, userName }) {
   );
 }
 
-Posts.propTypes = {
-  fullUrl: Proptypes.string,
-  history: Proptypes.object,
-  tag: Proptypes.string,
-  url: Proptypes.string,
-  userName: Proptypes.string
-};
+export default Posts
