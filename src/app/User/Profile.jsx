@@ -5,7 +5,7 @@ import axios from 'axios';
 import { ErrorContext } from '../contexts/ErrorContext.jsx';
 import { UserContext } from '../contexts/UserContext.jsx';
 import config from '../config';
-import Loader from '../Loader.jsx';
+import Loader from '../Loader.tsx';
 import { Header, Base } from "../Typography/Typography.style";
 import StyledProfile from "./Profile.style"
 import { Button, ButtonError } from "../components/Button.style";
