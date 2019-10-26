@@ -1,0 +1,7 @@
+dist
+package.json
+package-lock.json
+*.json
+*.css
+*.md
+*.html

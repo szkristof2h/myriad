@@ -1,7 +1,19 @@
 {
-  "presets": [["@babel/preset-env", { "useBuiltIns": "usage", "corejs": 3 }], "@babel/react"],
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "usage",
+        "corejs": 3
+      }
+    ],
+    "@babel/preset-typescript",
+    "@babel/react"
+  ],
   "plugins": [
     "@babel/plugin-transform-async-to-generator",
-    "@babel/plugin-syntax-dynamic-import"
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/proposal-class-properties",
+    "@babel/proposal-object-rest-spread"
   ]
 }
