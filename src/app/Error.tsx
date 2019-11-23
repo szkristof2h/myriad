@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
-import { ErrorContext } from './contexts/ErrorContext.jsx';
-import Popup from './Popup.jsx';
+import { ErrorContext } from './contexts/ErrorContext';
+import Popup from './Popup';
 import { Base, Header } from "./Typography/Typography.style";
 import StyledError from "./Error.style";
 
