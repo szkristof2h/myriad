@@ -15,7 +15,9 @@ const color = {
   redHighHover: "rgb(236, 43, 43)",
   redNormal: "rgba(255, 0, 0, 0.6)", // find better names
   redNormalHover: "rgba(255, 0, 0, 0.4)", // find better names
-  yellow: "yellow"
+  yellow: "yellow",
+  white: "#ffffff",
+  black: "#000000",
 };
 
 export default {
