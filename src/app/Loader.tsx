@@ -1,15 +1,28 @@
 import React from 'react';
 import Loading from 'react-feather/dist/icons/loader';
-import Popup from './Popup.jsx';
-import './loader.css';
+import StyledLoader from './Loader.style';
+import { Header } from './Typography/Typography.style'
 
-export default function Loader() {
+const Loader = () => {
   return (
-  <Popup dismissible={false} modifier="loader" show={true}>
-      <div className="loader posts__header">
-        <Loading className="loader__icon" strokeWidth="1.5px" size="100" color="white" />
-        <div className="loader__text">Loading...</div>
-    </div>
-  </Popup>
-  );
+    <StyledLoader
+      dismissible={false}
+      modifier="loader"
+      show={true}
+      type="basic"
+    >
+      <div className="loader">
+        <Loading
+          strokeWidth="1.5px"
+          size="100"
+          color="white"
+        />
+        <Header size={3} centered={1}>
+          Loading...
+        </Header>
+      </div>
+    </StyledLoader>
+  )
 }
+
+export default Loader
