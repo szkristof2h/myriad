@@ -1,4 +1,9 @@
 import styled from 'styled-components'
+import { FC } from 'react'
+
+interface Props {
+  type: 'basic' | 'scrollY' | 'post' | 'profile' | 'submit'
+}
 
 const styles = {
   basic: "",
@@ -8,7 +13,7 @@ const styles = {
   submit: `align-content: start;`,
 }
 
-const StyledPopup = ({ type }) => {
+const StyledPopup: FC<Props> = ({ type }) => {
   const style = `
     display: grid;
     position: fixed;
