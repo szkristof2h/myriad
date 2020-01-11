@@ -37,7 +37,7 @@ I started working on this project to learn, experiment and practice with new fea
  1. Fix the css mess (currently in the process of refactoring components to use CSS-in-JS)
  2. Make tags better and creating some kind of browsing component
  2. Create better loader component(s) to use with suspense
- 6. Try coming up with a better solution for handling axios requests
+ 6. Try coming up with a better solution for handling axios requests (in progress, not tested)
  3. Implement unit testing
  4. Experiment with webpack for better performance
  8. ~~Fix eslint config~~
