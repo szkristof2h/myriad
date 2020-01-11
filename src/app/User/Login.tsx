@@ -1,11 +1,11 @@
 import React from 'react';
-import Popup from '../Popup.jsx';
+import Popup from '../Popup';
 import Google from '../images/Google.jsx';
 import { ButtonGoogle } from "../components/Button.style";
 import { Box } from "../components/Box.style";
 import { Header } from "../Typography/Typography.style";
 
-export default function Login() {
+const Login = () => {
   return (
     <Popup show={true} dismissible={false}>
       <Box style={{ zIndex: 100 }}>
@@ -31,3 +31,5 @@ export default function Login() {
     </Popup>
   );
 }
+
+export default Login
