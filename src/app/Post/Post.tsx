@@ -1,14 +1,11 @@
-import React, { lazy, Suspense, useContext, useEffect, useState, useRef } from 'react';
+import React, { FC, lazy, Suspense, useContext, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Proptypes from 'prop-types';
-import axios from 'axios';
 import Star from 'react-feather/dist/icons/star';
 import { Facebook, Twitter } from 'react-feather';
-import { ErrorContext } from '../contexts/ErrorContext.jsx';
-import { PostsContext } from '../contexts/PostsContext.jsx';
+import { PostsContext, Post } from '../contexts/PostsContext';
 import config from '../config';
 import Meh from '../images/Meh.jsx';
-import Popup from '../Popup.jsx';
+import Popup from '../Popup';
 import sample from '../images/add.svg';
 import {
   ButtonArrow,
@@ -19,12 +16,12 @@ import { Header, Base, UserHeader } from "../Typography/Typography.style";
 import { StyledPost, StyledPostOpen } from "./Post.style";
 import getYoutubeId from "../../util/getYoutubeId"
 
-const Comments = lazy(() => import('../Comments/Comments.jsx' /* webpackChunkName: "Comments" */));
+const Comments = lazy(() => import('../Comments/Comments' /* webpackChunkName: "Comments" */));
 
 const siteUrl = config.url;
 
-export default function Post({
-  _id,
+const Post: FC<Post> = ({
+  id,
   col,
   comments,
   description,
@@ -40,89 +37,62 @@ export default function Post({
   title,
   type,
   ups
-}) {
-  const [loading, setLoading] = useState(false);
+}) => {
+  const [isLoading, setIsLoading] = useState(false); // specify what is loading
+  const [commentCount, setCommentCount] = useState(comments)
   const [mounted, setMounted] = useState();
   const [imageIndex, setImageIndex] = useState(0);
   const [videoId, setVideoId] = useState(false);
-  const [videoSize, setVideoSize] = useState({});
-  const { setErrors } = useContext(ErrorContext);
-  const { getPost, setPosts } = useContext(PostsContext);
+  const [videoSize, setVideoSize] = useState({ width: 0, height: 0 });
+  const { getPost, updatePost } = useContext(PostsContext);
   const ref = useRef(null);
-  const url = `${siteUrl}/${_id}`;
+  const url = `${siteUrl}/${id}`;
 
-  const rate = (val, e) => {
+  const rate = async (rating: number, e) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
 
-    !loading &&
-      axios
-        .post(`${siteUrl}/post/post/rating`, { _id, rating: val })
-        .then(res => {
-          setLoading(false);
-          if (res.data.errors) setErrors(errors => [...errors, res.data]);
-          else {
-            if (rated && rated === val)
-              return setPosts(posts => ({
-                ...posts,
-                [_id]: {
-                  ...posts[_id],
-                  rated: 0,
-                  [val > 0 ? "ups" : "downs"]: val > 0 ? ups - 1 : downs - 1
-                }
-              }));
+    if (!isLoading) return
 
-            setPosts(posts => ({
-              ...posts,
-              [_id]: {
-                ...posts[_id],
-                rated: val,
-                [val > 0 ? "ups" : "downs"]: val > 0 ? ups + 1 : downs + 1
-              }
-            }));
-            if (rated)
-              setPosts(posts => ({
-                ...posts,
-                [_id]: {
-                  ...posts[_id],
-                  [val < 0 ? "ups" : "downs"]: val < 0 ? ups - 1 : downs - 1
-                }
-              }));
-          }
-        })
-        .catch(e => {
-          setErrors(errors => [...errors, e.response.data]);
-          setLoading(false);
-        });
-  };
+    const { setPostContext } = updatePost("post/rating", { id, rating })
 
-  const handleClick = e => e.target === e.currentTarget && openPost();
+    await setPostContext()
+    setIsLoading(false);
+  }
+
+  const handleClick = e => e.target === e.currentTarget && openPost && openPost()
 
   const handleImageStep = (e, step) => {
     e.preventDefault();
     setImageIndex(index => index + step);
-  };
+  }
 
   useEffect(() => {
     setMounted(true);
     return () => {
       setMounted(false);
-      setLoading(false);
+      setIsLoading(false);
     };
   }, []);
 
   useEffect(() => {
     images && setVideoId(getYoutubeId(link))
-    images && ref && ref.current &&
-    setVideoSize({ width: ref.current.clientWidth, height: ref.current.clientHeight })
+    if (images && ref && ref.current)
+    // @ts-ignore
+      setVideoSize({ width: ref.current.clientWidth, height: ref.current.clientHeight })
   }, [images, imageIndex])
 
   useEffect(() => {
     if (!title && mounted) {
-      setLoading(true);
-      getPost(_id).then(() => mounted && setLoading(false));
+      setIsLoading(true)
+      const { cancel, setPostContext } = getPost(id)
+
+      ;(async () => await setPostContext())()
+
+      setIsLoading(false)
+      return cancel
     }
-  }, [mounted, _id]);
+  }, [mounted, id]);
 
   const classType = `post ${
     type && type !== "notification"
@@ -142,10 +112,10 @@ export default function Post({
       onClick={e => handleClick(e)}
       style={{
         background: `gray url('${
-          _id.length != 20 ? images[0] : sample
+          id.length != 20 ? images[0] : sample
         }') no-repeat center`,
         backgroundSize:
-          _id.length == 20 ? `70px 70px` : !type ? "cover" : "auto auto",
+          id.length == 20 ? `70px 70px` : !type ? "cover" : "auto auto",
         gridColumn: `${!type ? "" + col + " / span " + size : "initial"}`,
         gridRow: `${!type ? "" + row + " / span " + size : "initial"}`
       }}
@@ -200,7 +170,7 @@ export default function Post({
   );
 
   const renderStandAlone = () => (
-    <Popup show={true} dismiss={dismiss} dismissible={true} modifier="post">
+    <Popup show={true} dismiss={dismiss} dismissible={true} type="post">
       <StyledPostOpen>
         <div className="image-container" ref={ref}>
           {images && imageIndex > 0 && (
@@ -210,13 +180,13 @@ export default function Post({
               className="button--previous"
               onClick={e => handleImageStep(e, -1)}
             >
-              {"<"}
+              {'<'}
             </ButtonArrow>
           )}
           {videoId ? (
             <iframe
               width={videoSize.width}
-              height={videoSize.width/16*9}
+              height={(videoSize.width / 16) * 9}
               className="image"
               src={`https://www.youtube.com/embed/${videoId}`}
               frameBorder="0"
@@ -224,7 +194,7 @@ export default function Post({
               allowFullScreen
             />
           ) : (
-            <img className="image" src={images ? images[imageIndex] : ""} />
+            <img className="image" src={images ? images[imageIndex] : ''} />
           )}
           {images && imageIndex < images.length - 1 && (
             <ButtonArrow
@@ -233,7 +203,7 @@ export default function Post({
               className="button--next"
               onClick={e => handleImageStep(e, 1)}
             >
-              {">"}
+              {'>'}
             </ButtonArrow>
           )}
         </div>
@@ -241,7 +211,7 @@ export default function Post({
           centered
           size={3}
           as="a"
-          className={"title ellipsis"}
+          className={'title ellipsis'}
           href={link}
           target="_blank"
         >
@@ -251,7 +221,7 @@ export default function Post({
           as={Link}
           centered={1}
           size={1}
-          className={"user ellipsis"}
+          className={'user ellipsis'}
           to={`/user/${postedByName}`}
         >
           @{postedByName}
@@ -261,41 +231,41 @@ export default function Post({
           <ButtonRateBig
             className={`button`}
             as={Link}
-            type={"impressed"}
+            type={'impressed'}
             rated={rated > 0 ? 1 : 0}
             onClick={e => rate(1, e)}
-            to={"meh"}
+            to={'meh'}
           >
             <Star
               alt="Impressed!"
               className="icon impressed"
-              fill={rated > 0 ? "yellow" : "none"}
+              fill={rated > 0 ? 'yellow' : 'none'}
               placeholder="Impressed!"
               size="40"
               strokeWidth="1.5px"
-              color={rated > 0 ? "yellow" : "gray"}
+              color={rated > 0 ? 'yellow' : 'gray'}
             />
-            <Header size={2} className={"text"}>
+            <Header size={2} className={'text'}>
               {ups}
             </Header>
           </ButtonRateBig>
           <ButtonRateBig
             className={`button`}
             as={Link}
-            type={"meh"}
+            type={'meh'}
             rated={rated < 0 ? 1 : 0}
             onClick={e => rate(-1, e)}
-            to={"meh"}
+            to={'meh'}
           >
             <Meh
               alt="Meh..."
               className="icon meh"
-              color={rated < 0 ? "black" : "gray"}
+              color={rated < 0 ? 'black' : 'gray'}
               placeholder="Meh..."
               size="40"
               strokeWidth="1.5px"
             />
-            <Header size={2} className={"text"}>
+            <Header size={2} className={'text'}>
               {downs}
             </Header>
           </ButtonRateBig>
@@ -324,15 +294,15 @@ export default function Post({
         </div>
         <Suspense fallback={<div>Loading comments...</div>}>
           <Comments
-            closePost={dismiss}
-            count={comments}
-            id={_id}
-            type={"post"}
+            commentCount={commentCount}
+            setCommentCount={setCommentCount}
+            idPost={id}
+            type={'post'}
           />
         </Suspense>
       </StyledPostOpen>
     </Popup>
-  );
+  )
 
   return !type || type === "notification" ? (
     renderGridPost()
@@ -341,21 +311,4 @@ export default function Post({
   );
 }
 
-Post.propTypes = {
-  _id: Proptypes.string.isRequired,
-  col: Proptypes.number,
-  comments: Proptypes.number,
-  description: Proptypes.string,
-  dismiss: Proptypes.func,
-  downs: Proptypes.number,
-  images: Proptypes.array,
-  link: Proptypes.string,
-  openPost: Proptypes.func,
-  postedByName: Proptypes.string,
-  rated: Proptypes.number,
-  row: Proptypes.number,
-  size: Proptypes.number,
-  title: Proptypes.string,
-  type: Proptypes.string,
-  ups: Proptypes.number
-}
+export default Post
