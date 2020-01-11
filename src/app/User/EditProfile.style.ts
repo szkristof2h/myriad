@@ -6,9 +6,9 @@ const StyledEditProfile = styled(Box)`
   display: grid;
   justify-content: center;
   justify-self: center;
-  grid-row-gap: ${theme.base.gutter/2}px;
+  grid-row-gap: ${theme.base.gutter / 2}px;
   word-break: break-all;
-  margin-top: 3px;
+  margin-top: ${theme.base.gutter / 2}px;
   grid-template-rows: initial;
   > .avatar {
     justify-self: center;
@@ -16,6 +16,6 @@ const StyledEditProfile = styled(Box)`
     height: 200px;
     margin-bottom: ${theme.base.gutter}px;
   }
-`;
+`
 
 export default StyledEditProfile;
