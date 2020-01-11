@@ -1,27 +1,25 @@
-import React, { createContext, useContext, useState } from 'react';
-import { Canceler } from 'axios';
-import { ErrorContext } from './ErrorContext.jsx';
-import { get } from './utils/api';
+import React, { createContext, useContext, useState } from 'react'
+import { Canceler } from 'axios'
+import { ErrorContext } from './ErrorContext.jsx'
+import { get, post, APIRequestInteface } from '../utils/api'
 
 // TODO: add error type
-interface PostDataInterface {
-  data: {
-    post: PostData
-    errors?: {},
-  },
-  cancel: () => void
-  hasFailed: boolean
+export interface GetPostsInterface extends APIRequestInteface<GetPostsData> {}
+interface GetPostInterface extends APIRequestInteface<GetPostData> {}
+interface UpdatePostInterface extends APIRequestInteface<UpdatePostData> {}
+
+interface GetPostsData {
+  ids: string[]
+  posts: PostData[]
+  error?: {}
 }
 
-interface PostsDataInterface {
-  data: {
-    ids: string[]
-    posts: PostData[]
-    errors?: {},
-  },
-  cancel: () => void
-  hasFailed: boolean
+interface GetPostData {
+  post: PostData
+  error?: {}
 }
+
+interface UpdatePostData extends GetPostData {}
 
 interface PostData {
   id: string
@@ -38,7 +36,7 @@ interface PostData {
 
 export interface Post extends PostData {
   col: number
-  dismiss?: () => {}
+  dismiss?: () => void
   openPost?: () => {}
   row: number
   size: number
@@ -48,27 +46,47 @@ export interface Post extends PostData {
 interface PostContextInterface {
   focused: string
   ids: string[]
-  getPost: (id: string) => Promise<Canceler>
-  getPosts: (url: string, type: string) => Promise<Canceler>
+  getPost: (
+    id: string
+  ) => { cancel: Canceler; setPostContext: () => Promise<void> }
+  getPosts: (
+    url: string,
+    type?: string
+  ) => { cancel: Canceler; setPostsContext: () => Promise<void> }
   posts: {}
   previousUrl: string
   setFocused: (id: string) => void
   setIds: (ids: string[]) => void
   setPosts: (posts: Post[]) => void
   setPreviousUrl: (urL: string) => void
+  updatePost: (
+    id: string,
+    variables
+  ) => { cancel: Canceler; setPostContext: () => Promise<void> }
 }
 
-const initialState = {
+// Should find a better & easier way to provide an initial state to react contexts
+const initialState: PostContextInterface = {
   focused: '',
   ids: [],
-  getPost: (id: string) => new Promise<Canceler>(message => {}),
-  getPosts: (url: string, type: string) => new Promise<Canceler>(message => {}),
+  getPost: (id: string) => ({
+    cancel: (message?: string) => {},
+    setPostContext: () => new Promise(() => {}),
+  }),
+  getPosts: (url: string, type?: string) => ({
+    cancel: (message?: string) => {},
+    setPostsContext: () => new Promise(() => {}),
+  }),
   posts: {},
   previousUrl: '',
   setFocused: (id: string) => {},
   setIds: (ids: string[]) => {},
   setPosts: (posts: Post[]) => {},
   setPreviousUrl: (urL: string) => {},
+  updatePost: (id: string, variables) => ({
+    cancel: (message?: string) => {},
+    setPostContext: () => new Promise(() => {}),
+  }),
 }
 
 const PostsContext = createContext<PostContextInterface>(initialState)
@@ -77,35 +95,39 @@ const samplePost = {
   description: '',
   image: 'sample',
   rated: 0,
-  title: 'Submit a post!'
-};
+  title: 'Submit a post!',
+}
 
 const PostsProvider = ({ children }) => {
-  const [focused, setFocused] = useState('');
+  const [focused, setFocused] = useState('')
   const [previousUrl, setPreviousUrl] = useState('')
-  const [posts, setPosts] = useState({});
-  const [ids, setIds] = useState<string[]>([]);
-  const { setErrors } = useContext(ErrorContext);
+  const [posts, setPosts] = useState({})
+  const [ids, setIds] = useState<string[]>([])
+  const { setErrors } = useContext(ErrorContext)
 
-  const getPosts: PostContextInterface["getPosts"] = async (url: string, type: string) => {
-    const postsData: PostsDataInterface = await get(url, () =>
-      setErrors(errors => [...errors, 'some error message here'])
-    )
-    const {
-      data: { errors, ids, posts },
-      cancel,
-      hasFailed
-    } = postsData
+  const getPosts: PostContextInterface['getPosts'] = (url, type) => {
+    const { getData, cancel, getHasFailed }: GetPostsInterface = get<
+      GetPostsData
+    >(url, () => setErrors(errors => [...errors, 'some error message here']))
 
-    if (errors) {
-      setErrors(errors => [...errors, errors])
-    } else if (!hasFailed) {
+    const setPostsContext = async () => {
+      const response = await getData()
+
+      if (getHasFailed() || !response)
+        return setErrors(errors => [...errors, `get posts request failed`])
+
+      const {
+        data: { error, ids, posts },
+      } = response
+
+      if (error) return setErrors(errors => [...errors, error])
+
       const loaded: PostData | {} = {}
 
       ids.forEach(
         id =>
           (loaded[id] =
-            id.length == 20
+            id.length === 20
               ? { _id: id, postedByName: type, ...samplePost }
               : posts[id])
       )
@@ -116,47 +138,82 @@ const PostsProvider = ({ children }) => {
       })
     }
 
-    return cancel
+    return { cancel, setPostsContext }
   }
 
-  const getPost = async (id: string) => {
-    const postData: PostDataInterface = await get(
-      `/get/post/${id}`,
-      () => setErrors(errors => [...errors, 'some error message here'])
+  const getPost: PostContextInterface['getPost'] = (id: string) => {
+    const { getData, cancel, getHasFailed }: GetPostInterface = get<
+      GetPostData
+    >(`post/${id}`, () =>
+      setErrors(errors => [...errors, 'some error message here'])
     )
 
-    const {
-      data: { errors, post },
-      cancel,
-      hasFailed
-    } = postData
+    const setPostContext = async () => {
+      const response = await getData()
 
-    if (errors) {
-      setErrors(errors => [...errors, errors])
-    } else if (!hasFailed) {
+      if (getHasFailed() || !response)
+        return setErrors(errors => [...errors, `get post request failed`])
+
+      const {
+        data: { error, post },
+      } = response
+
+      if (error) return setErrors(errors => [...errors, error])
+
       setPosts(posts => ({ ...posts, [id]: post }))
       setFocused(id)
     }
-    
-    return cancel
+
+    return { cancel, setPostContext }
+  }
+
+  const updatePost: PostContextInterface['updatePost'] = (
+    id: string,
+    variables
+  ) => {
+    const { getData, cancel, getHasFailed }: UpdatePostInterface = post<UpdatePostData>(
+      `post/${id}`,
+      variables,
+      () => setErrors(errors => [...errors, 'some error message here'])
+    )
+
+    const setPostContext = async () => {
+      const response = await getData()
+
+      if (getHasFailed() || !response)
+        return setErrors(errors => [...errors, `update post request failed`])
+
+      const {
+        data: { error, post },
+      } = response
+
+      if (error) return setErrors(errors => [...errors, error])
+
+      setPosts(posts => ({ ...posts, [id]: post }))
+    }
+
+    return { cancel, setPostContext }
   }
 
   return (
-    <PostsContext.Provider value={{
-      focused,
-      getPost,
-      getPosts,
-      ids,
-      posts,
-      previousUrl,
-      setFocused,
-      setIds,
-      setPosts,
-      setPreviousUrl
-    }}>
+    <PostsContext.Provider
+      value={{
+        focused,
+        getPost,
+        getPosts,
+        ids: ids,
+        posts,
+        previousUrl,
+        setFocused,
+        setIds: setIds,
+        setPosts,
+        setPreviousUrl,
+        updatePost,
+      }}
+    >
       {children}
     </PostsContext.Provider>
   )
 }
 
-export { PostsProvider, PostsContext };
+export { PostsProvider, PostsContext }
