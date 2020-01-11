@@ -50,11 +50,7 @@ export default function App() {
                   />
                   <Route path="/messages" render={() => <Messages />} />
                   <Route
-                    path="/profile"
-                    render={({ match }) => <Profile params={match.params} />}
-                  />
-                  <Route
-                    path="/user/:name"
+                    path={["/profile", "/profile/edit", "/user/:name"]}
                     render={({ match }) => <Profile params={match.params} />}
                   />
                   <Route
