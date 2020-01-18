@@ -4,22 +4,34 @@ import Popup from './Popup';
 import { Base, Header } from "./Typography/Typography.style";
 import StyledError from "./Error.style";
 
-export default function Error() {
-  const { errors, setErrors } = useContext(ErrorContext);
-  const dismiss = () => setErrors([]);
+const Error =() => {
+  const { errors, resetErrors } = useContext(ErrorContext)
+  const dismiss = () => resetErrors()
 
   return (
-    <Popup show={errors.length > 0} dismiss={dismiss} dismissible={true} modifier="error">
+    <Popup
+      show={errors.length > 0}
+      dismiss={dismiss}
+      dismissible={true}
+      modifier="error"
+    >
       <StyledError className="errors box box--warn">
         <Header centered size={2}>
           Error
         </Header>
-        {errors && errors.map(e => (
-          <Base key={`error${e.type}`}>
-            {e.type}: {e.errors}
-          </Base>
-        ))}
+        {errors &&
+          errors.map(error => {
+            const errorType = Object.keys(error)[0]
+            const errorTexts = error[errorType]
+            errorTexts.map(erroText => (
+              <Base key={`error${errorType}`}>
+                {errorType}: {erroText}
+              </Base>
+            ))
+          })}
       </StyledError>
     </Popup>
   )
 }
+
+export default Error
