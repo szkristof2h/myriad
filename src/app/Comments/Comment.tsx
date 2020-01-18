@@ -1,11 +1,15 @@
-import React from 'react';
-import Proptypes from 'prop-types';
+import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Base } from "../Typography/Typography.style";
-import { TextArea } from "../components/Input.style";
 import StyledComment from "./Comment.style";
 
-export default function Comment({ date, text, userName }) {
+interface Props {
+  date: string
+  text: string
+  userName: string
+}
+
+const Comment: FC<Props> = ({ date, text, userName }) => {
   return (
     <StyledComment>
       <Link className="user" to={`/user/${userName}`}>
@@ -21,8 +25,5 @@ export default function Comment({ date, text, userName }) {
   );
 }
 
-Comment.propTypes = {
-  date: Proptypes.string.isRequired,
-  text: Proptypes.string.isRequired,
-  userName: Proptypes.string.isRequired
-}
+export default Comment
+
