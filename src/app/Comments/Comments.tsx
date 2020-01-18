@@ -1,9 +1,8 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Canceler } from 'axios';
-import { ErrorContext } from '../contexts/ErrorContext.jsx';
-import { UserContext } from '../contexts/UserContext.jsx';
-import Comment from './Comment.jsx';
+import { ErrorContext } from '../contexts/ErrorContext';
+import { UserContext } from '../contexts/UserContext';
+import Comment from './Comment';
 import {
   Button,
   ButtonError,
@@ -12,22 +11,20 @@ import {
 import { Base } from "../Typography/Typography.style";
 import { TextArea } from "../components/Input.style";
 import StyledComments from "./Comments.style";
-import { get, post } from '../utils/api.js';
+import { get, post, APIRequestInteface } from '../utils/api';
 
-export interface CommentsDataInterface {
-  getData: Promise<{
-    ids: string[]
-    comments: CommentData[]
-    errors?: {}
-  }>
-  cancel: Canceler
-  getHasFailed: () => boolean
+interface GetCommentsInterface extends APIRequestInteface<GetCommentsData> {}
+export interface GetCommentsData {
+  ids: string[]
+  comments: CommentData[]
+  error?: {}
 }
 
-interface CommentData {
+export interface CommentData {
   id: string
+  date: string
   text: string
-  postedByName: string
+  postedByName: string[]
 }
 
 interface Props {
@@ -42,60 +39,75 @@ const Comments: FC<Props> = ({ commentCount, setCommentCount, idPost, type }) =>
   const [isLoading, setIsLoading] = useState(false)
   const [idComments, setIdComments] = useState<string[]>([])
   const [newComment, setNewComment] = useState('')
-  const { setErrors } = useContext(ErrorContext)
+  const { addError } = useContext(ErrorContext)
   const { user } = useContext(UserContext)
 
   const getComments = () => {
     setIsLoading(true)
-    const { getData, cancel, getHasFailed }: CommentsDataInterface = get(
+    const { getData, cancel, getHasFailed }: GetCommentsInterface = get<GetCommentsData>(
       `${type === 'post' ? 'comments' : 'message'}/${idPost}/${
         idComments.length
       }/20`,
-      () => setErrors(errors => [...errors, 'some error message here'])
+      () => addError({ comments: ['some error message here']})
     )
 
     const setAllComments = async () => {
-      const { errors, ids, comments: newComments } = await getData
+      const response = await getData()
+      
+      if (getHasFailed() || !response)
+        return addError({ comments: [`get comments request failed`]})
 
-      if (errors) setErrors(errors => [...errors, errors])
-      else if (!getHasFailed) {
-        setComments({ ...comments, ...newComments })
-        setIdComments([...idComments, ...ids])
-      }
+      const { data: { error, ids, comments: newComments } } = response
+
+      if (error) return addError(error)
+      
+      setComments({ ...comments, ...newComments })
+      setIdComments([...idComments, ...ids])
     }
 
     setIsLoading(false)
     return { cancel, setAllComments }
   }
 
-  const handleLoadMore = e => {
+  const handleLoadMore = async (e: React.MouseEvent) => {
     e.preventDefault()
-    getComments()
+    if (!isLoading) {
+      const { setAllComments } = getComments()
+      await setAllComments()
+    }
   }
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault()
-
+    if (isLoading) return false
     setIsLoading(true)
-    const { getData, getHasFailed }: CommentsDataInterface = post(
-      `${type === 'post' ? 'comment' : 'message'}`,
+    const { getData, cancel, getHasFailed }: GetCommentsInterface = post<
+      GetCommentsData
+    >(
+      `${type === "post" ? "comment" : "message"}`,
       {
-        [type === 'post' ? 'postedOn' : 'postedByName']: idPost,
+        [type === "post" ? "postedOn" : "postedByName"]: idPost,
         text: newComment,
       },
-      () => setErrors(errors => [...errors, 'some error message here'])
+      () => addError({ comments: ["some error message here"]})
     )
 
+    // TODO: probably there's reason to make this its own function
     const addComment = async () => {
-      const { errors, ids, comments: newComments } = await getData
+      const response = await getData()
+      if (getHasFailed() || !response)
+        return addError({ comments: [`post comment request failed`]})
 
-      if (errors) setErrors(errors => [...errors, errors])
-      else if (!getHasFailed) {
-        setComments(comments => ({ ...comments, newComments }))
-        setIdComments([...idComments, ...ids])
-        setNewComment('')
-        setCommentCount && commentCount && setCommentCount(commentCount + 1)
-      }
+      const {
+        data: { error, ids, comments: newComments },
+      } = response
+
+      if (error) return addError(error)
+
+      setComments(comments => ({ ...comments, newComments }))
+      setIdComments([...idComments, ...ids])
+      setNewComment('')
+      setCommentCount && commentCount && setCommentCount(commentCount + 1)
     }
 
     await addComment()
@@ -103,10 +115,12 @@ const Comments: FC<Props> = ({ commentCount, setCommentCount, idPost, type }) =>
   }
 
   useEffect(() => {
-    const { cancel, setAllComments } = getComments()
-    ;(async () => await setAllComments())()
+    if (!isLoading) {
+      const { cancel, setAllComments } = getComments()
+      ;(async () => await setAllComments())()
 
-    return cancel
+      return cancel
+    }
   }, [idPost])
 
   return (
@@ -121,7 +135,7 @@ const Comments: FC<Props> = ({ commentCount, setCommentCount, idPost, type }) =>
               userName={
                 type === 'messages'
                   ? comments[c]['postedByName'].filter(u =>
-                      comments[c].poster !== user._id
+                      comments[c].poster !== user.id
                         ? u !== user.displayName
                         : u === user.displayName
                     )[0]
