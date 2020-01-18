@@ -11,7 +11,7 @@ const Box = styled.div`
   min-width: ${({ type }) =>
     !type ? "100px" : type === "login" ? "300px" : "initial"};
   background: ${({ type }) =>
-    !type ? "white" : type === "warn" ? theme.color.highRed : "blue"};
+    !type ? "white" : type === "warn" ? theme.color.redHigh : "blue"};
   color: ${({ type }) =>
     !type ? "black" : type === "warn" ? "white" : "blue"};
 `;
