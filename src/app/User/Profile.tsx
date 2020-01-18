@@ -1,4 +1,4 @@
-import React, { FC, useContext, useEffect, useState, SyntheticEvent } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import {
   Link,
   Redirect,
@@ -7,14 +7,14 @@ import {
   useHistory,
   useRouteMatch,
 } from 'react-router-dom'
-import { ErrorContext } from '../contexts/ErrorContext.jsx';
-import { UserContext } from '../contexts/UserContext.jsx';
+import { ErrorContext } from '../contexts/ErrorContext';
+import { UserContext } from '../contexts/UserContext';
 import Loader from '../Loader';
 import { Header, Base } from "../Typography/Typography.style";
 import StyledProfile from "./Profile.style"
 import { Button, ButtonError } from "../components/Button.style";
-import EditProfile from "./EditProfile.jsx";
-import { APIRequestInteface, get } from '../utils/api.js';
+import EditProfile from "./EditProfile";
+import { APIRequestInteface, get } from '../utils/api';
 
 interface Props {
   params?: {
@@ -33,7 +33,7 @@ const Profile: FC<Props> = ({ params }) => {
   const { currentUser, getUser, logout, updateCurrentUser, user } = useContext(
     UserContext
   )
-  const { setErrors } = useContext(ErrorContext)
+  const { addError } = useContext(ErrorContext)
   const [isNameAvailable, setIsNameAvailable] = useState<boolean | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const id = params?.name ?? ''
@@ -59,16 +59,13 @@ const Profile: FC<Props> = ({ params }) => {
     const { getData, getHasFailed }: IsNameAvailableRequest = get<
       IsNameAvailableData
     >(`user/displayName/${name}`, () =>
-      setErrors(errors => [...errors, 'some error message here'])
+      addError({ profile: ['some error message here']})
     )
 
     const response = await getData()
 
     if (getHasFailed() || !response)
-      return setErrors(errors => [
-        ...errors,
-        `get is name available request failed`,
-      ])
+      return addError({ profile: [`get is name available request failed`]})
 
     const {
       data: { error },
@@ -76,17 +73,17 @@ const Profile: FC<Props> = ({ params }) => {
 
     if (Object.keys(error).length) setIsNameAvailable(true)
     else {
-      setErrors(errors => [...errors, error])
+      addError(error)
       setIsNameAvailable(false)
     }
   }
 
-  const handleCheck = async (e: SyntheticEvent) => {
+  const handleCheck = async (e: React.MouseEvent) => {
     e.preventDefault()
     await getIsNameAvailable(displayName)
   }
 
-  const handleClick = async (e, type) => {
+  const handleClick = async (e: React.MouseEvent, type) => {
     e.preventDefault()
 
     if (isLoading) return
@@ -99,7 +96,7 @@ const Profile: FC<Props> = ({ params }) => {
     setIsLoading(false)
   }
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault()
 
     if (isLoading) return
@@ -121,7 +118,7 @@ const Profile: FC<Props> = ({ params }) => {
     )
 
     if (Object.keys(newValues).length === 0) {
-      setErrors(errors => [...errors, "You haven't change any of your data."])
+      addError({ profile: ["You haven't change any of your data."]})
       setIsLoading(false)
       return
     }
@@ -133,7 +130,7 @@ const Profile: FC<Props> = ({ params }) => {
     const success = await setCurrentUserContext()
     setIsLoading(false)
     setNewProfile({ avatar, bio, displayName })
-    success && history.push('/profile')
+    success && history.push("/profile")
   }
 
   if (isLoading) return <Loader />

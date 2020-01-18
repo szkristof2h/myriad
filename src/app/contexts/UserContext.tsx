@@ -75,32 +75,32 @@ const UserContext = createContext<UserContextInterface>(initialState)
 const UserProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [user, setUser] = useState<User>(initialState.user)
-  const { setErrors } = useContext(ErrorContext)
+  const { addError } = useContext(ErrorContext)
 
   const logout = async () => {
     const { getData, getHasFailed }: LogoutInterface = post<{}>(
       'logout',
       null,
-      () => setErrors(errors => [...errors, 'some error message here'])
+      () => addError({ user: ['some error message here']})
     )
     await getData()
 
     if (getHasFailed())
-      setErrors(errors => [...errors, `get user request failed`])
+      addError({ user: [`get user request failed`]})
   }
 
   const getUser: UserContextInterface['getUser'] = (id, isCurrentUser) => {
     const { getData, cancel, getHasFailed }: GetUserInterface = get<
       GetUserData
     >(`user${!isCurrentUser ? '/' + id : ''}`, () =>
-      setErrors(errors => [...errors, 'some error message here'])
+      addError({ user: ['some error message here']})
     )
 
     const setUserContext = async () => {
       const response = await getData()
 
       if (getHasFailed() || !response) {
-        setErrors(errors => [...errors, `get user request failed`])
+        addError({ user: [`get user request failed`]})
         return false
       }
 
@@ -109,7 +109,7 @@ const UserProvider = ({ children }) => {
       } = response
 
       if (error) {
-        setErrors(errors => [...errors, error])
+        addError(error)
         return false
       }
 
@@ -128,14 +128,14 @@ const UserProvider = ({ children }) => {
     const { getData, cancel, getHasFailed }: UpdateUserInterface = post<
       UpdateUserData
     >(`${path ? 'user/' + path : 'user'}`, variables, () =>
-      setErrors(errors => [...errors, 'some error message here'])
+      addError({ user: ['some error message here']})
     )
 
     const setCurrentUserContext = async () => {
       const response = await getData()
 
       if (getHasFailed() || !response) {
-        setErrors(errors => [...errors, `update user request failed`])
+        addError({ user: [`update user request failed`]})
         return false
       }
 
@@ -144,7 +144,7 @@ const UserProvider = ({ children }) => {
       } = response
 
       if (error) {
-        setErrors(errors => [...errors, error])
+        addError(error)
         return false
       }
 

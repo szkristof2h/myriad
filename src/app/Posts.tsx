@@ -7,14 +7,13 @@ import React, {
   useState,
 } from 'react'
 import { Route, History } from 'react-router-dom'
-import { NavigationContext } from './contexts/NavigationContext.jsx'
+import { NavigationContext } from './contexts/NavigationContext'
 import { PostsContext } from './contexts/PostsContext'
-import { UserContext } from './contexts/UserContext.jsx'
+import { UserContext } from './contexts/UserContext'
 import useWindowSize from './hooks/useWindowSize'
 import Loader from './Loader'
 import StyledPosts from './Posts.style'
-import Tags from './Tags.jsx'
-import './posts.css'
+import Tags from './Tags'
 
 const Post = lazy(() => import('./Post/Post' /* webpackChunkName: "Post" */))
 

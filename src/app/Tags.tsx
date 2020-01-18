@@ -1,35 +1,40 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Canceler } from 'axios'
-import { get } from './utils/api.js'
+import { get, APIRequestInteface } from './utils/api'
 import { Link } from 'react-router-dom'
-import { ErrorContext } from './contexts/ErrorContext.jsx'
-import { StyledTags } from './Tags.style.js'
+import { ErrorContext } from './contexts/ErrorContext'
+import { StyledTags } from './Tags.style'
 
-export interface TagsDataInterface {
-  getData: Promise<{
-    tags: string[]
-    errors?: {}
-  }>
-  cancel: Canceler
-  getHasFailed: () => boolean
+interface TagsDataInterface extends APIRequestInteface<GetTagsData> {} 
+
+interface GetTagsData {
+  ids: string[]
+  tags: string[]
+  error?: {}
 }
-export default function Tags() {
+
+const Tags =() => {
   const [tags, setTags] = useState<string[]>([]);
-  const { setErrors } = useContext(ErrorContext);
+  const { addError } = useContext(ErrorContext);
 
   const getTags = () => {
     const { getData, cancel, getHasFailed }: TagsDataInterface = get(
       'tags',
-      () => setErrors(errors => [...errors, 'some error message here'])
+      () => addError({ tags: ['some error message here']})
     )
 
     const setAllTags = async () => {
-      const { errors, tags: tagsData } = await getData
+      const response = await getData()
 
-      if (errors) setErrors(errors => [...errors, errors])
-      else if (!getHasFailed) {
-        setTags(tagsData)
-      }
+      if (getHasFailed() || !response)
+        return addError({ posts: [`get posts request failed`] })
+
+      const {
+        data: { error, tags: tagsData },
+      } = response
+
+      if (error) return addError(error)
+      
+      setTags(tagsData)
     }
 
     return { cancel, setAllTags }
@@ -55,3 +60,5 @@ export default function Tags() {
     </StyledTags>
   )
 }
+
+export default Tags

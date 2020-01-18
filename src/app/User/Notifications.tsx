@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { NavigationContext } from '../contexts/NavigationContext.jsx';
+import { Link, useHistory } from 'react-router-dom';
+import { NavigationContext } from '../contexts/NavigationContext';
 import { PostsContext, Post } from '../contexts/PostsContext';
 import { Header, Error } from "../Typography/Typography.style";
 import { Button } from "../components/Button.style";
@@ -8,25 +8,21 @@ import StyledNotifications from "./Notifications.style";
 
 const Post = lazy(() => import('../Post/Post' /* webpackChunkName: "Post" */));
 
-const Notifications = ({ history }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const { refresh } = useContext(NavigationContext); 
-  const {
-    getPosts,
-    ids,
-    posts,
-    setFocused,
-  } = useContext(PostsContext)
+const Notifications = () => {
+  const { history } = useHistory()
+  const [isLoading, setIsLoading] = useState(true)
+  const { refresh } = useContext(NavigationContext)
+  const { getPosts, ids, posts, setFocused } = useContext(PostsContext)
 
-  const openPost = id => {
-    setFocused(id);
-    history.push(`/post/${id}`);
-  };
+  const openPost = (id: string) => {
+    setFocused(id)
+    history.push(`/post/${id}`)
+  }
 
   // Left the ability to refresh posts (updates)
   useEffect(() => {
-    !isLoading && loadPosts();
-  }, [refresh]);
+    !isLoading && loadPosts()
+  }, [refresh])
 
   const loadPosts = () => {
     setIsLoading(true)
@@ -34,7 +30,6 @@ const Notifications = ({ history }) => {
     const { cancel, setPostsContext } = getPosts(
       `notifications/${ids.length ?? 0}/0`
     )
-
     ;(async () => await setPostsContext())()
     setIsLoading(false)
     return cancel
@@ -43,9 +38,12 @@ const Notifications = ({ history }) => {
   useEffect(() => {
     const cancel = loadPosts()
     return cancel
-  }, []);
+  }, [])
 
-  const loadMore = e => e.preventDefault() && loadPosts();// cancel?
+  const loadMore = (e: React.MouseEvent) => {
+    e.preventDefault()
+    loadPosts()
+  }
 
   return (
     <StyledNotifications>
@@ -74,7 +72,7 @@ const Notifications = ({ history }) => {
         </Error>
       )}
     </StyledNotifications>
-  );
+  )
 }
 
 export default Notifications

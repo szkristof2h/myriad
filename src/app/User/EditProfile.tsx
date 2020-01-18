@@ -6,8 +6,8 @@ import { Button, ButtonError, ButtonOk } from '../components/Button.style'
 import { Header } from '../Typography/Typography.style'
 
 interface Props {
-  handleCheck: (e: SyntheticEvent) => Promise<void>
-  handleSubmit: (e: SyntheticEvent) => Promise<void>
+  handleCheck: (e: React.MouseEvent) => Promise<void>
+  handleSubmit: (e: React.MouseEvent) => Promise<void>
   isNameAvailable: boolean | null
   newProfile: {
     avatar: string
@@ -48,21 +48,21 @@ const EditProfile: FC<Props> = ({
       </Header>
       <Input
         onChange={
-          (e: SyntheticEvent) =>
+          (e: React.MouseEvent) =>
             handleInput({ displayName: e.currentTarget.value }) // TODO: fix ts error
         }
         value={displayName}
       />
       <CheckButton
         as={Link}
-        onClick={async (e: SyntheticEvent) => await handleCheck(e)}
+        onClick={async (e: React.MouseEvent) => await handleCheck(e)}
         to="check/displayName"
       >
         {isNameAvailable
-          ? 'Available'
+          ? "Available"
           : isNameAvailable === false
-          ? 'Already in use'
-          : 'Check availability'}
+          ? "Already in use"
+          : "Check availability"}
       </CheckButton>
       <Header centered>Avatar</Header>
       <img className="avatar" src={avatar} />
