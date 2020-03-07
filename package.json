@@ -1,17 +1,17 @@
 {
   "name": "myriad",
-  "version": "2.42.0",
+  "version": "2.43.0",
   "description": "-",
   "author": "Kristof Szöllösi",
   "license": "ISC",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config src/webpack/webpack.prod.js",
-    "build-server": "npm run tsc clean && babel ./src/server --experimental --source-maps-inline -d ./src/dist",
+    "build-server": "npm run clean && babel ./src/server --experimental --source-maps-inline -d ./src/dist",
     "clean": "rimraf src/dist",
-    "dev": "set NODE_ENV=development&&npm run build-server && node src/dist/server.js",
+    "dev": "set NODE_ENV=development&&npm run build-server && npm run type-check && node src/dist/server.js",
     "precommit": "set NODE_ENV=production",
-    "start": "set NODE_ENV=production&&npm run build-server && npm run build && node src/dist/server.js",
+    "start": "set NODE_ENV=production&&npm run build-server && npm run build && npm run type-check && node src/dist/server.js",
     "tsc": "tsc",
     "type-check": "tsc --noEmit"
   },
@@ -21,6 +21,7 @@
     }
   },
   "dependencies": {
+    "@awaitjs/express": "^0.4.0",
     "axios": "^0.19.0",
     "body-parser": "^1.19.0",
     "connect-mongo": "^3.0.0",
