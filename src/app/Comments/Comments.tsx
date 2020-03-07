@@ -9,7 +9,7 @@ import {
   ButtonTransparent
 } from "../components/Button.style";
 import { Base } from "../Typography/Typography.style";
-import { TextArea } from "../components/Input.style";
+import { TextArea } from "../components";
 import StyledComments from "./Comments.style";
 import { get, post, APIRequestInteface } from '../utils/api';
 

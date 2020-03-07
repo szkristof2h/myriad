@@ -1,7 +1,7 @@
 import React, { FC, SyntheticEvent } from 'react'
 import { Link } from 'react-router-dom'
 import StyledEditProfile from './EditProfile.style'
-import { Input, TextArea } from '../components/Input.style'
+import { Input, TextArea } from '../components'
 import { Button, ButtonError, ButtonOk } from '../components/Button.style'
 import { Header } from '../Typography/Typography.style'
 
@@ -21,6 +21,12 @@ interface Props {
   }) => void
 }
 
+type inputFieldTypes = {
+  avatar?: string
+  bio?: string
+  displayName?: string
+}
+
 const EditProfile: FC<Props> = ({
   handleCheck,
   handleSubmit,
@@ -28,9 +34,8 @@ const EditProfile: FC<Props> = ({
   isNameAvailable,
   setNewProfile,
 }) => {
-  const handleInput = (
-    value: { [key in 'avatar' | 'bio' | 'displayName']: string }
-  ) => setNewProfile({ ...newProfile, ...value })
+  const handleInput = (value: inputFieldTypes) =>
+    setNewProfile({ ...newProfile, ...value })
   const { avatar, bio, displayName } = newProfile
   const CheckButton = isNameAvailable
     ? ButtonOk
@@ -47,9 +52,8 @@ const EditProfile: FC<Props> = ({
         Display Name (can only set once)*
       </Header>
       <Input
-        onChange={
-          (e: React.MouseEvent) =>
-            handleInput({ displayName: e.currentTarget.value }) // TODO: fix ts error
+        onChange={e =>
+          handleInput({ displayName: e.currentTarget.value ?? "" })
         }
         value={displayName}
       />
@@ -67,18 +71,14 @@ const EditProfile: FC<Props> = ({
       <Header centered>Avatar</Header>
       <img className="avatar" src={avatar} />
       <Input
-        onChange={(e: SyntheticEvent) =>
-          handleInput({ avatar: e.currentTarget.value })
-        }
+        onChange={e => handleInput({ avatar: e.currentTarget.value })}
         value={avatar}
       />
       <Header centered size={1}>
         Bio
       </Header>
       <TextArea
-        onChange={(e: SyntheticEvent) =>
-          handleInput({ bio: e.currentTarget.value })
-        }
+        onChange={e => handleInput({ bio: e.currentTarget.value })}
         rows="1"
         value={bio}
       />

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import theme from "../theme";
-import { TextArea } from "../components/Input.style";
+import { TextArea } from "../components/Input/styles";
 import {
   Button,
   ButtonError,

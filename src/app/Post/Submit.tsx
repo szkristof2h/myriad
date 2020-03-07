@@ -4,15 +4,16 @@ import isURL from "validator/lib/isURL"
 import { ErrorContext } from "../contexts/ErrorContext"
 import StyledSubmit from "./Submit.style"
 import { Box } from "../components/Box.style"
-import { Input } from "../components/Input.style"
+import { Input } from "../components"
 import { Button, ButtonError } from "../components/Button.style"
 import { Header, Error, Warning } from "../Typography/Typography.style"
 import getYoutubeId from "../../util/getYoutubeId"
-import { post, APIRequestInteface } from '../utils/api';
+import { post, APIRequestInteface } from "../utils/api"
 import validateField from "./utils"
 import { PostData } from "../contexts/PostsContext"
 
-interface PostGetImagesInterface extends APIRequestInteface<PostGetImagesData> {}
+interface PostGetImagesInterface
+  extends APIRequestInteface<PostGetImagesData> {}
 interface PostSubmitInterface extends APIRequestInteface<PostSubmitData> {}
 export interface PostGetImagesData {
   html: any
@@ -48,7 +49,7 @@ interface ActionType {
     | "changeUrl"
     | "removeTag"
     | "reset"
-    payload?: any
+  payload?: any
 }
 
 export type FieldTypes =
@@ -98,7 +99,8 @@ const reducer = (state: SubmitFields, action: ActionType) => {
           .filter(tag => tag !== action.payload)
           .join(","),
       }
-    case "reset": return initialState
+    case "reset":
+      return initialState
     default:
       return state
   }
@@ -130,11 +132,10 @@ const Submit: FC<Props> = () => {
     tags,
   } = state
   const [isImageLoading, setIsImageLoading] = useState(false)
-  const [validationMessage, setValidationMessage] = useState<
-    { [key: string]: string[] }
-  >(initialValidationMessages)
-  const { addError } = useContext(ErrorContext);
-
+  const [validationMessage, setValidationMessage] = useState<{
+    [key: string]: string[]
+  }>(initialValidationMessages)
+  const { addError } = useContext(ErrorContext)
 
   // Move this to input change
   useEffect(() => {
@@ -147,13 +148,14 @@ const Submit: FC<Props> = () => {
         const { getData, cancel, getHasFailed }: PostGetImagesInterface = post<
           PostGetImagesData
         >("/get/images", { url: fieldUrl }, () =>
-          addError({ submitImageLoading: ["some error message here"]})
+          addError({ submitImageLoading: ["some error message here"] })
         )
-
         ;(async () => {
           const response = await getData()
           if (getHasFailed() || !response)
-            return addError({ submitImageLoading: [`post get images request failed`] })
+            return addError({
+              submitImageLoading: [`post get images request failed`],
+            })
 
           const {
             data: { error, html },
@@ -163,6 +165,7 @@ const Submit: FC<Props> = () => {
 
           const parser = new DOMParser()
           const wrapper = parser.parseFromString(html, "text/html")
+          // @ts-ignore
           const imgs = [...wrapper.getElementsByTagName("img")]
             .map(a => a.src)
             .filter((img, i, self) => self.indexOf(img) === i)
@@ -205,8 +208,7 @@ const Submit: FC<Props> = () => {
       Object.keys(validationMessage).filter(key => validationMessage[key])
         .length === 0
 
-    if (!isValid)
-      return addError({ submit: ["Some fields aren't valid"] })
+    if (!isValid) return addError({ submit: ["Some fields aren't valid"] })
 
     const data = {
       description: fieldDescription,
@@ -219,9 +221,7 @@ const Submit: FC<Props> = () => {
     setIsImageLoading(true)
     const { getData, cancel, getHasFailed }: PostSubmitInterface = post<
       PostSubmitData
-    >("/submit", data, () =>
-      addError({ submit: ["some error message here"]})
-    )
+    >("/submit", data, () => addError({ submit: ["some error message here"] }))
     ;(async () => {
       const response = await getData()
       if (getHasFailed() || !response)
@@ -258,7 +258,9 @@ const Submit: FC<Props> = () => {
   }
 
   const removeNotExistingSelectedImages = () => {
-    const notExistingimages = fieldSelectedImages.filter(image => !images.includes(image))
+    const notExistingimages = fieldSelectedImages.filter(
+      image => !images.includes(image)
+    )
 
     if (notExistingimages.length > 0)
       dispatch({
@@ -288,7 +290,8 @@ const Submit: FC<Props> = () => {
     // TODO: should save errors to variables
     else if (
       validationErrors.images[0] === "Image is already on the list." ||
-      validationErrors.images[0] === "You can only have 10 images for your post."
+      validationErrors.images[0] ===
+        "You can only have 10 images for your post."
     ) {
       dispatch({
         type: "changeCustomImage",
@@ -333,14 +336,14 @@ const Submit: FC<Props> = () => {
       !images[index].includes("https://img.youtube.com/vi/") &&
       (image.naturalWidth < 500 || image.naturalHeight < 500)
     ) {
-        dispatch({
-          type: "changeImages",
-          payload: images.filter(img => img !== index),
-        })
-        dispatch({
-          type: "changeSelectedImages",
-          payload: images.filter(img => img !== index),
-        })
+      dispatch({
+        type: "changeImages",
+        payload: images.filter(img => img !== index),
+      })
+      dispatch({
+        type: "changeSelectedImages",
+        payload: images.filter(img => img !== index),
+      })
     }
   }
 
@@ -357,13 +360,13 @@ const Submit: FC<Props> = () => {
     })
   }
 
-
   const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const validationErrors = validateField("tags", [tags])
 
     setValidationMessage({ ...validationMessage, ...validationErrors })
     if (e.key === "," || e.key === "Enter") {
-      if (fieldTag.length < 3) // move to validation?
+      if (fieldTag.length < 3)
+        // move to validation?
         addError({
           submitTags: ["All tags should be at least 3 character long"],
         })
@@ -392,8 +395,6 @@ const Submit: FC<Props> = () => {
       payload: images.filter(img => img !== image),
     })
   }
-
-
 
   return (
     <Box style={{ width: "100%" }}>
@@ -507,15 +508,15 @@ const Submit: FC<Props> = () => {
           .length !== 0 ? (
           <ButtonError as="ul" className="button">
             {validationMessage.title?.map(e => (
-                <li key={e} className="error">
-                  {e}
-                </li>
-              ))}
+              <li key={e} className="error">
+                {e}
+              </li>
+            ))}
             {validationMessage.description.map(e => (
-                <li key={e} className="error">
-                  {e}
-                </li>
-              ))}
+              <li key={e} className="error">
+                {e}
+              </li>
+            ))}
             {fieldUrl &&
               validationMessage.images.map(e => (
                 <li key={e} className="error">
@@ -523,15 +524,15 @@ const Submit: FC<Props> = () => {
                 </li>
               ))}
             {validationMessage.url.map(e => (
-                <li key={e} className="error">
-                  {e}
-                </li>
-              ))}
+              <li key={e} className="error">
+                {e}
+              </li>
+            ))}
             {validationMessage.tags.map(e => (
-                <li key={e} className="error">
-                  {e}
-                </li>
-              ))}
+              <li key={e} className="error">
+                {e}
+              </li>
+            ))}
           </ButtonError>
         ) : (
           <Button
