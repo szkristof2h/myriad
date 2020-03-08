@@ -3,7 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { NavigationContext } from '../contexts/NavigationContext';
 import { PostsContext, Post } from '../contexts/PostsContext';
 import { Header, Error } from "../Typography/Typography.style";
-import { Button } from "../components/Button.style";
+import { Button } from "../components";
 import StyledNotifications from "./Notifications.style";
 
 const Post = lazy(() => import('../Post/Post' /* webpackChunkName: "Post" */));
@@ -63,7 +63,7 @@ const Notifications = () => {
           ))}
       </Suspense>
       {ids && ids.length != 0 ? (
-        <Button as={Link} to="/notifications/load" onClick={e => loadMore(e)}>
+        <Button type="primary" as={Link} to="/notifications/load" onClick={e => loadMore(e)}>
           Load more...
         </Button>
       ) : (

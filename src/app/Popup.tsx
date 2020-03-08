@@ -23,7 +23,7 @@ const Popup: FC<Props> = ({
   return show ? (
     <StyledPopup
       type={type}
-      className={`popup ${modifier ? 'popup--' + modifier : ''}`}
+      // className={`popup ${modifier ? 'popup--' + modifier : ''}`}
       onClick={e => handleClick(e)}
     >
       {children}

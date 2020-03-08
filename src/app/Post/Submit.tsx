@@ -4,8 +4,7 @@ import isURL from "validator/lib/isURL"
 import { ErrorContext } from "../contexts/ErrorContext"
 import StyledSubmit from "./Submit.style"
 import { Box } from "../components/Box.style"
-import { Input } from "../components"
-import { Button, ButtonError } from "../components/Button.style"
+import { Input, Button } from "../components"
 import { Header, Error, Warning } from "../Typography/Typography.style"
 import getYoutubeId from "../../util/getYoutubeId"
 import { post, APIRequestInteface } from "../utils/api"
@@ -506,7 +505,7 @@ const Submit: FC<Props> = () => {
         />
         {Object.keys(validationMessage).filter(k => validationMessage[k])
           .length !== 0 ? (
-          <ButtonError as="ul" className="button">
+          <Button type="danger" as="ul" className="button">
             {validationMessage.title?.map(e => (
               <li key={e} className="error">
                 {e}
@@ -533,9 +532,10 @@ const Submit: FC<Props> = () => {
                 {e}
               </li>
             ))}
-          </ButtonError>
+          </Button>
         ) : (
           <Button
+            type="primary"
             as={Link}
             className={"button"}
             onClick={e => handleSubmit(e)}

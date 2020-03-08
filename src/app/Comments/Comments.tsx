@@ -1,17 +1,13 @@
-import React, { FC, useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ErrorContext } from '../contexts/ErrorContext';
-import { UserContext } from '../contexts/UserContext';
-import Comment from './Comment';
-import {
-  Button,
-  ButtonError,
-  ButtonTransparent
-} from "../components/Button.style";
-import { Base } from "../Typography/Typography.style";
-import { TextArea } from "../components";
-import StyledComments from "./Comments.style";
-import { get, post, APIRequestInteface } from '../utils/api';
+import React, { FC, useContext, useEffect, useState } from "react"
+import { Link } from "react-router-dom"
+import { ErrorContext } from "../contexts/ErrorContext"
+import { UserContext } from "../contexts/UserContext"
+import Comment from "./Comment"
+import { Button } from "../components"
+import { Base } from "../Typography/Typography.style"
+import { TextArea } from "../components"
+import StyledComments from "./Comments.style"
+import { get, post, APIRequestInteface } from "../utils/api"
 
 interface GetCommentsInterface extends APIRequestInteface<GetCommentsData> {}
 export interface GetCommentsData {
@@ -34,33 +30,42 @@ interface Props {
   type: "post" | "messages"
 }
 
-const Comments: FC<Props> = ({ commentCount, setCommentCount, idPost, type }) => {
+const Comments: FC<Props> = ({
+  commentCount,
+  setCommentCount,
+  idPost,
+  type,
+}) => {
   const [comments, setComments] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [idComments, setIdComments] = useState<string[]>([])
-  const [newComment, setNewComment] = useState('')
+  const [newComment, setNewComment] = useState("")
   const { addError } = useContext(ErrorContext)
   const { user } = useContext(UserContext)
 
   const getComments = () => {
     setIsLoading(true)
-    const { getData, cancel, getHasFailed }: GetCommentsInterface = get<GetCommentsData>(
-      `${type === 'post' ? 'comments' : 'message'}/${idPost}/${
+    const { getData, cancel, getHasFailed }: GetCommentsInterface = get<
+      GetCommentsData
+    >(
+      `${type === "post" ? "comments" : "message"}/${idPost}/${
         idComments.length
       }/20`,
-      () => addError({ comments: ['some error message here']})
+      () => addError({ comments: ["some error message here"] })
     )
 
     const setAllComments = async () => {
       const response = await getData()
-      
-      if (getHasFailed() || !response)
-        return addError({ comments: [`get comments request failed`]})
 
-      const { data: { error, ids, comments: newComments } } = response
+      if (getHasFailed() || !response)
+        return addError({ comments: [`get comments request failed`] })
+
+      const {
+        data: { error, ids, comments: newComments },
+      } = response
 
       if (error) return addError(error)
-      
+
       setComments({ ...comments, ...newComments })
       setIdComments([...idComments, ...ids])
     }
@@ -89,14 +94,14 @@ const Comments: FC<Props> = ({ commentCount, setCommentCount, idPost, type }) =>
         [type === "post" ? "postedOn" : "postedByName"]: idPost,
         text: newComment,
       },
-      () => addError({ comments: ["some error message here"]})
+      () => addError({ comments: ["some error message here"] })
     )
 
     // TODO: probably there's reason to make this its own function
     const addComment = async () => {
       const response = await getData()
       if (getHasFailed() || !response)
-        return addError({ comments: [`post comment request failed`]})
+        return addError({ comments: [`post comment request failed`] })
 
       const {
         data: { error, ids, comments: newComments },
@@ -106,7 +111,7 @@ const Comments: FC<Props> = ({ commentCount, setCommentCount, idPost, type }) =>
 
       setComments(comments => ({ ...comments, newComments }))
       setIdComments([...idComments, ...ids])
-      setNewComment('')
+      setNewComment("")
       setCommentCount && commentCount && setCommentCount(commentCount + 1)
     }
 
@@ -133,8 +138,8 @@ const Comments: FC<Props> = ({ commentCount, setCommentCount, idPost, type }) =>
             <Comment
               key={c}
               userName={
-                type === 'messages'
-                  ? comments[c]['postedByName'].filter(u =>
+                type === "messages"
+                  ? comments[c]["postedByName"].filter(u =>
                       comments[c].poster !== user.id
                         ? u !== user.displayName
                         : u === user.displayName
@@ -147,9 +152,14 @@ const Comments: FC<Props> = ({ commentCount, setCommentCount, idPost, type }) =>
         )
       )}
       {commentCount && commentCount !== 0 && idComments.length < commentCount && (
-        <ButtonTransparent as={Link} onClick={e => handleLoadMore(e)} to="">
+        <Button
+          type="transparent"
+          as={Link}
+          onClick={e => handleLoadMore(e)}
+          to=""
+        >
           Load more...
-        </ButtonTransparent>
+        </Button>
       )}
       {user.logged && (
         <TextArea
@@ -160,14 +170,14 @@ const Comments: FC<Props> = ({ commentCount, setCommentCount, idPost, type }) =>
         />
       )}
       {user.logged && (
-        <Button as={Link} onClick={handleSubmit} to="">
-          {type === 'messages' ? 'Send Message' : 'Send'}
+        <Button type="primary" as={Link} onClick={handleSubmit} to="">
+          {type === "messages" ? "Send Message" : "Send"}
         </Button>
       )}
       {!user.logged && (
-        <ButtonError as={Link} to="/login">
+        <Button type="danger" as={Link} to="/login">
           You have to be logged in to post a comment
-        </ButtonError>
+        </Button>
       )}
     </StyledComments>
   )

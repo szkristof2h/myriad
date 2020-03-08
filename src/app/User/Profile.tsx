@@ -12,7 +12,7 @@ import { UserContext } from '../contexts/UserContext';
 import Loader from '../Loader';
 import { Header, Base } from "../Typography/Typography.style";
 import StyledProfile from "./Profile.style"
-import { Button, ButtonError } from "../components/Button.style";
+import { Button } from "../components";
 import EditProfile from "./EditProfile";
 import { APIRequestInteface, get } from '../utils/api';
 
@@ -139,7 +139,7 @@ const Profile: FC<Props> = ({ params }) => {
   const renderProfile = (
     <StyledProfile>
       <div className="avatar">
-        <img className="image" src={avatar ?? ''} alt="avatar" />
+        <img className="image" src={avatar ?? ""} alt="avatar" />
       </div>
       <Header centered className="title">
         {displayName}
@@ -149,23 +149,35 @@ const Profile: FC<Props> = ({ params }) => {
         <Button
           as={Link}
           active={followed}
+          type="primary"
           className={`button`}
-          to={`${followed ? 'un' : ''}follow`}
-          onClick={e => handleClick(e, 'follow')}
+          to={`${followed ? "un" : ""}follow`}
+          onClick={e => handleClick(e, "follow")}
         >
-          {(followed ? 'Unf' : 'F') + 'ollow!'}
+          {(followed ? "Unf" : "F") + "ollow!"}
         </Button>
       )}
-      <Button as={Link} className="button" to={`/posts/${displayName}`}>
+      <Button
+        type="primary"
+        as={Link}
+        className="button"
+        to={`/posts/${displayName}`}
+      >
         Posts
       </Button>
       {id !== user.id && (
-        <Button as={Link} className="button" to={`/message/${id}`}>
+        <Button
+          type="primary"
+          as={Link}
+          className="button"
+          to={`/message/${id}`}
+        >
           Send a message
         </Button>
       )}
       {id === user.id && (
         <Button
+          type="primary"
           as={Link}
           className="button"
           to={`/profile/edit`}
@@ -174,25 +186,27 @@ const Profile: FC<Props> = ({ params }) => {
         </Button>
       )}
       {id !== user.id && (
-        <ButtonError
+        <Button
           as={Link}
+          type="danger"
           active={blocked}
           className={`button`}
-          to={`/${blocked ? 'un' : ''}block`}
-          onClick={e => handleClick(e, 'block')}
+          to={`/${blocked ? "un" : ""}block`}
+          onClick={e => handleClick(e, "block")}
         >
-          {(blocked ? 'Unb' : 'B') + 'lock!'}
-        </ButtonError>
+          {(blocked ? "Unb" : "B") + "lock!"}
+        </Button>
       )}
       {id === user.id && (
-        <ButtonError
+        <Button
           as={Link}
+          type="danger"
           onClick={logout}
           className={`button`}
           to="/logout"
         >
           Logout
-        </ButtonError>
+        </Button>
       )}
     </StyledProfile>
   )

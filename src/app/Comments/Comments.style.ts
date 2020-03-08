@@ -1,11 +1,7 @@
 import styled from "styled-components";
 import theme from "../theme";
-import { TextArea } from "../components/Input/styles";
-import {
-  Button,
-  ButtonError,
-  ButtonTransparent
-} from "../components/Button.style";
+import TextArea from "../components/TextArea/styles";
+import Button from "../components/Button/styles";
 
 const StyledComments = styled.div`
   display: grid;
@@ -18,7 +14,7 @@ const StyledComments = styled.div`
     grid-column: 1 / span 2;
     margin-top: ${theme.base.gutter}px;
   }
-  > ${Button}, ${ButtonError}, ${ButtonTransparent} {
+  > ${Button} {
     grid-column: 1 / span 2;
     margin-top: ${theme.base.gutter / 2}px;
   }

@@ -33,7 +33,10 @@ export default {
     header3: "1.5em",
     header4: "1.75em",
     header5: "2em",
-    header6: "2.25em"
+    header6: "2.25em",
+    style: {
+      button: "Artifika"
+    }
   },
   color: {
     ...color,

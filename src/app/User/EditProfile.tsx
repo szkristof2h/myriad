@@ -1,8 +1,7 @@
-import React, { FC, SyntheticEvent } from 'react'
+import React, { FC } from 'react'
 import { Link } from 'react-router-dom'
 import StyledEditProfile from './EditProfile.style'
-import { Input, TextArea } from '../components'
-import { Button, ButtonError, ButtonOk } from '../components/Button.style'
+import { Button, Input, TextArea } from "../components"
 import { Header } from '../Typography/Typography.style'
 
 interface Props {
@@ -37,11 +36,11 @@ const EditProfile: FC<Props> = ({
   const handleInput = (value: inputFieldTypes) =>
     setNewProfile({ ...newProfile, ...value })
   const { avatar, bio, displayName } = newProfile
-  const CheckButton = isNameAvailable
-    ? ButtonOk
+  const checkButtonType = isNameAvailable
+    ? "confirm"
     : isNameAvailable !== null
-    ? ButtonError
-    : Button
+    ? "danger"
+    : "primary"
 
   return (
     <StyledEditProfile>
@@ -57,7 +56,8 @@ const EditProfile: FC<Props> = ({
         }
         value={displayName}
       />
-      <CheckButton
+      <Button
+      type={checkButtonType}
         as={Link}
         onClick={async (e: React.MouseEvent) => await handleCheck(e)}
         to="check/displayName"
@@ -67,7 +67,7 @@ const EditProfile: FC<Props> = ({
           : isNameAvailable === false
           ? "Already in use"
           : "Check availability"}
-      </CheckButton>
+      </Button>
       <Header centered>Avatar</Header>
       <img className="avatar" src={avatar} />
       <Input
@@ -84,7 +84,8 @@ const EditProfile: FC<Props> = ({
       />
       <Button
         as={Link}
-        onClick={async (e: SyntheticEvent) => await handleSubmit(e)}
+        type="primary"
+        onClick={async e => await handleSubmit(e)}
         to="check/displayName"
       >
         Save

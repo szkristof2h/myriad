@@ -1,7 +1,7 @@
 import React from 'react';
 import Popup from '../Popup';
 import Google from '../images/Google.jsx';
-import { ButtonGoogle } from "../components/Button.style";
+import { Button } from "../components";
 import { Box } from "../components/Box.style";
 import { Header } from "../Typography/Typography.style";
 
@@ -12,9 +12,10 @@ const Login = () => {
         <Header centered size={3}>
           Login
         </Header>
-        <ButtonGoogle
+        <Button
           as={"a"}
           href="/auth/google"
+          type="google"
           style={{ display: "grid", gridAutoFlow: "column" }}
         >
           <Google
@@ -26,7 +27,7 @@ const Login = () => {
           <Header centered size={2} style={{ fontWeight: 600 }}>
             Login with Google
           </Header>
-        </ButtonGoogle>
+        </Button>
       </Box>
     </Popup>
   );

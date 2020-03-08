@@ -7,11 +7,7 @@ import config from '../config';
 import Meh from '../images/Meh.jsx';
 import Popup from '../Popup';
 import sample from '../images/add.svg';
-import {
-  ButtonArrow,
-  ButtonRate,
-  ButtonRateBig
-} from "../components/Button.style";
+import { Button } from "../components";
 import { Header, Base, UserHeader } from "../Typography/Typography.style";
 import { StyledPost, StyledPostOpen } from "./Post.style";
 import getYoutubeId from "../../util/getYoutubeId"
@@ -117,7 +113,7 @@ const Post: FC<Post> = ({
         backgroundSize:
           id.length == 20 ? `70px 70px` : !type ? "cover" : "auto auto",
         gridColumn: `${!type ? "" + col + " / span " + size : "initial"}`,
-        gridRow: `${!type ? "" + row + " / span " + size : "initial"}`
+        gridRow: `${!type ? "" + row + " / span " + size : "initial"}`,
       }}
     >
       <div className="details">
@@ -137,12 +133,13 @@ const Post: FC<Post> = ({
           )}
         </div>
         {title !== "Submit a post!" && type !== "notification" && (
-          <ButtonRate
+          <Button
             className={`button`}
-            as={Link}
-            type={rated > 0 ? "rateActive" : "impressed"}
+            active={rated === 1}
+            type={"impressed"}
             onClick={e => rate(1, e)}
             to={"impressed"}
+            as={Link}
           >
             <Star
               className={"icon"}
@@ -151,37 +148,39 @@ const Post: FC<Post> = ({
               fill={rated > 0 ? "white" : "none"}
             />
             <Header size={styleSize}>{ups}</Header>
-          </ButtonRate>
+          </Button>
         )}
         {title !== "Submit a post!" && type !== "notification" && (
-          <ButtonRate
+          <Button
             className={`button`}
             as={Link}
-            type={rated < 0 ? "rateActive" : "meh"}
+            active={rated === -1}
+            type={"meh"}
             onClick={e => rate(-1, e)}
             to={"meh"}
           >
             <Meh className={"icon"} strokeWidth="1.5px" color="white" />
             <Header size={styleSize}>{downs}</Header>
-          </ButtonRate>
+          </Button>
         )}
       </div>
     </StyledPost>
-  );
+  )
 
   const renderStandAlone = () => (
     <Popup show={true} dismiss={dismiss} dismissible={true} type="post">
       <StyledPostOpen>
         <div className="image-container" ref={ref}>
           {images && imageIndex > 0 && (
-            <ButtonArrow
+            <Button
               as={Link}
               to="/"
+              type="arrow"
               className="button--previous"
               onClick={e => handleImageStep(e, -1)}
             >
-              {'<'}
-            </ButtonArrow>
+              {"<"}
+            </Button>
           )}
           {videoId ? (
             <iframe
@@ -194,24 +193,25 @@ const Post: FC<Post> = ({
               allowFullScreen
             />
           ) : (
-            <img className="image" src={images ? images[imageIndex] : ''} />
+            <img className="image" src={images ? images[imageIndex] : ""} />
           )}
           {images && imageIndex < images.length - 1 && (
-            <ButtonArrow
+            <Button
               as={Link}
               to="/"
+              type="arrow"
               className="button--next"
               onClick={e => handleImageStep(e, 1)}
             >
-              {'>'}
-            </ButtonArrow>
+              {">"}
+            </Button>
           )}
         </div>
         <Header
           centered
           size={3}
           as="a"
-          className={'title ellipsis'}
+          className={"title ellipsis"}
           href={link}
           target="_blank"
         >
@@ -221,61 +221,60 @@ const Post: FC<Post> = ({
           as={Link}
           centered={1}
           size={1}
-          className={'user ellipsis'}
+          className={"user ellipsis"}
           to={`/user/${postedByName}`}
         >
           @{postedByName}
         </UserHeader>
         <Base className="summary">{description}</Base>
         <div className="buttons">
-          <ButtonRateBig
+          <Button
             className={`button`}
             as={Link}
-            type={'impressed'}
-            rated={rated > 0 ? 1 : 0}
+            type={"impressedBig"}
+            rated={rated === 1}
             onClick={e => rate(1, e)}
-            to={'meh'}
+            to={"impressed"}
           >
             <Star
               alt="Impressed!"
               className="icon impressed"
-              fill={rated > 0 ? 'yellow' : 'none'}
+              fill={rated > 0 ? "yellow" : "none"}
               placeholder="Impressed!"
               size="40"
               strokeWidth="1.5px"
-              color={rated > 0 ? 'yellow' : 'gray'}
+              color={rated > 0 ? "yellow" : "gray"}
             />
-            <Header size={2} className={'text'}>
+            <Header size={2} className={"text"}>
               {ups}
             </Header>
-          </ButtonRateBig>
-          <ButtonRateBig
+          </Button>
+          <Button
             className={`button`}
             as={Link}
-            type={'meh'}
-            rated={rated < 0 ? 1 : 0}
+            type={"mehBig"}
+            rated={rated === -1}
             onClick={e => rate(-1, e)}
-            to={'meh'}
+            to={"meh"}
           >
             <Meh
               alt="Meh..."
               className="icon meh"
-              color={rated < 0 ? 'black' : 'gray'}
+              color={rated < 0 ? "black" : "gray"}
               placeholder="Meh..."
               size="40"
               strokeWidth="1.5px"
             />
-            <Header size={2} className={'text'}>
+            <Header size={2} className={"text"}>
               {downs}
             </Header>
-          </ButtonRateBig>
+          </Button>
           <div className="placeholder" />
           <a
             className="button"
             href={`http://www.facebook.com/sharer.php?u=${url}[title]=${title}`}
           >
             <Facebook
-              alt="share on facebook"
               className="share-icon share-icon--facebook"
               strokeWidth="1.5px"
               color="#3b5998"
@@ -284,7 +283,6 @@ const Post: FC<Post> = ({
           </a>
           <a className="button" href={`https://twitter.com/share?url=${url}`}>
             <Twitter
-              alt="share on twitter"
               className="share-icon share-icon--twitter"
               strokeWidth="1.5px"
               color="#0084b4"
@@ -297,7 +295,7 @@ const Post: FC<Post> = ({
             commentCount={commentCount}
             setCommentCount={setCommentCount}
             idPost={id}
-            type={'post'}
+            type={"post"}
           />
         </Suspense>
       </StyledPostOpen>

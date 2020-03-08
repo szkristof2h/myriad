@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import theme from "../theme";
 import { Box } from "../components/Box.style";
-import { Button } from "../components/Button.style";
+import Button from "../components/Button/styles";
 import { Header, Error } from "../Typography/Typography.style";
 
 const StyledNotifications = styled(Box)`
