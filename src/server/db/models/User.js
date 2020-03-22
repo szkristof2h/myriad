@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
-import { sanitize } from '../../util/utils';
+import mongoose from "mongoose"
+import { sanitize } from "../../utils"
 
-const { Schema } = mongoose;
+const { Schema } = mongoose
 
 const userSchema = new Schema({
   avatar: String,
@@ -10,17 +10,17 @@ const userSchema = new Schema({
   lastName: String,
   bio: {
     type: String,
-    maxlength: [200, 'The description can\'t be longer than 200 characters!'],
-    minlength: [3, 'The description should be at least 3 characters!'],
-    set: v => sanitize(v)
+    maxlength: [200, "The description can't be longer than 200 characters!"],
+    minlength: [3, "The description should be at least 3 characters!"],
+    set: v => sanitize(v),
   },
   googleId: String,
   social: {
     facebook: String,
     google: String,
-    twitter: String
-  }
-});
+    twitter: String,
+  },
+})
 
-const User = mongoose.model('User', userSchema);
-export default User;
+const User = mongoose.model("User", userSchema)
+export default User

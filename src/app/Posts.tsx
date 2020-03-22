@@ -5,17 +5,17 @@ import React, {
   useContext,
   useEffect,
   useState,
-} from 'react'
-import { Route, History } from 'react-router-dom'
-import { NavigationContext } from './contexts/NavigationContext'
-import { PostsContext } from './contexts/PostsContext'
-import { UserContext } from './contexts/UserContext'
-import useWindowSize from './hooks/useWindowSize'
-import Loader from './Loader'
-import StyledPosts from './Posts.style'
-import Tags from './Tags'
+} from "react"
+import { Route, RouteComponentProps } from "react-router-dom"
+import { NavigationContext } from "./contexts/NavigationContext"
+import { PostsContext } from "./contexts/PostsContext"
+import { UserContext } from "./contexts/UserContext"
+import useWindowSize from "./hooks/useWindowSize"
+import Loader from "./Loader"
+import StyledPosts from "./Posts.style"
+import Tags from "./Tags"
 
-const Post = lazy(() => import('./Post/Post' /* webpackChunkName: "Post" */))
+const Post = lazy(() => import("./Post/Post" /* webpackChunkName: "Post" */))
 
 // TODO: move to utils
 const setPos = (): [number[][], number] => {
@@ -74,8 +74,7 @@ const setPos = (): [number[][], number] => {
   return [positions, offset]
 }
 
-interface Props {
-  history: History
+interface Props extends RouteComponentProps {
   fullUrl: string
   tag: string
   url: string
@@ -95,7 +94,7 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
     setFocused,
     setPreviousUrl,
   } = useContext(PostsContext)
-  const [positions, setPositions] = useState()
+  const [positions, setPositions] = useState<number[][]>()
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useContext(UserContext)
   const { width, height } = useWindowSize()
@@ -107,15 +106,15 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
         ? `/post/${id}`
         : user.logged
         ? user.displayName
-          ? '/add'
-          : '/profile'
-        : '/login'
+          ? "/add"
+          : "/profile"
+        : "/login"
     )
   }
 
   const closePost = () => {
-    setFocused('')
-    history.push(previousUrl ? previousUrl : '/')
+    setFocused("")
+    history.push(previousUrl ? previousUrl : "/")
   }
 
   useEffect(() => {
@@ -125,7 +124,7 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
     setOffset(positions[1])
     setPositions(positions[0])
     return () => {
-      setFocused('')
+      setFocused("")
       setMounted(false)
       setRefresh(false)
     }
@@ -134,26 +133,26 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
   useEffect(() => {
     const type =
       fullUrl &&
-      fullUrl.split('/').length == 3 &&
-      fullUrl.split('/')[1] === 'post'
-        ? 'post'
+      fullUrl.split("/").length == 3 &&
+      fullUrl.split("/")[1] === "post"
+        ? "post"
         : tag
         ? tag
         : userName
         ? userName
-        : ''
-    ;`posts${userName ? '/user' : ''}${
-      tag ? '/' + tag.trim() : userName ? '/' + userName : ''
+        : ""
+    ;`posts${userName ? "/user" : ""}${
+      tag ? "/" + tag.trim() : userName ? "/" + userName : ""
     }`
 
     // Checks if url was the previous one (and is not refreshing) to avoid loading unnecessarily
-    if ((type !== 'post' || !previousUrl) && (previousUrl !== url || refresh)) {
+    if ((type !== "post" || !previousUrl) && (previousUrl !== url || refresh)) {
       setPositions([]) // reset position
       setIsLoading(true)
 
       const { cancel, setPostsContext } = getPosts(
-        `posts${userName ? '/user' : ''}${
-          tag ? '/' + tag.trim() : userName ? '/' + userName : ''
+        `posts${userName ? "/user" : ""}${
+          tag ? "/" + tag.trim() : userName ? "/" + userName : ""
         }`,
         type
       )
@@ -181,7 +180,7 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
           ) : (
             ids.map(
               (id, i) =>
-                positions.length > i && (
+                positions?.[i] && (
                   <Post
                     key={id}
                     col={positions[i][0] + 1 + offset}

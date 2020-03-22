@@ -1,15 +1,15 @@
-import React, { lazy, Suspense, useContext, useEffect, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { NavigationContext } from '../contexts/NavigationContext';
-import { PostsContext, Post } from '../contexts/PostsContext';
-import { Header, Error } from "../Typography/Typography.style";
-import { Button } from "../components";
-import StyledNotifications from "./Notifications.style";
+import React, { lazy, Suspense, useContext, useEffect, useState } from "react"
+import { Link, useHistory } from "react-router-dom"
+import { NavigationContext } from "../contexts/NavigationContext"
+import { PostsContext } from "../contexts/PostsContext"
+import { Header, Error } from "../Typography/Typography.style"
+import { Button } from "../components"
+import StyledNotifications from "./Notifications.style"
 
-const Post = lazy(() => import('../Post/Post' /* webpackChunkName: "Post" */));
+const Post = lazy(() => import("../Post/Post" /* webpackChunkName: "Post" */))
 
 const Notifications = () => {
-  const { history } = useHistory()
+  const history = useHistory()
   const [isLoading, setIsLoading] = useState(true)
   const { refresh } = useContext(NavigationContext)
   const { getPosts, ids, posts, setFocused } = useContext(PostsContext)
@@ -63,7 +63,12 @@ const Notifications = () => {
           ))}
       </Suspense>
       {ids && ids.length != 0 ? (
-        <Button type="primary" as={Link} to="/notifications/load" onClick={e => loadMore(e)}>
+        <Button
+          type="primary"
+          as={Link}
+          to="/notifications/load"
+          onClick={e => loadMore(e)}
+        >
           Load more...
         </Button>
       ) : (

@@ -1,8 +1,9 @@
-import styled from 'styled-components'
-import { FC } from 'react'
+import styled from "styled-components"
+import { FC } from "react"
 
 interface Props {
-  type: 'basic' | 'scrollY' | 'post' | 'profile' | 'submit'
+  type: "basic" | "scrollY" | "post" | "profile" | "submit"
+  onClick: Function
 }
 
 const styles = {

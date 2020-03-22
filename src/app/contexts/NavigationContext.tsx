@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState } from "react"
 
 interface Error {
   [type: string]: string[]
@@ -11,7 +11,6 @@ interface NavigationContextInterface {
   setIsFocused: (isFocused: boolean) => void
 }
 
-
 const initialState: NavigationContextInterface = {
   refresh: false,
   isFocused: false,
@@ -19,11 +18,13 @@ const initialState: NavigationContextInterface = {
   setIsFocused: isFocused => {},
 }
 
-const NavigationContext = createContext<NavigationContextInterface>(initialState)
+const NavigationContext = createContext<NavigationContextInterface>(
+  initialState
+)
 
 const NavigationProvider = ({ children }) => {
-  const [isFocused, setIsFocused] = useState();
-  const [refresh, setRefresh] = useState(false);
+  const [isFocused, setIsFocused] = useState(false)
+  const [refresh, setRefresh] = useState(false)
 
   return (
     <NavigationContext.Provider
@@ -34,4 +35,4 @@ const NavigationProvider = ({ children }) => {
   )
 }
 
-export { NavigationProvider, NavigationContext };
+export { NavigationProvider, NavigationContext }

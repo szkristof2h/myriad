@@ -1,34 +1,34 @@
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import React, { Suspense, lazy } from "react";
-import Navigation from "./Navigation.jsx";
-import Loader from "./Loader.tsx";
-import Error from "./Error.jsx";
-import { ErrorProvider } from "./contexts/ErrorContext.jsx";
-import { NavigationProvider } from "./contexts/NavigationContext.jsx";
-import { PostsProvider } from "./contexts/PostsContext.jsx";
-import { UserProvider } from "./contexts/UserContext.jsx";
-import "./main.css";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom"
+import React, { Suspense, lazy } from "react"
+import Navigation from "./Navigation.tsx"
+import Loader from "./Loader.tsx"
+import Error from "./Error.tsx"
+import { ErrorProvider } from "./contexts/ErrorContext.tsx"
+import { NavigationProvider } from "./contexts/NavigationContext.tsx"
+import { PostsProvider } from "./contexts/PostsContext.tsx"
+import { UserProvider } from "./contexts/UserContext.tsx"
+import "./main.css"
 
-const Browse = lazy(() => import("./Browse.jsx" /* webpackChunkName: "Browse" */));
+// const Browse = lazy(() => import("./Browse.tsx" /* webpackChunkName: "Browse" */));
 const Login = lazy(() =>
-  import("./User/Login.jsx" /* webpackChunkName: "Login" */)
-);
+  import("./User/Login.tsx" /* webpackChunkName: "Login" */)
+)
 const Message = lazy(() =>
-  import("./Messages/Message.jsx" /* webpackChunkName: "Message" */)
-);
+  import("./Messages/Message.tsx" /* webpackChunkName: "Message" */)
+)
 const Notifications = lazy(() =>
-  import("./User/Notifications.jsx" /* webpackChunkName: "Notifications" */)
-);
+  import("./User/Notifications.tsx" /* webpackChunkName: "Notifications" */)
+)
 const Messages = lazy(() =>
-  import("./Messages/Messages.jsx" /* webpackChunkName: "Messages" */)
-);
-const Posts = lazy(() => import("./Posts.tsx" /* webpackChunkName: "Posts" */));
+  import("./Messages/Messages.tsx" /* webpackChunkName: "Messages" */)
+)
+const Posts = lazy(() => import("./Posts.tsx" /* webpackChunkName: "Posts" */))
 const Profile = lazy(() =>
-  import("./User/Profile.jsx" /* webpackChunkName: "Profile" */)
-);
+  import("./User/Profile.tsx" /* webpackChunkName: "Profile" */)
+)
 const Submit = lazy(() =>
-  import("./Post/Submit.jsx" /* webpackChunkName: "Submit" */)
-);
+  import("./Post/Submit.tsx" /* webpackChunkName: "Submit" */)
+)
 
 export default function App() {
   return (
@@ -53,10 +53,10 @@ export default function App() {
                     path={["/profile", "/profile/edit", "/user/:name"]}
                     render={({ match }) => <Profile params={match.params} />}
                   />
-                  <Route
+                  {/* <Route
                     path="/browse"
                     render={() => <Browse />}
-                  />
+                  /> */}
                   <Route
                     path="/tag/:tag"
                     render={({ history, location, match }) => (
@@ -104,5 +104,5 @@ export default function App() {
         </ErrorProvider>
       </Suspense>
     </Router>
-  );
+  )
 }

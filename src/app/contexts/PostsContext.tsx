@@ -1,20 +1,20 @@
-import React, { createContext, useContext, useState } from 'react'
-import { Canceler } from 'axios'
-import { ErrorContext } from './ErrorContext'
-import { get, post, APIRequestInteface } from '../utils/api'
+import React, { createContext, useContext, useState } from "react"
+import { Canceler } from "axios"
+import { ErrorContext } from "./ErrorContext"
+import { get, post, APIRequestInteface } from "../utils/api"
 
 // TODO: add error type
 export interface GetPostsInterface extends APIRequestInteface<GetPostsData> {}
-interface GetPostInterface extends APIRequestInteface<GetPostData> {}
+export interface GetPostInterface extends APIRequestInteface<GetPostData> {}
 interface UpdatePostInterface extends APIRequestInteface<UpdatePostData> {}
 
-interface GetPostsData {
+export interface GetPostsData {
   ids: string[]
   posts: PostData[]
   error?: {}
 }
 
-interface GetPostData {
+export interface GetPostData {
   post: PostData
   error?: {}
 }
@@ -67,7 +67,7 @@ interface PostContextInterface {
 
 // Should find a better & easier way to provide an initial state to react contexts
 const initialState: PostContextInterface = {
-  focused: '',
+  focused: "",
   ids: [],
   getPost: (id: string) => ({
     cancel: (message?: string) => {},
@@ -78,7 +78,7 @@ const initialState: PostContextInterface = {
     setPostsContext: () => new Promise(() => {}),
   }),
   posts: {},
-  previousUrl: '',
+  previousUrl: "",
   setFocused: (id: string) => {},
   setIds: (ids: string[]) => {},
   setPosts: (posts: Post[]) => {},
@@ -92,29 +92,29 @@ const initialState: PostContextInterface = {
 const PostsContext = createContext<PostContextInterface>(initialState)
 
 const samplePost = {
-  description: '',
-  image: 'sample',
+  description: "",
+  image: "sample",
   rated: 0,
-  title: 'Submit a post!',
+  title: "Submit a post!",
 }
 
 const PostsProvider = ({ children }) => {
-  const [focused, setFocused] = useState('')
-  const [previousUrl, setPreviousUrl] = useState('')
+  const [focused, setFocused] = useState("")
+  const [previousUrl, setPreviousUrl] = useState("")
   const [posts, setPosts] = useState({})
   const [ids, setIds] = useState<string[]>([])
   const { addError } = useContext(ErrorContext)
 
-  const getPosts: PostContextInterface['getPosts'] = (url, type) => {
+  const getPosts: PostContextInterface["getPosts"] = (url, type) => {
     const { getData, cancel, getHasFailed }: GetPostsInterface = get<
       GetPostsData
-    >(url, () => addError({ posts: ['some error message here']}))
+    >(url, () => addError({ posts: ["some error message here"] }))
 
     const setPostsContext = async () => {
       const response = await getData()
 
       if (getHasFailed() || !response)
-        return addError({ posts:  [`get posts request failed`]})
+        return addError({ posts: [`get posts request failed`] })
 
       const {
         data: { error, ids, posts },
@@ -141,18 +141,16 @@ const PostsProvider = ({ children }) => {
     return { cancel, setPostsContext }
   }
 
-  const getPost: PostContextInterface['getPost'] = (id: string) => {
+  const getPost: PostContextInterface["getPost"] = (id: string) => {
     const { getData, cancel, getHasFailed }: GetPostInterface = get<
       GetPostData
-    >(`post/${id}`, () =>
-      addError({ posts: ['some error message here']})
-    )
+    >(`post/${id}`, () => addError({ posts: ["some error message here"] }))
 
     const setPostContext = async () => {
       const response = await getData()
 
       if (getHasFailed() || !response)
-        return addError({ posts: [`get post request failed`]})
+        return addError({ posts: [`get post request failed`] })
 
       const {
         data: { error, post },
@@ -167,14 +165,14 @@ const PostsProvider = ({ children }) => {
     return { cancel, setPostContext }
   }
 
-  const updatePost: PostContextInterface['updatePost'] = (
+  const updatePost: PostContextInterface["updatePost"] = (
     id: string,
     variables
   ) => {
-    const { getData, cancel, getHasFailed }: UpdatePostInterface = post<UpdatePostData>(
-      `post/${id}`,
-      variables,
-      () => addError({ posts: ['some error message here']})
+    const { getData, cancel, getHasFailed }: UpdatePostInterface = post<
+      UpdatePostData
+    >(`post/${id}`, variables, () =>
+      addError({ posts: ["some error message here"] })
     )
 
     const setPostContext = async () => {

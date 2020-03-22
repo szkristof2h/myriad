@@ -1,9 +1,9 @@
-import React from 'react';
-import Popup from '../Popup';
-import Google from '../images/Google.jsx';
-import { Button } from "../components";
-import { Box } from "../components/Box.style";
-import { Header } from "../Typography/Typography.style";
+import React from "react"
+import Popup from "../Popup"
+import Google from "../images/Google.jsx"
+import { Button } from "../components"
+import { Box } from "../components/Box.style"
+import { Header } from "../Typography/Typography.style"
 
 const Login = () => {
   return (
@@ -20,6 +20,7 @@ const Login = () => {
         >
           <Google
             size="40"
+            // @ts-ignore
             fill="white"
             strokeWidth="0"
             alt="login with google"
@@ -30,7 +31,7 @@ const Login = () => {
         </Button>
       </Box>
     </Popup>
-  );
+  )
 }
 
 export default Login

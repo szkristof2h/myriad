@@ -1,22 +1,33 @@
-import React, { FC, lazy, Suspense, useContext, useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import Star from 'react-feather/dist/icons/star';
-import { Facebook, Twitter } from 'react-feather';
-import { PostsContext, Post } from '../contexts/PostsContext';
-import config from '../config';
-import Meh from '../images/Meh.jsx';
-import Popup from '../Popup';
-import sample from '../images/add.svg';
-import { Button } from "../components";
-import { Header, Base, UserHeader } from "../Typography/Typography.style";
-import { StyledPost, StyledPostOpen } from "./Post.style";
+import React, {
+  FC,
+  lazy,
+  Suspense,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react"
+import { Link } from "react-router-dom"
+import Star from "react-feather/dist/icons/star"
+import { Facebook, Twitter } from "react-feather"
+import { PostsContext, Post as PostProps } from "../contexts/PostsContext"
+import config from "../config"
+import Meh from "../images/Meh.jsx"
+import Popup from "../Popup"
+// @ts-ignore
+import sample from "../images/add.svg"
+import { Button } from "../components"
+import { Header, Base, UserHeader } from "../Typography/Typography.style"
+import { StyledPost, StyledPostOpen } from "./Post.style"
 import getYoutubeId from "../../util/getYoutubeId"
 
-const Comments = lazy(() => import('../Comments/Comments' /* webpackChunkName: "Comments" */));
+const Comments = lazy(() =>
+  import("../Comments/Comments" /* webpackChunkName: "Comments" */)
+)
 
-const siteUrl = config.url;
+const siteUrl = config.url
 
-const Post: FC<Post> = ({
+const Post: FC<PostProps> = ({
   id,
   col,
   comments,
@@ -32,63 +43,67 @@ const Post: FC<Post> = ({
   size,
   title,
   type,
-  ups
+  ups,
 }) => {
-  const [isLoading, setIsLoading] = useState(false); // specify what is loading
+  const [isLoading, setIsLoading] = useState(false) // specify what is loading
   const [commentCount, setCommentCount] = useState(comments)
-  const [mounted, setMounted] = useState();
-  const [imageIndex, setImageIndex] = useState(0);
-  const [videoId, setVideoId] = useState(false);
-  const [videoSize, setVideoSize] = useState({ width: 0, height: 0 });
-  const { getPost, updatePost } = useContext(PostsContext);
-  const ref = useRef(null);
-  const url = `${siteUrl}/${id}`;
+  const [mounted, setMounted] = useState(false)
+  const [imageIndex, setImageIndex] = useState(0)
+  const [videoId, setVideoId] = useState(false)
+  const [videoSize, setVideoSize] = useState({ width: 0, height: 0 })
+  const { getPost, updatePost } = useContext(PostsContext)
+  const ref = useRef(null)
+  const url = `${siteUrl}/${id}`
 
   const rate = async (rating: number, e) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
 
     if (!isLoading) return
 
     const { setPostContext } = updatePost("post/rating", { id, rating })
 
     await setPostContext()
-    setIsLoading(false);
+    setIsLoading(false)
   }
 
-  const handleClick = e => e.target === e.currentTarget && openPost && openPost()
+  const handleClick = e =>
+    e.target === e.currentTarget && openPost && openPost()
 
   const handleImageStep = (e, step) => {
-    e.preventDefault();
-    setImageIndex(index => index + step);
+    e.preventDefault()
+    setImageIndex(index => index + step)
   }
 
   useEffect(() => {
-    setMounted(true);
+    setMounted(true)
     return () => {
-      setMounted(false);
-      setIsLoading(false);
-    };
-  }, []);
+      setMounted(false)
+      setIsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     images && setVideoId(getYoutubeId(link))
     if (images && ref && ref.current)
-    // @ts-ignore
-      setVideoSize({ width: ref.current.clientWidth, height: ref.current.clientHeight })
+      setVideoSize({
+        // @ts-ignore
+        width: ref?.current?.clientWidth,
+        // @ts-ignore
+        height: ref?.current?.clientHeight,
+      })
   }, [images, imageIndex])
 
   useEffect(() => {
     if (!title && mounted) {
       setIsLoading(true)
       const { cancel, setPostContext } = getPost(id)
-
       ;(async () => await setPostContext())()
 
       setIsLoading(false)
       return cancel
     }
-  }, [mounted, id]);
+  }, [mounted, id])
 
   const classType = `post ${
     type && type !== "notification"
@@ -98,9 +113,13 @@ const Post: FC<Post> = ({
       : size < 18
       ? "sub1"
       : "main"
-  }`;
+  }`
 
-  const styleSize = classType.includes("main") ? 2 : classType.includes("sub2") ? -1 : 1;
+  const styleSize = classType.includes("main")
+    ? 2
+    : classType.includes("sub2")
+    ? -1
+    : 1
 
   const renderGridPost = () => (
     <StyledPost
@@ -142,6 +161,7 @@ const Post: FC<Post> = ({
             as={Link}
           >
             <Star
+              // @ts-ignore
               className={"icon"}
               strokeWidth="1.5px"
               color="white"
@@ -159,6 +179,7 @@ const Post: FC<Post> = ({
             onClick={e => rate(-1, e)}
             to={"meh"}
           >
+            // @ts-ignore
             <Meh className={"icon"} strokeWidth="1.5px" color="white" />
             <Header size={styleSize}>{downs}</Header>
           </Button>
@@ -237,6 +258,7 @@ const Post: FC<Post> = ({
             to={"impressed"}
           >
             <Star
+              // @ts-ignore
               alt="Impressed!"
               className="icon impressed"
               fill={rated > 0 ? "yellow" : "none"}
@@ -258,6 +280,7 @@ const Post: FC<Post> = ({
             to={"meh"}
           >
             <Meh
+              // @ts-ignore
               alt="Meh..."
               className="icon meh"
               color={rated < 0 ? "black" : "gray"}
@@ -302,11 +325,9 @@ const Post: FC<Post> = ({
     </Popup>
   )
 
-  return !type || type === "notification" ? (
-    renderGridPost()
-  ) : (
- renderStandAlone()
-  );
+  return !type || type === "notification"
+    ? renderGridPost()
+    : renderStandAlone()
 }
 
 export default Post
