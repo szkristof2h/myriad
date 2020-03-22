@@ -19,6 +19,7 @@
 This means that, although each of the more popular posts fill up a larger area by themselves, the overall number of less popular posts will always be higher. This hopefully creates better balance between the tiers.
 
 ## Frameworks, libraries, etc
+ - Typescript
  - Node.js
  - Express
  - MongoDB
@@ -31,13 +32,14 @@ This means that, although each of the more popular posts fill up a larger area b
 I started working on this project to learn, experiment and practice with new features of various frameworks, libraries, etc., I use. I felt that I have neglected actual practice with some of them --like React-- so I decided to create a smaller project where practice is a lot easier. This also means that I might use alpha or beta versions of dependencies.
 
 ## Roadmap (mostly in order of importance, finished ones at the end of the list)
- 2. Make tags better and creating some kind of browsing component (*in progress*)
+ 1. Make tags better and creating some kind of browsing component (*in progress*)
  1. Convert js -> ts on the backend
  1. Implement facebook and twitter social login
  1. Improve Profile page
  2. Create better loader component(s) to use with suspense
- 6. Try coming up with a better solution for handling axios requests (***in progress, not tested***)
-   1. Come up with a better way to handle `IsLoading` and `cancel()`
+ 6. Try coming up with a better solution for handling requests (***in progress, not tested***)
+   1. *Backend*: Create error handler for each request (*in progress*)
+   1. *Frontend*: Come up with a better way to handle `IsLoading` and `cancel()` (`axios`)
  4. Experiment with webpack for better performance
  3. Implement unit testing
  1. Fix the css mess ~~(currently in the process of refactoring components to use CSS-in-JS) (2020)~~
