@@ -38,8 +38,8 @@ I started working on this project to learn, experiment and practice with new fea
  1. Improve Profile page
  2. Create better loader component(s) to use with suspense
  6. Try coming up with a better solution for handling requests (***in progress, not tested***)
-   1. *Backend*: Create error handler for each request (*in progress*)
-   1. *Frontend*: Come up with a better way to handle `IsLoading` and `cancel()` (`axios`)
+    1. *Backend*: Create error handler for each request (*in progress*)
+    1. *Frontend*: Come up with a better way to handle `IsLoading` and `cancel()` (`axios`)
  4. Experiment with webpack for better performance
  3. Implement unit testing
  1. Fix the css mess ~~(currently in the process of refactoring components to use CSS-in-JS) (2020)~~
