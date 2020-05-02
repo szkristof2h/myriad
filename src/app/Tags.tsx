@@ -1,25 +1,24 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { get, APIRequestInteface } from './utils/api'
-import { Link } from 'react-router-dom'
-import { ErrorContext } from './contexts/ErrorContext'
-import { StyledTags } from './Tags.style'
+import React, { useContext, useEffect, useState } from "react"
+import { get, APIRequestInteface } from "./utils/api"
+import { Link } from "react-router-dom"
+import { ErrorContext } from "./contexts/ErrorContext"
+import { StyledTags } from "./Tags.style"
 
-interface TagsDataInterface extends APIRequestInteface<GetTagsData> {} 
+interface TagsDataInterface extends APIRequestInteface<GetTagsData> {}
 
 interface GetTagsData {
   ids: string[]
   tags: string[]
-  error?: {}
 }
 
-const Tags =() => {
-  const [tags, setTags] = useState<string[]>([]);
-  const { addError } = useContext(ErrorContext);
+const Tags = () => {
+  const [tags, setTags] = useState<string[]>([])
+  const { addError } = useContext(ErrorContext)
 
   const getTags = () => {
     const { getData, cancel, getHasFailed }: TagsDataInterface = get(
-      'tags',
-      () => addError({ tags: ['some error message here']})
+      "tags",
+      () => addError({ tags: ["some error message here"] })
     )
 
     const setAllTags = async () => {
@@ -32,8 +31,8 @@ const Tags =() => {
         data: { error, tags: tagsData },
       } = response
 
-      if (error) return addError(error)
-      
+      if (error) return addError(error.message, error.type)
+      console.log(tagsData)
       setTags(tagsData)
     }
 
@@ -50,7 +49,7 @@ const Tags =() => {
 
   return (
     <StyledTags className="tags">
-      {tags.map(tag => (
+      {tags?.map((tag) => (
         <li key={`tag:${tag}`} className="tag">
           <Link className="tag__link" to={`/tag/${tag}`}>
             #{tag.trim()}

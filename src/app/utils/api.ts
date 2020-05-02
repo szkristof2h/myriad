@@ -1,8 +1,9 @@
-import axios, { AxiosResponse, Canceler } from 'axios'
-import config from '../config'
+import axios, { AxiosResponse, Canceler } from "axios"
+import config from "../config"
+import { APIResponseError } from "."
 
 export interface APIRequestInteface<T> {
-  getData: () => Promise<AxiosResponse<T> | undefined>
+  getData: () => Promise<AxiosResponse<T & APIResponseError> | undefined>
   cancel: Canceler
   getHasFailed: () => boolean
 }
@@ -31,7 +32,11 @@ const get = <T = any, R = AxiosResponse<T>>(url: string, handleErrors) => {
   return { getData: data, cancel, getHasFailed }
 }
 
-const post = <T = any, R = AxiosResponse<T>>(url: string, variables, handleErrors) => {
+const post = <T = any, R = AxiosResponse<T>>(
+  url: string,
+  variables,
+  handleErrors
+) => {
   let hasFailed
   const getHasFailed = () => hasFailed
   const source = axios.CancelToken.source()

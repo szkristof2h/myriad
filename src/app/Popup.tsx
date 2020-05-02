@@ -1,11 +1,10 @@
-import React, { FC } from 'react';
-import StyledPopup from './Popup.style';
+import React, { FC } from "react"
+import StyledPopup from "./Popup.style"
 
 export interface Props {
   dismiss?: (shouldDismiss: boolean) => void
   dismissible?: boolean
-  modifier?: string
-  type?: "basic" | "scrollY" | "post" | "profile" |"submit"
+  type?: "basic" | "scrollY" | "post" | "profile" | "submit"
   show: boolean
 }
 
@@ -13,19 +12,14 @@ const Popup: FC<Props> = ({
   children,
   dismiss,
   dismissible,
-  modifier,
   show,
-  type = 'basic',
+  type = "basic",
 }) => {
-  const handleClick = e =>
+  const handleClick = (e: React.MouseEvent) =>
     dismissible ? e.target === e.currentTarget && dismiss && dismiss(false) : {}
 
   return show ? (
-    <StyledPopup
-      type={type}
-      // className={`popup ${modifier ? 'popup--' + modifier : ''}`}
-      onClick={e => handleClick(e)}
-    >
+    <StyledPopup type={type} onClick={(e) => handleClick(e)}>
       {children}
     </StyledPopup>
   ) : null

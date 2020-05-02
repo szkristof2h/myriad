@@ -1,7 +1,7 @@
-import styled from 'styled-components'
-import Popup from './Popup';
+import styled from "styled-components"
+import StyledPopup from "./Popup.style"
 
-const Loader = styled(Popup)`
+const Loader = styled.div`
   > .loader {
     display: grid;
     align-self: center;

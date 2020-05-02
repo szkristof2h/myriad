@@ -14,18 +14,17 @@ const styles = {
   submit: `align-content: start;`,
 }
 
-const StyledPopup: FC<Props> = ({ type }) => {
-  const style = `
-    display: grid;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    justify-content: center;
-    justify-items: center;
-    align-content: center;
-    ${styles[type]}
-  `
-  return styled.div(style)
-}
+const StyledPopup: FC<Props> = styled.div(({ type }) => ({
+  ...{
+    display: "grid",
+    position: "fixed",
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    justifyItems: "center",
+    alignContent: "center",
+  },
+  ...styles[type],
+}))
 
 export default StyledPopup

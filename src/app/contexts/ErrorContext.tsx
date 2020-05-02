@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState } from "react"
 
 export interface Error {
   [type: string]: string[]
@@ -11,11 +11,10 @@ interface ErrorContextInterface {
   resetErrors: () => void
 }
 
-
 const initialState: ErrorContextInterface = {
   errors: [],
-  addError: error => {},
-  removeErrors: errors => {},
+  addError: (error) => {},
+  removeErrors: (errors) => {},
   resetErrors: () => {},
 }
 
@@ -31,21 +30,24 @@ const ErrorProvider = ({ children }) => {
     const existingErrors = errors[type] ?? []
     const newError = typeof error === "string" ? [error] : error[type]
 
-    setErrors({
+    setErrors([
       ...errors,
-      [type]: [
-        ...existingErrors,
-        ...newError.filter(e => !existingErrors.includes(e)),
-      ],
-    })
+      {
+        [type]: [
+          ...existingErrors,
+          ...newError.filter((e) => !existingErrors.includes(e)),
+        ],
+      },
+    ])
   }
 
   const removeErrors = (errorsToRemove: string[]) => {
     setErrors(
       errors.filter(
-        error =>
-          error[Object.keys(error)[0]].filter(e => !errorsToRemove.includes(e))
-            .length
+        (error) =>
+          error[Object.keys(error)[0]].filter(
+            (e) => !errorsToRemove.includes(e)
+          ).length
       )
     )
   }
@@ -63,4 +65,4 @@ const ErrorProvider = ({ children }) => {
   )
 }
 
-export { ErrorProvider, ErrorContext };
+export { ErrorProvider, ErrorContext }

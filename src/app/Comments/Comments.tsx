@@ -13,7 +13,6 @@ interface GetCommentsInterface extends APIRequestInteface<GetCommentsData> {}
 export interface GetCommentsData {
   ids: string[]
   comments: CommentData[]
-  error?: {}
 }
 
 export interface CommentData {
@@ -41,7 +40,7 @@ const Comments: FC<Props> = ({
   const [idComments, setIdComments] = useState<string[]>([])
   const [newComment, setNewComment] = useState("")
   const { addError } = useContext(ErrorContext)
-  const { user } = useContext(UserContext)
+  const { currentUser } = useContext(UserContext)
 
   const getComments = () => {
     setIsLoading(true)
@@ -64,7 +63,7 @@ const Comments: FC<Props> = ({
         data: { error, ids, comments: newComments },
       } = response
 
-      if (error) return addError(error)
+      if (error) return addError(error.message, error.type)
 
       setComments({ ...comments, ...newComments })
       setIdComments([...idComments, ...ids])
@@ -107,9 +106,9 @@ const Comments: FC<Props> = ({
         data: { error, ids, comments: newComments },
       } = response
 
-      if (error) return addError(error)
+      if (error) return addError(error.message, error.type)
 
-      setComments(comments => ({ ...comments, newComments }))
+      setComments((comments) => ({ ...comments, newComments }))
       setIdComments([...idComments, ...ids])
       setNewComment("")
       setCommentCount && commentCount && setCommentCount(commentCount + 1)
@@ -133,16 +132,16 @@ const Comments: FC<Props> = ({
       {!idComments || idComments.length == 0 ? (
         <Base className="warning">There are no comments yet!</Base>
       ) : (
-        idComments.map(c =>
+        idComments.map((c) =>
           comments[c] ? (
             <Comment
               key={c}
               userName={
                 type === "messages"
-                  ? comments[c]["postedByName"].filter(u =>
-                      comments[c].poster !== user.id
-                        ? u !== user.displayName
-                        : u === user.displayName
+                  ? comments[c]["postedByName"].filter((u) =>
+                      comments[c].poster !== currentUser?.id
+                        ? u !== currentUser?.displayName
+                        : u === currentUser?.displayName
                     )[0]
                   : comments[c].postedByName[0]
               }
@@ -155,26 +154,26 @@ const Comments: FC<Props> = ({
         <Button
           type="transparent"
           as={Link}
-          onClick={e => handleLoadMore(e)}
+          onClick={(e) => handleLoadMore(e)}
           to=""
         >
           Load more...
         </Button>
       )}
-      {user.logged && (
+      {currentUser?.isLoggedIn && (
         <TextArea
-          onChange={e => setNewComment(e.currentTarget.value)}
+          onChange={(e) => setNewComment(e.currentTarget.value)}
           placeholder="Write a comment!"
           rows="1"
           value={newComment}
         />
       )}
-      {user.logged && (
+      {currentUser?.isLoggedIn && (
         <Button type="primary" as={Link} onClick={handleSubmit} to="">
           {type === "messages" ? "Send Message" : "Send"}
         </Button>
       )}
-      {!user.logged && (
+      {!currentUser?.isLoggedIn && (
         <Button type="danger" as={Link} to="/login">
           You have to be logged in to post a comment
         </Button>

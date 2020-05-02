@@ -1,4 +1,4 @@
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from "react"
 import {
   Link,
   Redirect,
@@ -6,15 +6,15 @@ import {
   Switch,
   useHistory,
   useRouteMatch,
-} from 'react-router-dom'
-import { ErrorContext } from '../contexts/ErrorContext';
-import { UserContext } from '../contexts/UserContext';
-import Loader from '../Loader';
-import { Header, Base } from "../Typography/Typography.style";
+} from "react-router-dom"
+import { ErrorContext } from "../contexts/ErrorContext"
+import { UserContext, CurrentUserType, User } from "../contexts/UserContext"
+import Loader from "../Loader"
+import { Header, Base } from "../Typography/Typography.style"
 import StyledProfile from "./Profile.style"
-import { Button } from "../components";
-import EditProfile from "./EditProfile";
-import { APIRequestInteface, get } from '../utils/api';
+import { Button } from "../components"
+import EditProfile from "./EditProfile"
+import { APIRequestInteface, get } from "../utils/api"
 
 interface Props {
   params?: {
@@ -24,11 +24,14 @@ interface Props {
 }
 
 type GetIsNameAvailable = (name: string) => Promise<void>
-interface IsNameAvailableRequest extends APIRequestInteface<IsNameAvailableData> {}
-interface IsNameAvailableData { error: {  } }
+interface IsNameAvailableRequest
+  extends APIRequestInteface<IsNameAvailableData> {}
+interface IsNameAvailableData {
+  data: { isNameAvailable: boolean }
+}
 
 const Profile: FC<Props> = ({ params }) => {
-  const hasMatchedEdit = useRouteMatch('/profile/edit')
+  const hasMatchedEdit = useRouteMatch("/profile/edit")
   let history = useHistory()
   const { currentUser, getUser, logout, updateCurrentUser, user } = useContext(
     UserContext
@@ -36,9 +39,14 @@ const Profile: FC<Props> = ({ params }) => {
   const { addError } = useContext(ErrorContext)
   const [isNameAvailable, setIsNameAvailable] = useState<boolean | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const id = params?.name ?? ''
-  const { avatar, blocked, bio, displayName, followed } =
-    id === currentUser?.id ? currentUser : user
+  const id = params?.name ?? ""
+  const {
+    avatar = "",
+    bio = "",
+    displayName = "",
+    isBlocked = false,
+    isFollowed = false,
+  } = id === currentUser?.id ? currentUser : user
   const [newProfile, setNewProfile] = useState({ avatar, bio, displayName })
   const isEditing = !id && (!displayName || hasMatchedEdit)
 
@@ -59,21 +67,21 @@ const Profile: FC<Props> = ({ params }) => {
     const { getData, getHasFailed }: IsNameAvailableRequest = get<
       IsNameAvailableData
     >(`user/displayName/${name}`, () =>
-      addError({ profile: ['some error message here']})
+      addError({ profile: ["some error message here"] })
     )
 
     const response = await getData()
 
     if (getHasFailed() || !response)
-      return addError({ profile: [`get is name available request failed`]})
+      return addError({ profile: [`get is name available request failed`] })
 
     const {
       data: { error },
     } = response
 
-    if (Object.keys(error).length) setIsNameAvailable(true)
+    if (!error) setIsNameAvailable(true)
     else {
-      addError(error)
+      addError(error.message, error.type)
       setIsNameAvailable(false)
     }
   }
@@ -90,7 +98,7 @@ const Profile: FC<Props> = ({ params }) => {
 
     setIsLoading(true)
 
-    const { setCurrentUserContext } = updateCurrentUser({ id, type }, 'rate')
+    const { setCurrentUserContext } = updateCurrentUser({ id, type }, "rate")
 
     params && params.name && (await setCurrentUserContext())
     setIsLoading(false)
@@ -118,7 +126,7 @@ const Profile: FC<Props> = ({ params }) => {
     )
 
     if (Object.keys(newValues).length === 0) {
-      addError({ profile: ["You haven't change any of your data."]})
+      addError({ profile: ["You haven't change any of your data."] })
       setIsLoading(false)
       return
     }
@@ -148,13 +156,13 @@ const Profile: FC<Props> = ({ params }) => {
       {id !== user.id && (
         <Button
           as={Link}
-          active={followed}
+          active={isFollowed}
           type="primary"
           className={`button`}
-          to={`${followed ? "un" : ""}follow`}
-          onClick={e => handleClick(e, "follow")}
+          to={`${isFollowed ? "un" : ""}follow`}
+          onClick={(e) => handleClick(e, "follow")}
         >
-          {(followed ? "Unf" : "F") + "ollow!"}
+          {(isFollowed ? "Unf" : "F") + "ollow!"}
         </Button>
       )}
       <Button
@@ -189,12 +197,12 @@ const Profile: FC<Props> = ({ params }) => {
         <Button
           as={Link}
           type="danger"
-          active={blocked}
+          active={isBlocked}
           className={`button`}
-          to={`/${blocked ? "un" : ""}block`}
-          onClick={e => handleClick(e, "block")}
+          to={`/${isBlocked ? "un" : ""}block`}
+          onClick={(e) => handleClick(e, "block")}
         >
-          {(blocked ? "Unb" : "B") + "lock!"}
+          {(isBlocked ? "Unb" : "B") + "lock!"}
         </Button>
       )}
       {id === user.id && (
@@ -225,10 +233,9 @@ const Profile: FC<Props> = ({ params }) => {
           />
         )}
       />
-      <Route path={['/profile', '/user/:name']} render={() => renderProfile} />
+      <Route path={["/profile", "/user/:name"]} render={() => renderProfile} />
     </Switch>
   )
 }
-
 
 export default Profile

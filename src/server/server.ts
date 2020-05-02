@@ -50,27 +50,27 @@ passportInit(app) // initialize passport
 const getSiteImages = (req, res) => {
   return axios
     .get(req.body.url)
-    .then(r => {
+    .then((r) => {
       const clean = sanitizeHtml(r.data, {
         allowedTags: ["img"],
       })
       res.send(clean)
     })
-    .catch(e => {
-      handleErrors("Couldn't load images from the url", e)
+    .catch((e) => {
+      throw Error("Couldn't load images from the url")
       return res.json({})
     })
 }
 
 const getUserInfo = (req, res, next) => {
   if (req.user)
-    User.findById(req.user, (e, u) => {
-      if (u)
+    User.findById(req.user, (e, user) => {
+      if (user)
         res.locals.user = {
-          displayName: u.displayName,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          id: u.id,
+          displayName: user.displayName,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          id: user.id,
         }
       next()
     })
@@ -79,69 +79,52 @@ const getUserInfo = (req, res, next) => {
 
 const authenticate = (req, res, next) => {
   if (res.locals && res.locals.user)
-    if (!res.locals.user.displayName)
-      return res.json(
-        handleErrors("No display name", {
-          errors: {
-            displayName: {
-              message:
-                "You have to first set your display name on your profile!",
-            },
-          },
-        })
-      )
+    if (!res.locals.user.displayName) throw Error("NO_DISPLAYNAME")
     else next()
-  else
-    return res.json(
-      handleErrors(NOT_LOGGED_IN, {
-        errors: {
-          user: { message: "You should be logged in for this feature!" },
-        },
-      })
-    )
+  else throw Error("NOT_LOGGED_IN")
 }
 
 app.use(getUserInfo)
 
-function timeout(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-app.get("/test", async () => {
-  console.log("testing it")
-  await timeout(1000)
-  console.log("waited!")
-})
-
 // Routes
-app.post("/get/images", authenticate, getSiteImages)
+app.postAsync("/get/images", authenticate, getSiteImages)
 
-app.get("/get/tags", getTags)
+app.getAsync("/get/tags", getTags)
 
-app.get("/get/notifications/:skip/:limit", authenticate, getNotifications)
-app.get("/get/posts/user/:userId", getPosts)
-app.get("/get/posts/:tags", getPosts)
-app.get("/get/posts", getPosts)
-app.get("/get/post/:_id", getPost)
-app.post("/post/post", authenticate, postPost)
-app.post("/post/post/rating", authenticate, postRating)
+app.getAsync("/get/notifications/:skip/:limit", authenticate, getNotifications)
+app.getAsync("/get/posts/user/:userId", getPosts)
+app.getAsync("/get/posts/:tags", getPosts)
+app.getAsync("/get/posts", getPosts)
+app.getAsync("/get/post/:_id", getPost)
+app.postAsync("/post/post", authenticate, postPost)
+app.postAsync("/post/post/rating", authenticate, postRating)
 
-app.get("/get/profile", getUser)
-app.get("/get/user/:name", getUser)
-app.get("/get/user", getUser)
-app.put("/put/user/profile", updateProfile)
-app.put("/put/user/displayName", setDisplayName)
-app.get("/get/user/displayName/:displayName", checkDisplayName)
-app.post("/post/user/block", authenticate, block)
-app.post("/post/user/unblock", authenticate, unblock)
-app.post("/post/user/follow", authenticate, follow)
-app.post("/post/user/unfollow", authenticate, unfollow)
+app.getAsync("/get/profile", getUser)
+app.getAsync("/get/user/:name", getUser)
+app.getAsync("/get/user", getUser)
+app.putAsync("/put/user/profile", updateProfile)
+app.putAsync("/put/user/displayName", setDisplayName)
+app.getAsync("/get/user/displayName/:displayName", checkDisplayName)
+app.postAsync("/post/user/block", authenticate, block)
+app.postAsync("/post/user/unblock", authenticate, unblock)
+app.postAsync("/post/user/follow", authenticate, follow)
+app.postAsync("/post/user/unfollow", authenticate, unfollow)
 
-app.get("/get/comments/:postedOn/:skip/:limit", getComments)
-app.get("/get/messages/:skip/:limit", authenticate, getConversations)
-app.get("/get/message/:from/:skip/:limit", authenticate, getMessages)
-app.post("/post/comment", authenticate, postComment)
-app.post("/post/message", authenticate, postMessage)
+app.getAsync("/get/comments/:postedOn/:skip/:limit", getComments)
+app.getAsync("/get/messages/:skip/:limit", authenticate, getConversations)
+app.getAsync("/get/message/:from/:skip/:limit", authenticate, getMessages)
+app.postAsync("/post/comment", authenticate, postComment)
+app.postAsync("/post/message", authenticate, postMessage)
+
+app.use(handleErrors)
+app.use((req, res, next) => {
+  const { dataToSendBack } = res
+
+  if (dataToSendBack) {
+    console.log("sending back data")
+    res.json(dataToSendBack)
+  } else next()
+})
 
 // Webpack
 if (process.env.NODE_ENV !== "production") {
@@ -161,10 +144,11 @@ if (process.env.NODE_ENV !== "production") {
   // Webpack-dev-middleware doesn't create file, but stores them in memory
   app.use("*", (req, res, next) => {
     var filename = path.join(compiler.outputPath, "index.html")
-    compiler.outputFileSystem.readFile(filename, function(err, result) {
+    compiler.outputFileSystem.readFile(filename, function (err, result) {
       if (err) {
         return next(err)
       }
+
       res.set("content-type", "text/html")
       res.send(result)
       res.end()
