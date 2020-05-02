@@ -84,7 +84,9 @@ const Button = styled("div")((props: ButtonProps) => {
     padding: "1px 2px",
     background: rated ? theme.color.rateActive : theme.color[type],
     ["&:hover"]: {
-      background: rated ? theme.color.rateActiveHover : theme.color[type + "Hover"],
+      background: rated
+        ? theme.color.rateActiveHover
+        : theme.color[type + "Hover"],
     },
     ["> .icon"]: {
       width: "20px",
@@ -131,16 +133,16 @@ const Button = styled("div")((props: ButtonProps) => {
 
   const styles = {
     primary: primaryStyle,
-    danger: { ...primaryStyle, dangerStyle },
-    arrow: { ...primaryStyle, arrowStyle },
-    confirm: { ...primaryStyle, confirmStyle },
-    google: { ...primaryStyle, googleStyle },
-    transparent: { ...primaryStyle, transparentStyle },
-    active: { ...primaryStyle, activeStyle },
-    impressed: { ...primaryStyle, rateStyle },
-    meh: { ...primaryStyle, rateStyle },
-    impressedBig: { ...primaryStyle, rateBigStyle },
-    mehBig: { ...primaryStyle, rateBigStyle },
+    danger: { ...primaryStyle, ...dangerStyle },
+    arrow: { ...primaryStyle, ...arrowStyle },
+    confirm: { ...primaryStyle, ...confirmStyle },
+    google: { ...primaryStyle, ...googleStyle },
+    transparent: { ...primaryStyle, ...transparentStyle },
+    active: { ...primaryStyle, ...activeStyle },
+    impressed: { ...primaryStyle, ...rateStyle },
+    meh: { ...primaryStyle, ...rateStyle },
+    impressedBig: { ...primaryStyle, ...rateBigStyle },
+    mehBig: { ...primaryStyle, ...rateBigStyle },
   }
 
   return styles[type]

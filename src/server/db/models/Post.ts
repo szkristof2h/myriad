@@ -4,6 +4,22 @@ import { sanitize } from "../../utils"
 
 const { ObjectId, Schema } = mongoose
 
+export interface PostModel {
+  _id: string
+  date: Date
+  description: string
+  comments: number
+  downs: number
+  link: string
+  images: string[]
+  postedById: string
+  postedByName: string
+  ratio: number
+  tags: string[]
+  title: string
+  ups: number
+}
+
 const postSchema = new Schema({
   date: { type: Date, default: Date.now },
   description: {
@@ -11,25 +27,26 @@ const postSchema = new Schema({
     maxlength: [300, "The description can't be longer than 300 characters!"],
     minlength: [3, "The description should be at least 3 characters!"],
     required: [true, "Your post should have a description!"],
-    set: v => sanitize(v),
+    set: (value: string) => sanitize(value),
   },
   comments: Number,
   downs: { type: Number, index: true, default: 0 },
   link: {
     type: String,
     validate: {
-      validator: v => isURL(v),
-      message: props => `${props.value} is not a valid url!`,
+      validator: (value: string) => isURL(value),
+      message: (props) => `${props.value} is not a valid url!`,
     },
     required: [true, "You should give your post a link!"],
   },
   images: {
     type: [String],
     validate: {
-      validator: images => images.filter(image => !isURL(image)).length === 0,
-      message: props =>
+      validator: (images) =>
+        images.filter((image) => !isURL(image)).length === 0,
+      message: (props) =>
         `The following images aren't valid: ${props.value
-          .filter(image => !isURL(image))
+          .filter((image) => !isURL(image))
           .join(", ")}!`,
     },
     required: [true, "You should give your post a thumbnail!"],

@@ -38,7 +38,7 @@ const Post: FC<PostProps> = ({
   link,
   openPost,
   postedByName,
-  rated,
+  rating = 0,
   row,
   size,
   title,
@@ -67,12 +67,12 @@ const Post: FC<PostProps> = ({
     setIsLoading(false)
   }
 
-  const handleClick = e =>
+  const handleClick = (e) =>
     e.target === e.currentTarget && openPost && openPost()
 
   const handleImageStep = (e, step) => {
     e.preventDefault()
-    setImageIndex(index => index + step)
+    setImageIndex((index) => index + step)
   }
 
   useEffect(() => {
@@ -124,7 +124,7 @@ const Post: FC<PostProps> = ({
   const renderGridPost = () => (
     <StyledPost
       className={classType}
-      onClick={e => handleClick(e)}
+      onClick={(e) => handleClick(e)}
       style={{
         background: `gray url('${
           id.length != 20 ? images[0] : sample
@@ -141,7 +141,7 @@ const Post: FC<PostProps> = ({
             centered
             size={styleSize}
             className={"ellipsis"}
-            onClick={e => handleClick(e)}
+            onClick={(e) => handleClick(e)}
           >
             {title}
           </Header>
@@ -154,18 +154,17 @@ const Post: FC<PostProps> = ({
         {title !== "Submit a post!" && type !== "notification" && (
           <Button
             className={`button`}
-            active={rated === 1}
+            active={rating === 1}
             type={"impressed"}
-            onClick={e => rate(1, e)}
+            onClick={(e) => rate(1, e)}
             to={"impressed"}
             as={Link}
           >
             <Star
-              // @ts-ignore
               className={"icon"}
               strokeWidth="1.5px"
               color="white"
-              fill={rated > 0 ? "white" : "none"}
+              fill={rating > 0 ? "white" : "none"}
             />
             <Header size={styleSize}>{ups}</Header>
           </Button>
@@ -174,12 +173,11 @@ const Post: FC<PostProps> = ({
           <Button
             className={`button`}
             as={Link}
-            active={rated === -1}
+            active={rating === -1}
             type={"meh"}
-            onClick={e => rate(-1, e)}
+            onClick={(e) => rate(-1, e)}
             to={"meh"}
           >
-            // @ts-ignore
             <Meh className={"icon"} strokeWidth="1.5px" color="white" />
             <Header size={styleSize}>{downs}</Header>
           </Button>
@@ -198,7 +196,7 @@ const Post: FC<PostProps> = ({
               to="/"
               type="arrow"
               className="button--previous"
-              onClick={e => handleImageStep(e, -1)}
+              onClick={(e) => handleImageStep(e, -1)}
             >
               {"<"}
             </Button>
@@ -222,7 +220,7 @@ const Post: FC<PostProps> = ({
               to="/"
               type="arrow"
               className="button--next"
-              onClick={e => handleImageStep(e, 1)}
+              onClick={(e) => handleImageStep(e, 1)}
             >
               {">"}
             </Button>
@@ -253,19 +251,19 @@ const Post: FC<PostProps> = ({
             className={`button`}
             as={Link}
             type={"impressedBig"}
-            rated={rated === 1}
-            onClick={e => rate(1, e)}
+            rated={rating === 1}
+            onClick={(e) => rate(1, e)}
             to={"impressed"}
           >
             <Star
               // @ts-ignore
               alt="Impressed!"
               className="icon impressed"
-              fill={rated > 0 ? "yellow" : "none"}
+              fill={rating > 0 ? "yellow" : "none"}
               placeholder="Impressed!"
               size="40"
               strokeWidth="1.5px"
-              color={rated > 0 ? "yellow" : "gray"}
+              color={rating > 0 ? "yellow" : "gray"}
             />
             <Header size={2} className={"text"}>
               {ups}
@@ -275,15 +273,15 @@ const Post: FC<PostProps> = ({
             className={`button`}
             as={Link}
             type={"mehBig"}
-            rated={rated === -1}
-            onClick={e => rate(-1, e)}
+            rated={rating === -1}
+            onClick={(e) => rate(-1, e)}
             to={"meh"}
           >
             <Meh
               // @ts-ignore
               alt="Meh..."
               className="icon meh"
-              color={rated < 0 ? "black" : "gray"}
+              color={rating < 0 ? "black" : "gray"}
               placeholder="Meh..."
               size="40"
               strokeWidth="1.5px"

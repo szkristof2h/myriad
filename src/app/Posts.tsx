@@ -96,7 +96,7 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
   } = useContext(PostsContext)
   const [positions, setPositions] = useState<number[][]>()
   const [isLoading, setIsLoading] = useState(true)
-  const { user } = useContext(UserContext)
+  const { currentUser } = useContext(UserContext)
   const { width, height } = useWindowSize()
 
   const openPost = (id: string) => {
@@ -104,8 +104,8 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
     history.push(
       id.length != 20
         ? `/post/${id}`
-        : user.logged
-        ? user.displayName
+        : currentUser?.isLoggedIn
+        ? currentUser?.displayName
           ? "/add"
           : "/profile"
         : "/login"
@@ -178,19 +178,25 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
           {isLoading ? (
             <Loader />
           ) : (
-            ids.map(
-              (id, i) =>
+            ids.map((id, i) => {
+              const post = posts?.find((post) => post.id === id)
+
+              return (
+                post &&
                 positions?.[i] && (
                   <Post
                     key={id}
                     col={positions[i][0] + 1 + offset}
                     row={positions[i][1] + 1 + offset}
-                    openPost={() => openPost(id)}
+                    openPost={() => {
+                      openPost(id)
+                    }}
                     size={positions[i][2]}
-                    {...posts[id]}
+                    {...post}
                   />
                 )
-            )
+              )
+            })
           )}
         </Suspense>
       </StyledPosts>

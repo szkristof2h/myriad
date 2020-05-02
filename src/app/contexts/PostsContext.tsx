@@ -11,12 +11,10 @@ interface UpdatePostInterface extends APIRequestInteface<UpdatePostData> {}
 export interface GetPostsData {
   ids: string[]
   posts: PostData[]
-  error?: {}
 }
 
 export interface GetPostData {
   post: PostData
-  error?: {}
 }
 
 interface UpdatePostData extends GetPostData {}
@@ -30,17 +28,17 @@ export interface PostData {
   downs: number
   link: string
   postedByName: string
-  rated: -1 | 0 | 1
+  rating?: number
   ups: number
 }
 
 export interface Post extends PostData {
   col: number
   dismiss?: () => void
-  openPost?: () => {}
+  openPost?: () => void
   row: number
   size: number
-  type: string
+  type?: string
 }
 
 interface PostContextInterface {
@@ -53,7 +51,7 @@ interface PostContextInterface {
     url: string,
     type?: string
   ) => { cancel: Canceler; setPostsContext: () => Promise<void> }
-  posts: {}
+  posts: PostData[]
   previousUrl: string
   setFocused: (id: string) => void
   setIds: (ids: string[]) => void
@@ -77,7 +75,7 @@ const initialState: PostContextInterface = {
     cancel: (message?: string) => {},
     setPostsContext: () => new Promise(() => {}),
   }),
-  posts: {},
+  posts: [],
   previousUrl: "",
   setFocused: (id: string) => {},
   setIds: (ids: string[]) => {},
@@ -93,19 +91,23 @@ const PostsContext = createContext<PostContextInterface>(initialState)
 
 const samplePost = {
   description: "",
-  image: "sample",
-  rated: 0,
+  comments: 0,
+  downs: 0,
+  link: "",
+  ups: 0,
+  images: ["sample"],
+  rating: 0,
   title: "Submit a post!",
 }
 
 const PostsProvider = ({ children }) => {
   const [focused, setFocused] = useState("")
   const [previousUrl, setPreviousUrl] = useState("")
-  const [posts, setPosts] = useState({})
+  const [posts, setPosts] = useState<PostData[] | []>([])
   const [ids, setIds] = useState<string[]>([])
   const { addError } = useContext(ErrorContext)
 
-  const getPosts: PostContextInterface["getPosts"] = (url, type) => {
+  const getPosts: PostContextInterface["getPosts"] = (url, type = "") => {
     const { getData, cancel, getHasFailed }: GetPostsInterface = get<
       GetPostsData
     >(url, () => addError({ posts: ["some error message here"] }))
@@ -120,21 +122,15 @@ const PostsProvider = ({ children }) => {
         data: { error, ids, posts },
       } = response
 
-      if (error) return addError(error)
+      if (error) return addError(error.message, error.type)
 
-      const loaded: PostData | {} = {}
-
-      ids.forEach(
-        id =>
-          (loaded[id] =
-            id.length === 20
-              ? { _id: id, postedByName: type, ...samplePost }
-              : posts[id])
-      )
+      const fillerPosts: PostData[] = ids
+        .filter((id) => id.length === 20)
+        .map((id) => ({ id, postedByName: type, ...samplePost }))
 
       setPosts(() => {
         setIds(ids)
-        return loaded
+        return [...posts, ...fillerPosts]
       })
     }
 
@@ -156,9 +152,9 @@ const PostsProvider = ({ children }) => {
         data: { error, post },
       } = response
 
-      if (error) return addError(error)
+      if (error) return addError(error.message, error.type)
 
-      setPosts(posts => ({ ...posts, [id]: post }))
+      setPosts((posts) => ({ ...posts, [id]: post }))
       setFocused(id)
     }
 
@@ -185,9 +181,9 @@ const PostsProvider = ({ children }) => {
         data: { error, post },
       } = response
 
-      if (error) return addError(error)
+      if (error) return addError(error.message, error.type)
 
-      setPosts(posts => ({ ...posts, [id]: post }))
+      setPosts((posts) => ({ ...posts, [id]: post }))
     }
 
     return { cancel, setPostContext }
