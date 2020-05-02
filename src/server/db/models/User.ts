@@ -1,6 +1,17 @@
 import mongoose from "mongoose"
 import { sanitize } from "../../utils"
 
+export interface UserModel {
+  _id: string
+  avatar: string
+  bio: string
+  displayName: string
+  googleId: string
+  firstName: string
+  id: string
+  lastName: string
+}
+
 const { Schema } = mongoose
 
 const userSchema = new Schema({
@@ -12,7 +23,7 @@ const userSchema = new Schema({
     type: String,
     maxlength: [200, "The description can't be longer than 200 characters!"],
     minlength: [3, "The description should be at least 3 characters!"],
-    set: v => sanitize(v),
+    set: (value: string) => sanitize(value),
   },
   googleId: String,
   social: {

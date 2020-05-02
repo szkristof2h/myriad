@@ -1,5 +1,11 @@
 import isURL from "validator/lib/isURL"
-import { handleErrors, sanitize } from "../../utils"
+import { Request, Response } from "express"
+import {
+  handleErrors,
+  sanitize,
+  setErrorType,
+  setResponseData,
+} from "../../utils"
 import {
   BLOCK_USER_ERROR,
   CHECK_DISPLAY_NAME_ERROR,
@@ -10,9 +16,11 @@ import {
   USER_NOT_FOUND,
   UPDATE_PROFILE_ERROR,
 } from "../types"
-import User from "../models/User"
+import User, { UserModel } from "../models/User"
 import BlockedList from "../models/BlockedList"
 import FollowedList from "../models/FollowedList"
+import { CustomResponse } from "src/server/utils"
+import { UserData } from "../../../app/contexts/UserContext"
 
 export function block(req, res) {
   const { targetUser } = req.body
@@ -20,13 +28,13 @@ export function block(req, res) {
 
   User.findById(targetUser)
     .exec()
-    .then(user =>
+    .then((user) =>
       user
         ? ""
         : Promise.reject({ errors: { id: { message: USER_NOT_FOUND } } })
     )
     .then(() => BlockedList.findOne({ by: userId, user: targetUser }).exec())
-    .then(b =>
+    .then((b) =>
       b
         ? Promise.reject({
             errors: { blocked: { message: "User already blocked!" } },
@@ -40,7 +48,7 @@ export function block(req, res) {
     .then(() =>
       res.json({ status: "User successfully blocked!", type: "blocked" })
     )
-    .catch(e => res.json(handleErrors(BLOCK_USER_ERROR, e)))
+  // .catch(e => res.json(handleErrors(BLOCK_USER_ERROR, e)))
 }
 
 export function checkDisplayName(req, res) {
@@ -48,7 +56,7 @@ export function checkDisplayName(req, res) {
 
   return User.findOne({ displayName: displayName.toLowerCase() })
     .exec()
-    .then(u =>
+    .then((u) =>
       !u
         ? res
           ? res.json({ status: "Name is available!" })
@@ -59,9 +67,9 @@ export function checkDisplayName(req, res) {
             },
           })
     )
-    .catch(e =>
-      res ? res.json(handleErrors(CHECK_DISPLAY_NAME_ERROR, e)) : false
-    )
+  // .catch(e =>
+  //   res ? res.json(handleErrors(CHECK_DISPLAY_NAME_ERROR, e)) : false
+  // )
 }
 
 export function follow(req, res) {
@@ -70,13 +78,13 @@ export function follow(req, res) {
 
   User.findById(targetUser)
     .exec()
-    .then(user =>
+    .then((user) =>
       user
         ? ""
         : Promise.reject({ errors: { id: { message: USER_NOT_FOUND } } })
     )
     .then(() => FollowedList.findOne({ from: userId, to: targetUser }).exec())
-    .then(b =>
+    .then((b) =>
       b
         ? Promise.reject({
             errors: { message: { followed: "User already followed!" } },
@@ -90,51 +98,47 @@ export function follow(req, res) {
     .then(() =>
       res.json({ status: "User successfully followed!", type: "followed" })
     )
-    .catch(e => res.json(handleErrors(FOLLOW_USER_ERROR, e)))
+  // .catch(e => res.json(handleErrors(FOLLOW_USER_ERROR, e)))
 }
 
-export function getUser(req, res) {
-  const userId = res.locals && res.locals.user ? res.locals.user.id : null
-  const profileName =
-    req.params && req.params.name
-      ? req.params.name
-      : res.locals && res.locals.user
-      ? res.locals.user.displayName
-      : null
-  let user = {}
-  let search = profileName
+const getUser = async (req: Request, res: Response) => {
+  const idUser = res.locals && res.locals.user ? res.locals.user.id : null
+  const isLoggedIn = !!idUser
+  const profileName = req.params?.name ? res.locals.user?.displayName : null
+  const search = profileName
     ? { displayName: profileName }
-    : res.locals && res.locals.user && res.locals.user.id
-    ? { _id: res.locals.user.id }
+    : idUser
+    ? { _id: idUser }
     : null
 
-  if (!search)
-    return res.json(
-      handleErrors(GET_USER_ERROR, { errors: { id: { message: INVALID_ID } } })
-    )
+  setErrorType(res, "GET_USER_ERROR")
 
-  User.findOne(search)
+  if (!search) throw Error("NOT_LOGGED_IN") // TODO: shouldn't be an error
+
+  const userFromDB: UserModel = await User.findOne(search)
     .select("-googleId -social")
     .exec()
-    .then(u => {
-      user = u._doc
-      return !userId
-        ? false
-        : FollowedList.findOne({ from: userId, to: user._id }).exec()
+
+  if (!userFromDB) throw Error("INVALID_ID")
+
+  const { _id, ...user } = userFromDB
+
+  if (idUser) {
+    const isFollowed = !!FollowedList.findOne({
+      from: idUser,
+      to: user.id,
+    }).exec()
+    const isBlocked = !!BlockedList.findOne({
+      by: idUser,
+      user: user.id,
+    }).exec()
+
+    setResponseData<UserData>(res, {
+      ...user,
+      ...{ isFollowed, isBlocked },
+      ...(idUser ? { isLoggedIn } : {}),
     })
-    .then(r => {
-      if (r) user.followed = true
-      else user.followed = false
-      return !userId
-        ? false
-        : BlockedList.findOne({ by: userId, user: user._id }).exec()
-    })
-    .then(r => {
-      if (r) user.blocked = true
-      else user.blocked = false
-      return res.json(user)
-    })
-    .catch(e => res.json(handleErrors(GET_USER_ERROR, e)))
+  }
 }
 
 export function setDisplayName(req, res) {
@@ -147,18 +151,17 @@ export function setDisplayName(req, res) {
     displayName.length < 3 ||
     displayName.length > 20
   )
-    return res.json(
-      handleErrors(SET_DISPLAY_NAME_ERROR, {
-        errors: { displayName: { message: "Invalid display name!" } },
-      })
-    )
+    // return res.json(
+    //   handleErrors(SET_DISPLAY_NAME_ERROR, {
+    //     errors: { displayName: { message: "Invalid display name!" } },
+    //   })
+    // )
 
-  checkDisplayName(req, null)
-    .then(r =>
+    checkDisplayName(req, null).then((r) =>
       r
         ? User.findById(userId)
             .exec()
-            .then(user => {
+            .then((user) => {
               if (user.displayName)
                 return Promise.reject({
                   errors: {
@@ -178,7 +181,7 @@ export function setDisplayName(req, res) {
             },
           })
     )
-    .catch(e => res.json(handleErrors(SET_DISPLAY_NAME_ERROR, e)))
+  // .catch(e => res.json(handleErrors(SET_DISPLAY_NAME_ERROR, e)))
 }
 
 export function unblock(req, res) {
@@ -187,7 +190,7 @@ export function unblock(req, res) {
 
   BlockedList.findOneAndDelete({ by: userId, user: targetUser })
     .exec()
-    .then(block =>
+    .then((block) =>
       block
         ? res.json({ status: "User successfully unblocked!", type: "blocked" })
         : Promise.reject({
@@ -198,7 +201,7 @@ export function unblock(req, res) {
             },
           })
     )
-    .catch(e => res.json(handleErrors(BLOCK_USER_ERROR, e)))
+  // .catch(e => res.json(handleErrors(BLOCK_USER_ERROR, e)))
 }
 
 export function unfollow(req, res) {
@@ -207,7 +210,7 @@ export function unfollow(req, res) {
 
   FollowedList.findOneAndDelete({ from: userId, to: targetUser })
     .exec()
-    .then(follow =>
+    .then((follow) =>
       follow
         ? res.json({
             status: "User successfully unfollowed!",
@@ -222,7 +225,7 @@ export function unfollow(req, res) {
             },
           })
     )
-    .catch(e => res.json(handleErrors(FOLLOW_USER_ERROR, e)))
+  // .catch(e => res.json(handleErrors(FOLLOW_USER_ERROR, e)))
 }
 
 export function updateProfile(req, res) {
@@ -231,50 +234,52 @@ export function updateProfile(req, res) {
   const newProfile = {}
   bio = sanitize(bio)
 
-  if (!avatar && !bio)
-    return res.json(
-      handleErrors(UPDATE_PROFILE_ERROR, {
-        errors: {
-          profile: {
-            message:
-              "You cannot update your profile without changing anything!",
-          },
-        },
-      })
-    )
+  // if (!avatar && !bio)
+  //   return res.json(
+  //     handleErrors(UPDATE_PROFILE_ERROR, {
+  //       errors: {
+  //         profile: {
+  //           message:
+  //             "You cannot update your profile without changing anything!",
+  //         },
+  //       },
+  //     })
+  //   )
 
-  if (avatar)
-    if (!isURL(avatar))
-      return res.json(
-        handleErrors(UPDATE_PROFILE_ERROR, {
-          errors: { avatar: { message: "Invalid url for avatar!" } },
-        })
-      )
-    else newProfile.avatar = avatar
+  // if (avatar)
+  //   if (!isURL(avatar))
+  //     return res.json(
+  //       handleErrors(UPDATE_PROFILE_ERROR, {
+  //         errors: { avatar: { message: "Invalid url for avatar!" } },
+  //       })
+  //     )
+  // //   else newProfile.avatar = avatar
 
-  if (bio)
-    if (bio.length < 3)
-      return res.json(
-        handleErrors(UPDATE_PROFILE_ERROR, {
-          errors: {
-            bio: { message: "Your profile bio should be > 3 characters long!" },
-          },
-        })
-      )
-    else if (bio.length > 200)
-      return res.json(
-        handleErrors(UPDATE_PROFILE_ERROR, {
-          errors: {
-            bio: {
-              message: "Your profile bio should be < 200 characters long!",
-            },
-          },
-        })
-      )
-    else newProfile.bio = bio
+  // if (bio)
+  //   if (bio.length < 3)
+  //     return res.json(
+  //       handleErrors(UPDATE_PROFILE_ERROR, {
+  //         errors: {
+  //           bio: { message: "Your profile bio should be > 3 characters long!" },
+  //         },
+  //       })
+  //     )
+  //   else if (bio.length > 200)
+  //     return res.json(
+  //       handleErrors(UPDATE_PROFILE_ERROR, {
+  //         errors: {
+  //           bio: {
+  //             message: "Your profile bio should be < 200 characters long!",
+  //           },
+  //         },
+  //       })
+  //     )
+  //   else newProfile.bio = bio
 
   User.findByIdAndUpdate(userId, newProfile)
     .exec()
     .then(() => res.json({ status: "Successfully updated profile" }))
-    .catch(e => (res ? res.json(handleErrors(UPDATE_PROFILE_ERROR, e)) : false))
+  // .catch(e => (res ? res.json(handleErrors(UPDATE_PROFILE_ERROR, e)) : false))
 }
+
+export { getUser }

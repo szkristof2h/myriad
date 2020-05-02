@@ -1,36 +1,35 @@
-import React, { createContext, useEffect, useState, useContext } from 'react'
-import { Canceler } from 'axios'
-import { get, APIRequestInteface, post } from '../utils/api'
-import { ErrorContext } from './ErrorContext'
+import React, { createContext, useEffect, useState, useContext } from "react"
+import { Canceler } from "axios"
+import { get, APIRequestInteface, post } from "../utils/api"
+import { ErrorContext } from "./ErrorContext"
 
-// TODO: add error type
 interface GetUserInterface extends APIRequestInteface<GetUserData> {}
 interface UpdateUserInterface extends APIRequestInteface<UpdateUserData> {}
 interface LogoutInterface extends APIRequestInteface<{}> {}
 
 interface GetUserData {
   user: UserData
-  error?: {}
 }
 
 interface UpdateUserData extends GetUserData {}
 
-interface UserData {
+export interface UserData {
   id: string
   avatar: string
   bio: string
-  blocked: boolean
-  firstName: string
-  followed: boolean
   displayName: string
+  firstName: string
+  isBlocked?: boolean
+  isFollowed?: boolean
   lastName: string
-  logged?: boolean
 }
 
 export interface User extends UserData {}
 
+export type CurrentUserType = (User & { isLoggedIn: boolean }) | undefined
+
 interface UserContextInterface {
-  currentUser: User | null
+  currentUser: CurrentUserType
   logout: () => void
   getUser: (
     id: string,
@@ -41,14 +40,26 @@ interface UserContextInterface {
   }
   updateCurrentUser: (
     variables,
-    path?: string,
+    path?: string
   ) => { cancel: Canceler; setCurrentUserContext: () => Promise<boolean> }
   user: User
 }
 
-// Should find a better & easier way to provide an initial state to react contexts
+const emptyUser = {
+  _id: "",
+  avatar: "",
+  bio: "",
+  displayName: "",
+  googleId: "",
+  firstName: "",
+  id: "",
+  lastName: "",
+  isLoggedIn: false,
+}
+
+// TODO: Should find a better & easier way to provide an initial state to react contexts
 const initialState: UserContextInterface = {
-  currentUser: null,
+  currentUser: emptyUser,
   logout: () => {},
   getUser: (id: string) => ({
     cancel: (message?: string) => {},
@@ -59,48 +70,46 @@ const initialState: UserContextInterface = {
     setCurrentUserContext: () => new Promise(() => {}),
   }),
   user: {
-    id: '',
-    avatar: '',
-    bio: '',
-    blocked: false,
-    firstName: '',
-    followed: false,
-    displayName: '',
-    lastName: '',
-    logged: false,
+    id: "",
+    avatar: "",
+    bio: "",
+    displayName: "",
+    firstName: "",
+    isBlocked: false,
+    isFollowed: false,
+    lastName: "",
   },
 }
 const UserContext = createContext<UserContextInterface>(initialState)
 
 const UserProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [currentUser, setCurrentUser] = useState<CurrentUserType>(emptyUser)
   const [user, setUser] = useState<User>(initialState.user)
   const { addError } = useContext(ErrorContext)
 
   const logout = async () => {
     const { getData, getHasFailed }: LogoutInterface = post<{}>(
-      'logout',
+      "logout",
       null,
-      () => addError({ user: ['some error message here']})
+      () => addError({ user: ["some error message here"] })
     )
     await getData()
 
-    if (getHasFailed())
-      addError({ user: [`get user request failed`]})
+    if (getHasFailed()) addError({ user: [`get user request failed`] })
   }
 
-  const getUser: UserContextInterface['getUser'] = (id, isCurrentUser) => {
+  const getUser: UserContextInterface["getUser"] = (id, isCurrentUser) => {
     const { getData, cancel, getHasFailed }: GetUserInterface = get<
       GetUserData
-    >(`user${!isCurrentUser ? '/' + id : ''}`, () =>
-      addError({ user: ['some error message here']})
+    >(`user${!isCurrentUser ? "/" + id : ""}`, () =>
+      addError({ user: ["some error message here"] })
     )
 
     const setUserContext = async () => {
       const response = await getData()
 
       if (getHasFailed() || !response) {
-        addError({ user: [`get user request failed`]})
+        addError(`get user request failed`, "user")
         return false
       }
 
@@ -109,11 +118,14 @@ const UserProvider = ({ children }) => {
       } = response
 
       if (error) {
-        addError(error)
+        if (isCurrentUser && error.message === "NOT_LOGGED_IN") {
+          setCurrentUser({ ...emptyUser, isLoggedIn: false })
+        } else addError(error.message, error.type)
+
         return false
       }
 
-      if (isCurrentUser) setCurrentUser(user)
+      if (isCurrentUser) setCurrentUser({ ...user, isLoggedIn: true })
       setUser(user)
       return true
     }
@@ -121,21 +133,21 @@ const UserProvider = ({ children }) => {
     return { cancel, setUserContext }
   }
 
-  const updateCurrentUser: UserContextInterface['updateCurrentUser'] = (
+  const updateCurrentUser: UserContextInterface["updateCurrentUser"] = (
     variables,
     path
   ) => {
     const { getData, cancel, getHasFailed }: UpdateUserInterface = post<
       UpdateUserData
-    >(`${path ? 'user/' + path : 'user'}`, variables, () =>
-      addError({ user: ['some error message here']})
+    >(`${path ? "user/" + path : "user"}`, variables, () =>
+      addError({ user: ["some error message here"] })
     )
 
     const setCurrentUserContext = async () => {
       const response = await getData()
 
       if (getHasFailed() || !response) {
-        addError({ user: [`update user request failed`]})
+        addError({ user: [`update user request failed`] })
         return false
       }
 
@@ -144,11 +156,12 @@ const UserProvider = ({ children }) => {
       } = response
 
       if (error) {
-        addError(error)
-        return false
+        if (error.message === "NOT_LOGGED_IN") {
+          setCurrentUser({ ...emptyUser, isLoggedIn: false })
+        } else addError(error.message, error.type)
       }
 
-      setCurrentUser(user)
+      setCurrentUser({ ...user, isLoggedIn: true })
       return true
     }
 
@@ -156,14 +169,16 @@ const UserProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    const { cancel, setUserContext } = getUser('', true)
+    const { cancel, setUserContext } = getUser("", true)
     ;(async () => await setUserContext())()
 
     return cancel
   }, [])
 
   return (
-    <UserContext.Provider value={{ currentUser, logout, user, getUser, updateCurrentUser }}>
+    <UserContext.Provider
+      value={{ currentUser, logout, user, getUser, updateCurrentUser }}
+    >
       {children}
     </UserContext.Provider>
   )

@@ -14,7 +14,7 @@ import { Base } from "./Typography/Typography.style"
 
 const Navigation: FC = () => {
   const { setRefresh } = useContext(NavigationContext)
-  const { user } = useContext(UserContext)
+  const { currentUser } = useContext(UserContext)
 
   const handleRefresh = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -27,30 +27,39 @@ const Navigation: FC = () => {
         <Home className="icon" strokeWidth="1.5px" color="black" />
         <Base>Home</Base>
       </Link>
-      <Link className="button" to={`${user.logged ? "/add" : "/login"}`}>
+      <Link
+        className="button"
+        to={`${currentUser?.isLoggedIn ? "/add" : "/login"}`}
+      >
         <Add className="icon" strokeWidth="1.5px" color="black" />
         <Base>Add new!</Base>
       </Link>
-      <Link className="button" to={`${user.logged ? "/profile" : "/login"}`}>
-        {user.logged ? (
+      <Link
+        className="button"
+        to={`${currentUser?.isLoggedIn ? "/profile" : "/login"}`}
+      >
+        {currentUser?.isLoggedIn ? (
           <Profile className="icon" strokeWidth="1.5px" color="black" />
         ) : (
           <Login className="icon" strokeWidth="1.5px" color="black" />
         )}
-        <Base>{user.logged ? "Profile" : "Login"}</Base>
+        <Base>{currentUser?.isLoggedIn ? "Profile" : "Login"}</Base>
       </Link>
-      <Link className="button" to={`${user.logged ? "/messages" : "/login"}`}>
+      <Link
+        className="button"
+        to={`${currentUser?.isLoggedIn ? "/messages" : "/login"}`}
+      >
         <Message className="icon" strokeWidth="1.5px" color="black" />
         <Base>Messages</Base>
       </Link>
       <Link
         className="button"
-        to={`${user.logged ? "/notifications" : "/login"}`}
+        to={`${currentUser?.isLoggedIn ? "/notifications" : "/login"}`}
       >
         <Updates className="icon" strokeWidth="1.5px" color="black" />
         <Base>Updates</Base>
       </Link>
-      <Link className="button" to="/refresh" onClick={e => handleRefresh(e)}>
+      <Link className="button" to="/refresh" onClick={(e) => handleRefresh(e)}>
         <Refresh className="icon" strokeWidth="1.5px" color="black" />
         <Base>Refresh</Base>
       </Link>
