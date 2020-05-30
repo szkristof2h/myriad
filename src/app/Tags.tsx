@@ -32,7 +32,7 @@ const Tags = () => {
       } = response
 
       if (error) return addError(error.message, error.type)
-      console.log(tagsData)
+
       setTags(tagsData)
     }
 

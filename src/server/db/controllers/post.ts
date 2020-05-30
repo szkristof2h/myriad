@@ -135,11 +135,14 @@ const getDBPosts = async (
   offset: number,
   criteria?: CriteriaPostedBy | CriteriaTag
 ): Promise<PostModel[]> => {
-  let match = { _id: { $nin: ids }, ratio: { $gt: tiers[tier] } }
-  if (criteria) match = { ...match, ...criteria }
+  const match = { _id: { $nin: ids }, ratio: { $gt: tiers[tier] } }
+  const matchWithCriteria = {
+    ...match,
+    ...(criteria ? criteria : {}),
+  }
 
   return await Post.aggregate()
-    .match(match)
+    .match(matchWithCriteria)
     .sample(limits[tier] + offset)
     .exec()
 }
@@ -238,14 +241,16 @@ const postRating = (req, res) => {
 }
 
 // Maybe randomize them? Or select them according to some ranking? Both?
-const getTags = (req, res) => {
-  return Post.aggregate()
+const getTags = async (req: Request, res: Response) => {
+  setErrorType(res, "GET_TAGS")
+
+  const [{ tags }]: [{ tags: string[] }] = await Post.aggregate()
     .unwind("$tags")
     .group({ _id: null, tags: { $addToSet: "$tags" } })
     .project({ tags: { $slice: ["$tags", 100] } })
     .exec()
-    .then((tags) => res.json(tags.length > 0 ? tags[0].tags : []))
-  // .catch(e => res.json(handleErrors(GET_TAGS_ERROR, e)));
+
+  setResponseData(res, { tags })
 }
 
 const postPost = (req, res) => {
