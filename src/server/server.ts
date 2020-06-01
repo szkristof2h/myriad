@@ -95,7 +95,7 @@ app.getAsync("/get/notifications/:skip/:limit", authenticate, getNotifications)
 app.getAsync("/get/posts/user/:userId", getPosts)
 app.getAsync("/get/posts/:tags", getPosts)
 app.getAsync("/get/posts", getPosts)
-app.getAsync("/get/post/:_id", getPost)
+app.getAsync("/get/post/:id", getPost)
 app.postAsync("/post/post", authenticate, postPost)
 app.postAsync("/post/post/rating", authenticate, postRating)
 

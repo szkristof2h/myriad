@@ -103,7 +103,7 @@ const samplePost = {
 const PostsProvider = ({ children }) => {
   const [focused, setFocused] = useState("")
   const [previousUrl, setPreviousUrl] = useState("")
-  const [posts, setPosts] = useState<PostData[] | []>([])
+  const [posts, setPosts] = useState<PostData[]>([])
   const [ids, setIds] = useState<string[]>([])
   const { addError } = useContext(ErrorContext)
 
@@ -149,12 +149,16 @@ const PostsProvider = ({ children }) => {
         return addError({ posts: [`get post request failed`] })
 
       const {
-        data: { error, post },
+        data: { error, post: postData },
       } = response
 
       if (error) return addError(error.message, error.type)
 
-      setPosts((posts) => ({ ...posts, [id]: post }))
+      setPosts(
+        posts.find((post) => post.id === postData.id)
+          ? posts.map((post) => (post.id === postData.id ? postData : post))
+          : [...posts, postData]
+      )
       setFocused(id)
     }
 

@@ -55,7 +55,7 @@ const Post: FC<PostProps> = ({
   const ref = useRef(null)
   const url = `${siteUrl}/${id}`
 
-  const rate = async (rating: number, e) => {
+  const rate = async (rating: number, e: React.MouseEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
@@ -67,10 +67,10 @@ const Post: FC<PostProps> = ({
     setIsLoading(false)
   }
 
-  const handleClick = (e) =>
+  const handleClick = (e: React.MouseEvent) =>
     e.target === e.currentTarget && openPost && openPost()
 
-  const handleImageStep = (e, step) => {
+  const handleImageStep = (e: React.MouseEvent, step: number) => {
     e.preventDefault()
     setImageIndex((index) => index + step)
   }
@@ -124,7 +124,7 @@ const Post: FC<PostProps> = ({
   const renderGridPost = () => (
     <StyledPost
       className={classType}
-      onClick={(e) => handleClick(e)}
+      onClick={handleClick}
       style={{
         background: `gray url('${
           id.length != 20 ? images[0] : sample
@@ -141,7 +141,7 @@ const Post: FC<PostProps> = ({
             centered
             size={styleSize}
             className={"ellipsis"}
-            onClick={(e) => handleClick(e)}
+            onClick={handleClick}
           >
             {title}
           </Header>

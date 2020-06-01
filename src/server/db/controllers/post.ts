@@ -37,22 +37,30 @@ interface CriteriaPostedBy {
   postedByName: string
 }
 
-const getPost = (req, res) => {
-  // const userId = res.locals && res.locals.user ? res.locals.user.id : null;
-  // const { _id } = req.params;
-  // let post = {};
-  // Post.findById(_id)
-  //   .exec()
-  //   .then(p => {
-  //     if (!p)
-  //       return Promise.reject({
-  //         error: { id: { message: "No post with this id!" } }
-  //       });
-  //     post = p._doc;
-  //     return Rating.findOne({ post: _id, user: userId }).select('value').exec();
-  //   })
-  //   .then(rating => res.json({ ...post, rated: rating ? rating.value : 0 }))
-  //   .catch(e => res.json(handleErrors(GET_POST_ERROR, e)));
+const getPost = async (req: Request, res: Response) => {
+  setErrorType(res, "GET_POST")
+  const idUser = res.locals?.user?.id
+  const id = req.params?.id
+
+  const post: PostModel = await Post.findById(id).lean().exec()
+  const { _id, ...postWithout_id } = post
+
+  if (!post) throw Error("POST_NOT_FOUND")
+
+  const rating = await Rating.findOne({ post: id, user: idUser })
+    .select("value")
+    .lean()
+    .exec()
+
+  setResponseData(res, {
+    post: {
+      ...postWithout_id,
+      ...(rating ? { rating: rating.value } : {}),
+      id: _id,
+    },
+  })
+  // .then(rating => res.json({ ...post, rated: rating ? rating.value : 0 }))
+  // .catch(e => res.json(handleErrors(GET_POST_ERROR, e)));
 }
 
 const getCriteria = (params: {
