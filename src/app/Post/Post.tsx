@@ -17,9 +17,21 @@ import Popup from "../Popup"
 // @ts-ignore
 import sample from "../images/add.svg"
 import { Button } from "../components"
-import { Header, Base, UserHeader } from "../Typography/Typography.style"
-import { StyledPost, StyledPostOpen } from "./Post.style"
+import { Header, UserHeader } from "../Typography/Typography.style"
+import {
+  StyledNavigationButton,
+  StyledPost,
+  StyledPostOpen,
+  StyledDetailsContainer,
+  StyledHeaderContainer,
+  StyledImageContainer,
+  StyledMainImage,
+  StyledMainVideo,
+  StyledSummary,
+  StyledButtonContainer,
+} from "./Post.style"
 import getYoutubeId from "../../util/getYoutubeId"
+import theme from "../theme"
 
 const Comments = lazy(() =>
   import("../Comments/Comments" /* webpackChunkName: "Comments" */)
@@ -72,7 +84,7 @@ const Post: FC<PostProps> = ({
 
   const handleImageStep = (e: React.MouseEvent, step: number) => {
     e.preventDefault()
-    setImageIndex((index) => index + step)
+    setImageIndex(index => index + step)
   }
 
   useEffect(() => {
@@ -123,7 +135,6 @@ const Post: FC<PostProps> = ({
 
   const renderGridPost = () => (
     <StyledPost
-      className={classType}
       onClick={handleClick}
       style={{
         background: `gray url('${
@@ -135,28 +146,22 @@ const Post: FC<PostProps> = ({
         gridRow: `${!type ? "" + row + " / span " + size : "initial"}`,
       }}
     >
-      <div className="details">
-        <div className="personal">
-          <Header
-            centered
-            size={styleSize}
-            className={"ellipsis"}
-            onClick={handleClick}
-          >
+      <StyledDetailsContainer>
+        <StyledHeaderContainer>
+          <Header centered size={styleSize} onClick={handleClick}>
             {title}
           </Header>
           {postedByName && (
-            <UserHeader centered size={1} className={"user ellipsis"}>
-              @ {postedByName}
+            <UserHeader centered size={1}>
+              // add ellipsis? @ {postedByName}
             </UserHeader>
           )}
-        </div>
+        </StyledHeaderContainer>
         {title !== "Submit a post!" && type !== "notification" && (
           <Button
-            className={`button`}
             active={rating === 1}
             type={"impressed"}
-            onClick={(e) => rate(1, e)}
+            onClick={e => rate(1, e)}
             to={"impressed"}
             as={Link}
           >
@@ -171,88 +176,81 @@ const Post: FC<PostProps> = ({
         )}
         {title !== "Submit a post!" && type !== "notification" && (
           <Button
-            className={`button`}
             as={Link}
             active={rating === -1}
             type={"meh"}
-            onClick={(e) => rate(-1, e)}
+            onClick={e => rate(-1, e)}
             to={"meh"}
           >
             <Meh className={"icon"} strokeWidth="1.5px" color="white" />
             <Header size={styleSize}>{downs}</Header>
           </Button>
         )}
-      </div>
+      </StyledDetailsContainer>
     </StyledPost>
   )
 
   const renderStandAlone = () => (
     <Popup show={true} dismiss={dismiss} dismissible={true} type="post">
       <StyledPostOpen>
-        <div className="image-container" ref={ref}>
+        <StyledImageContainer ref={ref}>
           {images && imageIndex > 0 && (
-            <Button
+            <StyledNavigationButton
               as={Link}
               to="/"
               type="arrow"
-              className="button--previous"
-              onClick={(e) => handleImageStep(e, -1)}
+              onClick={(e: React.MouseEvent) => handleImageStep(e, -1)}
+              style={{
+                left: `${theme.base.gutter * 2}px`,
+              }}
             >
               {"<"}
-            </Button>
+            </StyledNavigationButton>
           )}
           {videoId ? (
-            <iframe
+            <StyledMainVideo
               width={videoSize.width}
               height={(videoSize.width / 16) * 9}
-              className="image"
               src={`https://www.youtube.com/embed/${videoId}`}
               frameBorder="0"
               allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
           ) : (
-            <img className="image" src={images ? images[imageIndex] : ""} />
+            <StyledMainImage src={images ? images[imageIndex] : ""} />
           )}
           {images && imageIndex < images.length - 1 && (
-            <Button
+            <StyledNavigationButton
               as={Link}
               to="/"
               type="arrow"
-              className="button--next"
-              onClick={(e) => handleImageStep(e, 1)}
+              onClick={(e: React.MouseEvent) => handleImageStep(e, 1)}
+              style={{
+                right: `${theme.base.gutter * 2}px`,
+              }}
             >
               {">"}
-            </Button>
+            </StyledNavigationButton>
           )}
-        </div>
-        <Header
-          centered
-          size={3}
-          as="a"
-          className={"title ellipsis"}
-          href={link}
-          target="_blank"
-        >
+        </StyledImageContainer>
+        <Header centered size={3} as="a" href={link} target="_blank">
           {title}
         </Header>
         <UserHeader
           as={Link}
           centered={1}
           size={1}
-          className={"user ellipsis"}
           to={`/user/${postedByName}`}
         >
           @{postedByName}
         </UserHeader>
-        <Base className="summary">{description}</Base>
-        <div className="buttons">
+        <StyledSummary>{description}</StyledSummary>
+        <StyledButtonContainer>
           <Button
-            className={`button`}
             as={Link}
             type={"impressedBig"}
             rated={rating === 1}
-            onClick={(e) => rate(1, e)}
+            onClick={e => rate(1, e)}
             to={"impressed"}
           >
             <Star
@@ -265,16 +263,13 @@ const Post: FC<PostProps> = ({
               strokeWidth="1.5px"
               color={rating > 0 ? "yellow" : "gray"}
             />
-            <Header size={2} className={"text"}>
-              {ups}
-            </Header>
+            <Header size={2}>{ups}</Header>
           </Button>
           <Button
-            className={`button`}
             as={Link}
             type={"mehBig"}
             rated={rating === -1}
-            onClick={(e) => rate(-1, e)}
+            onClick={e => rate(-1, e)}
             to={"meh"}
           >
             <Meh
@@ -286,13 +281,10 @@ const Post: FC<PostProps> = ({
               size="40"
               strokeWidth="1.5px"
             />
-            <Header size={2} className={"text"}>
-              {downs}
-            </Header>
+            <Header size={2}>{downs}</Header>
           </Button>
-          <div className="placeholder" />
+          <div />
           <a
-            className="button"
             href={`http://www.facebook.com/sharer.php?u=${url}[title]=${title}`}
           >
             <Facebook
@@ -302,7 +294,7 @@ const Post: FC<PostProps> = ({
               size="40"
             />
           </a>
-          <a className="button" href={`https://twitter.com/share?url=${url}`}>
+          <a href={`https://twitter.com/share?url=${url}`}>
             <Twitter
               className="share-icon share-icon--twitter"
               strokeWidth="1.5px"
@@ -310,7 +302,7 @@ const Post: FC<PostProps> = ({
               size="40"
             />
           </a>
-        </div>
+        </StyledButtonContainer>
         <Suspense fallback={<div>Loading comments...</div>}>
           <Comments
             commentCount={commentCount}
