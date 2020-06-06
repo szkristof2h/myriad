@@ -8,10 +8,14 @@ interface Props {
 
 const styles = {
   basic: "",
-  scrollY: `overflow-y: scroll;`,
-  post: `justify-content: initial; justify-items: initial; align-content: initial;`,
-  profile: `align-content: start; overflow-y: scroll;`,
-  submit: `align-content: start;`,
+  scrollY: { "overflow-y": scroll },
+  post: {
+    justifyContent: "initial",
+    justifyItems: "initial",
+    alignContent: "initial",
+  },
+  profile: { alignContent: "start", overflowY: "scroll" },
+  submit: { alignContent: "start" },
 }
 
 const StyledPopup: FC<Props> = styled.div(({ type }) => ({
