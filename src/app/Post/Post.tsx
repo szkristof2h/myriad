@@ -153,7 +153,7 @@ const Post: FC<PostProps> = ({
           </Header>
           {postedByName && (
             <UserHeader centered size={1}>
-              // add ellipsis? @ {postedByName}
+              @ {postedByName}
             </UserHeader>
           )}
         </StyledHeaderContainer>

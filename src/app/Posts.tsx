@@ -8,7 +8,7 @@ import React, {
 } from "react"
 import { Route, RouteComponentProps } from "react-router-dom"
 import { NavigationContext } from "./contexts/NavigationContext"
-import { PostsContext } from "./contexts/PostsContext"
+import { PostsContext, PostData } from "./contexts/PostsContext"
 import { UserContext } from "./contexts/UserContext"
 import useWindowSize from "./hooks/useWindowSize"
 import Loader from "./Loader"
@@ -98,7 +98,6 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
   const [isLoading, setIsLoading] = useState(true)
   const { currentUser } = useContext(UserContext)
   const { width, height } = useWindowSize()
-
   const openPost = (id: string) => {
     setFocused(id)
     history.push(
@@ -111,7 +110,6 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
         : "/login"
     )
   }
-
   const closePost = () => {
     setFocused("")
     history.push(previousUrl ? previousUrl : "/")
@@ -179,7 +177,7 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
             <Loader />
           ) : (
             ids.map((id, i) => {
-              const post = posts?.find((post) => post.id === id)
+              const post = posts?.find(post => post.id === id)
 
               return (
                 post &&
@@ -202,17 +200,23 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
       </StyledPosts>
       <Route
         exact
-        path="/post/:postId"
-        render={({ match }) => (
-          <Suspense fallback={<Loader />}>
-            <Post
-              dismiss={closePost}
-              id={match.params.postId}
-              type="standAlone"
-              {...posts[focused]}
-            />
-          </Suspense>
-        )}
+        path="/post/:idPost"
+        render={({ match }) => {
+          const idPost = match.params.idPost
+          const post = posts.find(post => post.id === idPost)
+          return (
+            <Suspense fallback={<Loader />}>
+              {post && (
+                <Post
+                  {...post}
+                  dismiss={closePost}
+                  id={idPost}
+                  type="standAlone"
+                />
+              )}
+            </Suspense>
+          )
+        }}
       />
       <Tags />
     </>
