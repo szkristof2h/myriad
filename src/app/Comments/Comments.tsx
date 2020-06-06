@@ -11,15 +11,18 @@ import { get, post, APIRequestInteface } from "../utils/api"
 
 interface GetCommentsInterface extends APIRequestInteface<GetCommentsData> {}
 export interface GetCommentsData {
-  ids: string[]
   comments: CommentData[]
 }
 
 export interface CommentData {
   id: string
-  date: string
+  createdAt: string
+  posted: string
+  idPost?: string
+  idReceiver?: string
+  idUser: string
   text: string
-  postedByName: string[]
+  userName: string
 }
 
 interface Props {
@@ -35,9 +38,8 @@ const Comments: FC<Props> = ({
   idPost,
   type,
 }) => {
-  const [comments, setComments] = useState({})
+  const [comments, setComments] = useState<CommentData[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [idComments, setIdComments] = useState<string[]>([])
   const [newComment, setNewComment] = useState("")
   const { addError } = useContext(ErrorContext)
   const { currentUser } = useContext(UserContext)
@@ -48,7 +50,7 @@ const Comments: FC<Props> = ({
       GetCommentsData
     >(
       `${type === "post" ? "comments" : "message"}/${idPost}/${
-        idComments.length
+        comments.length
       }/20`,
       () => addError({ comments: ["some error message here"] })
     )
@@ -60,13 +62,12 @@ const Comments: FC<Props> = ({
         return addError({ comments: [`get comments request failed`] })
 
       const {
-        data: { error, ids, comments: newComments },
+        data: { error, comments: newComments },
       } = response
 
       if (error) return addError(error.message, error.type)
 
-      setComments({ ...comments, ...newComments })
-      setIdComments([...idComments, ...ids])
+      setComments([...comments, ...newComments])
     }
 
     setIsLoading(false)
@@ -90,7 +91,7 @@ const Comments: FC<Props> = ({
     >(
       `${type === "post" ? "comment" : "message"}`,
       {
-        [type === "post" ? "postedOn" : "postedByName"]: idPost,
+        [type === "post" ? "idPost" : "postedByName"]: idPost,
         text: newComment,
       },
       () => addError({ comments: ["some error message here"] })
@@ -103,15 +104,14 @@ const Comments: FC<Props> = ({
         return addError({ comments: [`post comment request failed`] })
 
       const {
-        data: { error, ids, comments: newComments },
+        data: { error, comments: newComments },
       } = response
 
       if (error) return addError(error.message, error.type)
 
-      setComments((comments) => ({ ...comments, newComments }))
-      setIdComments([...idComments, ...ids])
+      setComments([...comments, ...newComments])
       setNewComment("")
-      setCommentCount && commentCount && setCommentCount(commentCount + 1)
+      commentCount && setCommentCount?.(commentCount + 1)
     }
 
     await addComment()
@@ -129,40 +129,21 @@ const Comments: FC<Props> = ({
 
   return (
     <StyledComments className={`comments comments--${type}`}>
-      {!idComments || idComments.length == 0 ? (
+      {comments?.length == 0 ? (
         <Base className="warning">There are no comments yet!</Base>
       ) : (
-        idComments.map((c) =>
-          comments[c] ? (
-            <Comment
-              key={c}
-              userName={
-                type === "messages"
-                  ? comments[c]["postedByName"].filter((u) =>
-                      comments[c].poster !== currentUser?.id
-                        ? u !== currentUser?.displayName
-                        : u === currentUser?.displayName
-                    )[0]
-                  : comments[c].postedByName[0]
-              }
-              {...comments[c]}
-            />
-          ) : null
-        )
+        comments.map(comment => (
+          <Comment key={comment.id} userName={comment.userName} {...comment} />
+        ))
       )}
-      {commentCount && commentCount !== 0 && idComments.length < commentCount && (
-        <Button
-          type="transparent"
-          as={Link}
-          onClick={(e) => handleLoadMore(e)}
-          to=""
-        >
+      {commentCount && commentCount !== 0 && comments.length < commentCount && (
+        <Button type="transparent" as={Link} onClick={handleLoadMore} to="">
           Load more...
         </Button>
       )}
       {currentUser?.isLoggedIn && (
         <TextArea
-          onChange={(e) => setNewComment(e.currentTarget.value)}
+          onChange={e => setNewComment(e.currentTarget.value)}
           placeholder="Write a comment!"
           rows="1"
           value={newComment}

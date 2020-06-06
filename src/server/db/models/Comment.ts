@@ -3,26 +3,32 @@ import { sanitize } from "../../utils"
 
 const { ObjectId, Schema } = mongoose
 
+export interface CommentModel {
+  _id: string
+  createdAt: Date
+  idPost: string
+  idReceiver: string
+  idUser: string
+  id: string
+  text: string
+  type: string
+}
+
 const commentSchema = new Schema({
-  date: { type: Date, default: Date.now, index: true },
+  createdAt: { type: Date, default: Date.now, index: true },
+  idPost: ObjectId,
+  idReceiver: ObjectId,
+  idUser: {
+    type: [ObjectId],
+    index: true,
+    required: [true, "Invalid user!"],
+  },
   text: {
     type: String,
     maxlength: [200, "Your comment can't be longer than 200 characters!"],
     minlength: [2, "Your comment should be at least 3 characters!"],
     required: [true, "Your comment should have a description!"],
-    set: v => sanitize(v),
-  },
-  postedOn: ObjectId,
-  poster: ObjectId,
-  postedById: {
-    type: [ObjectId],
-    index: true,
-    required: [true, "Invalid poster or target user!"],
-  },
-  postedByName: {
-    type: [String],
-    index: true,
-    required: [true, "Invalid poster or target user!"],
+    set: (text: string) => sanitize(text),
   },
   type: String,
 })

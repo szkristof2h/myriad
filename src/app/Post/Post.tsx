@@ -52,7 +52,7 @@ const Post: FC<PostProps> = ({
   postedByName,
   rating = 0,
   row,
-  size,
+  size = 0,
   title,
   type,
   ups,

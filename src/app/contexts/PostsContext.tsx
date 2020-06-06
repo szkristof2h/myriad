@@ -33,11 +33,11 @@ export interface PostData {
 }
 
 export interface Post extends PostData {
-  col: number
+  col?: number
   dismiss?: () => void
   openPost?: () => void
-  row: number
-  size: number
+  row?: number
+  size?: number
   type?: string
 }
 
@@ -125,8 +125,8 @@ const PostsProvider = ({ children }) => {
       if (error) return addError(error.message, error.type)
 
       const fillerPosts: PostData[] = ids
-        .filter((id) => id.length === 20)
-        .map((id) => ({ id, postedByName: type, ...samplePost }))
+        .filter(id => id.length === 20)
+        .map(id => ({ id, postedByName: type, ...samplePost }))
 
       setPosts(() => {
         setIds(ids)
@@ -155,8 +155,8 @@ const PostsProvider = ({ children }) => {
       if (error) return addError(error.message, error.type)
 
       setPosts(
-        posts.find((post) => post.id === postData.id)
-          ? posts.map((post) => (post.id === postData.id ? postData : post))
+        posts.find(post => post.id === postData.id)
+          ? posts.map(post => (post.id === postData.id ? postData : post))
           : [...posts, postData]
       )
       setFocused(id)
@@ -187,7 +187,7 @@ const PostsProvider = ({ children }) => {
 
       if (error) return addError(error.message, error.type)
 
-      setPosts((posts) => ({ ...posts, [id]: post }))
+      setPosts(posts => ({ ...posts, [id]: post }))
     }
 
     return { cancel, setPostContext }
