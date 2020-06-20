@@ -1,26 +1,27 @@
+import { NextFunction, Request, Response } from "express"
 import sanitizeHtml from "sanitize-html"
-import { Response } from "express"
-
-export interface CustomResponse<T> extends Response {
-  dataToSendBack?: T
-}
 
 export function toObject(arr, key) {
   return arr === null || arr.length === 0
     ? {}
-    : Object.assign({}, ...arr.map((item) => ({ [item[key]]: item })))
+    : Object.assign({}, ...arr.map(item => ({ [item[key]]: item })))
 }
 
 const setErrorType = (res: Response, type) => {
   res.locals.errorType = type
 }
 
-const setResponseData = <T>(res: CustomResponse<T>, data: T) => {
+const setResponseData = <T>(res: Response, data: T) => {
   res.dataToSendBack = data
 }
 
 // TODO: fix formatting
-export function handleErrors(error, req, res, next) {
+export function handleErrors(
+  error: { message: string },
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const type = res.locals.errorType
   console.warn(type)
   console.warn(error)
@@ -54,7 +55,7 @@ export function handleErrors(error, req, res, next) {
   res.json(publicError)
 }
 
-export function sanitize(text) {
+export function sanitize(text: string) {
   return sanitizeHtml(text, { allowedTags: [], allowedAttributes: {} })
 }
 
