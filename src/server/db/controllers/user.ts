@@ -19,7 +19,6 @@ import {
 import User, { UserModel } from "../models/User"
 import BlockedList from "../models/BlockedList"
 import FollowedList from "../models/FollowedList"
-import { CustomResponse } from "src/server/utils"
 import { UserData } from "../../../app/contexts/UserContext"
 
 export function block(req, res) {
@@ -28,13 +27,13 @@ export function block(req, res) {
 
   User.findById(targetUser)
     .exec()
-    .then((user) =>
+    .then(user =>
       user
         ? ""
         : Promise.reject({ errors: { id: { message: USER_NOT_FOUND } } })
     )
     .then(() => BlockedList.findOne({ by: userId, user: targetUser }).exec())
-    .then((b) =>
+    .then(b =>
       b
         ? Promise.reject({
             errors: { blocked: { message: "User already blocked!" } },
@@ -56,7 +55,7 @@ export function checkDisplayName(req, res) {
 
   return User.findOne({ displayName: displayName.toLowerCase() })
     .exec()
-    .then((u) =>
+    .then(u =>
       !u
         ? res
           ? res.json({ status: "Name is available!" })
@@ -78,13 +77,13 @@ export function follow(req, res) {
 
   User.findById(targetUser)
     .exec()
-    .then((user) =>
+    .then(user =>
       user
         ? ""
         : Promise.reject({ errors: { id: { message: USER_NOT_FOUND } } })
     )
     .then(() => FollowedList.findOne({ from: userId, to: targetUser }).exec())
-    .then((b) =>
+    .then(b =>
       b
         ? Promise.reject({
             errors: { message: { followed: "User already followed!" } },
@@ -102,7 +101,7 @@ export function follow(req, res) {
 }
 
 const getUser = async (req: Request, res: Response) => {
-  const idUser = res.locals && res.locals.user ? res.locals.user.id : null
+  const idUser = req.user?.id
   const isLoggedIn = !!idUser
   const profileName = req.params?.name ? res.locals.user?.displayName : null
   const search = profileName
@@ -117,6 +116,7 @@ const getUser = async (req: Request, res: Response) => {
 
   const userFromDB: UserModel = await User.findOne(search)
     .select("-googleId -social")
+    .lean()
     .exec()
 
   if (!userFromDB) throw Error("INVALID_ID")
@@ -127,11 +127,15 @@ const getUser = async (req: Request, res: Response) => {
     const isFollowed = !!FollowedList.findOne({
       from: idUser,
       to: user.id,
-    }).exec()
+    })
+      .lean()
+      .exec()
     const isBlocked = !!BlockedList.findOne({
       by: idUser,
       user: user.id,
-    }).exec()
+    })
+      .lean()
+      .exec()
 
     setResponseData<UserData>(res, {
       ...user,
@@ -157,11 +161,11 @@ export function setDisplayName(req, res) {
     //   })
     // )
 
-    checkDisplayName(req, null).then((r) =>
+    checkDisplayName(req, null).then(r =>
       r
         ? User.findById(userId)
             .exec()
-            .then((user) => {
+            .then(user => {
               if (user.displayName)
                 return Promise.reject({
                   errors: {
@@ -190,7 +194,7 @@ export function unblock(req, res) {
 
   BlockedList.findOneAndDelete({ by: userId, user: targetUser })
     .exec()
-    .then((block) =>
+    .then(block =>
       block
         ? res.json({ status: "User successfully unblocked!", type: "blocked" })
         : Promise.reject({
@@ -210,7 +214,7 @@ export function unfollow(req, res) {
 
   FollowedList.findOneAndDelete({ from: userId, to: targetUser })
     .exec()
-    .then((follow) =>
+    .then(follow =>
       follow
         ? res.json({
             status: "User successfully unfollowed!",
