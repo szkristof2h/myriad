@@ -307,7 +307,7 @@ const Post: FC<PostProps> = ({
           <Comments
             commentCount={commentCount}
             setCommentCount={setCommentCount}
-            idPost={id}
+            idParent={id}
             type={"post"}
           />
         </Suspense>

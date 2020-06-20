@@ -1,13 +1,7 @@
 import { Request, Response } from "express"
 import { isArray } from "util"
 import Post, { PostModel } from "../models/Post"
-import {
-  handleErrors,
-  toObject,
-  CustomResponse,
-  setErrorType,
-  setResponseData,
-} from "../../utils"
+import { toObject, setErrorType, setResponseData } from "../../utils"
 import {
   GET_POST_ERROR,
   POST_NOT_FOUND,
@@ -19,11 +13,7 @@ import {
 } from "../types"
 import { Rating, RatingType } from "../models/Rating"
 import FollowedList from "../models/FollowedList"
-import {
-  GetPostInterface,
-  GetPostsData,
-  PostData,
-} from "../../../app/contexts/PostsContext"
+import { GetPostsData } from "../../../app/contexts/PostsContext"
 
 const tiers = [0.7, 0.4, -1]
 const limits = [1, 16, 28]
@@ -94,7 +84,7 @@ const getPosts = async (req: Request, res: Response) => {
 
     const newPosts = await getDBPosts(tier, posts.ids, offset, criteria)
     const newOffset = getOffset(newPosts.length, offset, tier)
-    const newPostsWithout_id = newPosts.map((newPost) => {
+    const newPostsWithout_id = newPosts.map(newPost => {
       const { _id, ...post } = newPost
 
       return { ...post, id: _id }
@@ -103,7 +93,7 @@ const getPosts = async (req: Request, res: Response) => {
     return mergePosts(
       {
         posts: [...posts.posts, ...newPostsWithout_id],
-        ids: [...posts.ids, ...newPosts.map((post) => post._id)],
+        ids: [...posts.ids, ...newPosts.map(post => post._id)],
       },
       tier + 1,
       newOffset
@@ -116,15 +106,15 @@ const getPosts = async (req: Request, res: Response) => {
     0
   )
   const missingPosts = limits.reduce((a, v) => a + v) - ids.length
-  const fillingIds = new Array(missingPosts).fill("").map((_) => makeId()) // TODO: better name?
+  const fillingIds = new Array(missingPosts).fill("").map(_ => makeId()) // TODO: better name?
 
   const ratings: RatingType[] | null =
     idUser && ids.length > 0
       ? await Rating.find({ user: idUser }).in("post", ids).exec()
       : null
 
-  const postsWithRatings = posts.map((post) => {
-    const rating = ratings?.find((rating) => rating.post === post.id)
+  const postsWithRatings = posts.map(post => {
+    const rating = ratings?.find(rating => rating.post === post.id)
 
     return { ...post, rating: rating?.value ?? 0 }
   })
@@ -164,13 +154,13 @@ const getNotifications = (req, res) => {
 
   FollowedList.find({ from: userId })
     .exec()
-    .then((follows) =>
+    .then(follows =>
       follows.length == 0
         ? false
         : Post.find()
             .in(
               "postedById",
-              follows.map((f) => f.to)
+              follows.map(f => f.to)
             )
             .sort("-data")
             .skip(Number(skip))
@@ -178,10 +168,10 @@ const getNotifications = (req, res) => {
             .lean()
             .exec()
     )
-    .then((posts) =>
+    .then(posts =>
       res.json(
         posts
-          ? { ...toObject(posts, "_id"), ids: posts.map((p) => p._id) }
+          ? { ...toObject(posts, "_id"), ids: posts.map(p => p._id) }
           : { ids: [] }
       )
     )
@@ -214,7 +204,7 @@ const postRating = (req, res) => {
 
   Post.findById(_id)
     .exec()
-    .then((p) => {
+    .then(p => {
       if (!p)
         return Promise.reject({
           errors: { message: { id: "No post with this id!" } },
@@ -222,7 +212,7 @@ const postRating = (req, res) => {
       post = p
       return Rating.findOne({ post: _id, user: userId }).select("value").exec()
     })
-    .then((r) => {
+    .then(r => {
       if (r) {
         if (r.value === rating) {
           increment = -1
@@ -265,11 +255,11 @@ const postPost = (req, res) => {
   const tags =
     !req.body.tags ||
     !req.body.tags.includes(",") ||
-    req.body.tags.split(",").filter((t) => t.replace(/\//g, "")).length < 3
+    req.body.tags.split(",").filter(t => t.replace(/\//g, "")).length < 3
       ? "You should give the post at least 3 tags (seperated by commas)!"
       : req.body.tags
           .split(",")
-          .map((t) => t.toLowerCase().trim().replace(/\//g, ""))
+          .map(t => t.toLowerCase().trim().replace(/\//g, ""))
   const userId = res.locals.user.id
   const displayName = res.locals.user.displayName
   const link = `http${
@@ -293,7 +283,7 @@ const postPost = (req, res) => {
     ups: 0,
   })
 
-  newPost.save().then((r) => res.json(r))
+  newPost.save().then(r => res.json(r))
   // .catch(e => res.json(handleErrors(POST_POST_ERROR, e)));
 }
 

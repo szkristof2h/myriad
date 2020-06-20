@@ -1,12 +1,12 @@
 import mongoose from "mongoose"
 import { sanitize } from "../../utils"
+import { MongooseModel } from "./utils"
 
-export interface UserModel {
-  _id: string
+export interface UserModel extends MongooseModel {
   avatar: string
   bio: string
   displayName: string
-  googleId: string
+  idGoogle: string
   firstName: string
   id: string
   lastName: string
@@ -25,7 +25,7 @@ const userSchema = new Schema({
     minlength: [3, "The description should be at least 3 characters!"],
     set: (value: string) => sanitize(value),
   },
-  googleId: String,
+  idGoogle: String,
   social: {
     facebook: String,
     google: String,

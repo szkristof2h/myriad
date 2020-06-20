@@ -1,25 +1,25 @@
 import mongoose from "mongoose"
 import { sanitize } from "../../utils"
+import { MongooseModel } from "./utils"
 
 const { ObjectId, Schema } = mongoose
 
-export interface CommentModel {
-  _id: string
+export interface CommentModel extends Comment, MongooseModel {}
+export interface Comment {
   createdAt: Date
-  idPost: string
-  idReceiver: string
+  idParent: string
   idUser: string
-  id: string
   text: string
   type: string
+  updatedAt: Date
 }
 
 const commentSchema = new Schema({
   createdAt: { type: Date, default: Date.now, index: true },
-  idPost: ObjectId,
-  idReceiver: ObjectId,
+  updatedAt: { type: Date, default: Date.now, index: true },
+  idParent: ObjectId,
   idUser: {
-    type: [ObjectId],
+    type: ObjectId,
     index: true,
     required: [true, "Invalid user!"],
   },

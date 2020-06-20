@@ -1,11 +1,11 @@
 import mongoose from "mongoose"
 import isURL from "validator/lib/isURL"
 import { sanitize } from "../../utils"
+import { MongooseModel } from "./utils"
 
 const { ObjectId, Schema } = mongoose
 
-export interface PostModel {
-  _id: string
+export interface PostModel extends MongooseModel {
   date: Date
   description: string
   comments: number
@@ -35,18 +35,17 @@ const postSchema = new Schema({
     type: String,
     validate: {
       validator: (value: string) => isURL(value),
-      message: (props) => `${props.value} is not a valid url!`,
+      message: props => `${props.value} is not a valid url!`,
     },
     required: [true, "You should give your post a link!"],
   },
   images: {
     type: [String],
     validate: {
-      validator: (images) =>
-        images.filter((image) => !isURL(image)).length === 0,
-      message: (props) =>
+      validator: images => images.filter(image => !isURL(image)).length === 0,
+      message: props =>
         `The following images aren't valid: ${props.value
-          .filter((image) => !isURL(image))
+          .filter(image => !isURL(image))
           .join(", ")}!`,
     },
     required: [true, "You should give your post a thumbnail!"],
