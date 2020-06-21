@@ -33,11 +33,11 @@ const getPost = async (req: Request, res: Response) => {
   const id = req.params?.id
 
   const post: PostModel = await Post.findById(id).lean().exec()
-  const { _id, ...postWithout_id } = post
+  const { _id, _v, ...postWithout_id } = post
 
   if (!post) throw Error("POST_NOT_FOUND")
 
-  const rating = await Rating.findOne({ post: id, user: idUser })
+  const rating = await Rating.findOne({ idPost: id, idUser })
     .select("value")
     .lean()
     .exec()
@@ -49,8 +49,6 @@ const getPost = async (req: Request, res: Response) => {
       id: _id,
     },
   })
-  // .then(rating => res.json({ ...post, rated: rating ? rating.value : 0 }))
-  // .catch(e => res.json(handleErrors(GET_POST_ERROR, e)));
 }
 
 const getCriteria = (params: {
@@ -110,11 +108,11 @@ const getPosts = async (req: Request, res: Response) => {
 
   const ratings: RatingType[] | null =
     idUser && ids.length > 0
-      ? await Rating.find({ user: idUser }).in("post", ids).exec()
+      ? await Rating.find({ idUser }).in("idPost", ids).exec()
       : null
 
   const postsWithRatings = posts.map(post => {
-    const rating = ratings?.find(rating => rating.post === post.id)
+    const rating = ratings?.find(rating => rating.idPost === post.id)
 
     return { ...post, rating: rating?.value ?? 0 }
   })
