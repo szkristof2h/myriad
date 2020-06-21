@@ -8,25 +8,20 @@ import { Base } from "../Typography/Typography.style"
 import { TextArea } from "../components"
 import StyledComments from "./Comments.style"
 import { get, post, APIRequestInteface } from "../utils/api"
+import { Comment as CommentType } from "src/server/db/models/Comment"
 
 interface GetCommentsInterface extends APIRequestInteface<GetCommentsData> {}
 export interface GetCommentsData {
   comments: CommentData[]
 }
 
-export interface CommentData {
+export interface CommentData extends CommentType {
+  displayName: string
   id: string
-  createdAt: string
-  posted: string
-  idPost?: string
-  idReceiver?: string
-  idUser: string
-  text: string
-  userName: string
 }
 
 interface Props {
-  idPost: string
+  idParent: string
   commentCount?: number
   setCommentCount?: (count: number) => number | void
   type: "post" | "messages"
@@ -35,7 +30,7 @@ interface Props {
 const Comments: FC<Props> = ({
   commentCount,
   setCommentCount,
-  idPost,
+  idParent,
   type,
 }) => {
   const [comments, setComments] = useState<CommentData[]>([])
@@ -49,7 +44,7 @@ const Comments: FC<Props> = ({
     const { getData, cancel, getHasFailed }: GetCommentsInterface = get<
       GetCommentsData
     >(
-      `${type === "post" ? "comments" : "message"}/${idPost}/${
+      `${type === "post" ? "comments" : "message"}/${idParent}/${
         comments.length
       }/20`,
       () => addError({ comments: ["some error message here"] })
@@ -91,7 +86,7 @@ const Comments: FC<Props> = ({
     >(
       `${type === "post" ? "comment" : "message"}`,
       {
-        [type === "post" ? "idPost" : "postedByName"]: idPost,
+        [type === "post" ? "idParent" : "postedByName"]: idParent,
         text: newComment,
       },
       () => addError({ comments: ["some error message here"] })
@@ -125,15 +120,19 @@ const Comments: FC<Props> = ({
 
       return cancel
     }
-  }, [idPost])
+  }, [idParent])
 
   return (
-    <StyledComments className={`comments comments--${type}`}>
+    <StyledComments>
       {comments?.length == 0 ? (
-        <Base className="warning">There are no comments yet!</Base>
+        <Base>There are no comments yet!</Base>
       ) : (
         comments.map(comment => (
-          <Comment key={comment.id} userName={comment.userName} {...comment} />
+          <Comment
+            key={comment.id}
+            userName={comment.displayName}
+            {...comment}
+          />
         ))
       )}
       {commentCount && commentCount !== 0 && comments.length < commentCount && (

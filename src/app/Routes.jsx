@@ -13,14 +13,14 @@ import "./main.css"
 const Login = lazy(() =>
   import("./User/Login.tsx" /* webpackChunkName: "Login" */)
 )
-const Message = lazy(() =>
-  import("./Messages/Message.tsx" /* webpackChunkName: "Message" */)
+const Messages = lazy(() =>
+  import("./Messages/Messages.tsx" /* webpackChunkName: "Messages" */)
 )
 const Notifications = lazy(() =>
   import("./User/Notifications.tsx" /* webpackChunkName: "Notifications" */)
 )
-const Messages = lazy(() =>
-  import("./Messages/Messages.tsx" /* webpackChunkName: "Messages" */)
+const Conversations = lazy(() =>
+  import("./Messages/Conversations.tsx" /* webpackChunkName: "Conversations" */)
 )
 const Posts = lazy(() => import("./Posts.tsx" /* webpackChunkName: "Posts" */))
 const Profile = lazy(() =>
@@ -45,10 +45,10 @@ export default function App() {
                   />
                   <Route path="/login" render={() => <Login />} />
                   <Route
-                    path="/message/:name"
-                    render={({ match }) => <Message params={match.params} />}
+                    path="/message/:conversationPartner"
+                    render={({ match }) => <Messages params={match.params} />}
                   />
-                  <Route path="/messages" render={() => <Messages />} />
+                  <Route path="/messages" render={() => <Conversations />} />
                   <Route
                     path={["/profile", "/profile/edit", "/user/:name"]}
                     render={({ match }) => <Profile params={match.params} />}

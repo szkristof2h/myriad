@@ -4,7 +4,7 @@ import { Base } from "../Typography/Typography.style"
 import StyledComment from "./Comment.style"
 
 interface Props {
-  createdAt: string
+  createdAt: Date
   text: string
   userName: string
 }
@@ -16,7 +16,9 @@ const Comment: FC<Props> = ({ createdAt, text, userName }) => {
         {userName}
       </Link>
       <Base className="text">{": " + text}</Base>
-      <span className="date">{" on '" + createdAt.slice(2, 10)}</span>
+      <span className="date">
+        {" on '" + createdAt.toString().slice(2, 10)}
+      </span>
     </StyledComment>
   )
 }
