@@ -1,7 +1,8 @@
 import mongoose from "mongoose"
 import { MongooseModel } from "./utils"
 
-export interface RatingType extends MongooseModel {
+export interface RatingModel extends RatingType, MongooseModel {}
+export interface RatingType {
   idPost: string
   idUser: string
   value: number

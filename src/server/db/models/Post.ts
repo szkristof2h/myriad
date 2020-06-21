@@ -5,7 +5,8 @@ import { MongooseModel } from "./utils"
 
 const { ObjectId, Schema } = mongoose
 
-export interface PostModel extends MongooseModel {
+export interface PostModel extends PostType, MongooseModel {}
+export interface PostType {
   date: Date
   description: string
   comments: number

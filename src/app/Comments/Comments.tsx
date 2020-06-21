@@ -8,7 +8,7 @@ import { Base } from "../Typography/Typography.style"
 import { TextArea } from "../components"
 import StyledComments from "./Comments.style"
 import { get, post, APIRequestInteface } from "../utils/api"
-import { Comment as CommentType } from "src/server/db/models/Comment"
+import { CommentType } from "src/server/db/models/Comment"
 
 interface GetCommentsInterface extends APIRequestInteface<GetCommentsData> {}
 export interface GetCommentsData {

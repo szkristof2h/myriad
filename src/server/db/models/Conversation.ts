@@ -3,9 +3,9 @@ import { MongooseModel } from "./utils"
 
 const { ObjectId, Schema } = mongoose
 
-export interface ConversationModel extends Conversation, MongooseModel {}
+export interface ConversationModel extends ConversationType, MongooseModel {}
 
-export interface Conversation {
+export interface ConversationType {
   createdAt: Date
   updatedAt: Date
   idUsers: string[]

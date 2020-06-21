@@ -2,8 +2,7 @@ import React, { createContext, useContext, useState } from "react"
 import { Canceler } from "axios"
 import { ErrorContext } from "./ErrorContext"
 import { get, post, APIRequestInteface } from "../utils/api"
-import { PostModel } from "src/server/db/models/Post"
-import { MongooseModel } from "src/server/db/models/utils"
+import { PostType } from "src/server/db/models/Post"
 
 // TODO: add error type
 export interface GetPostsInterface extends APIRequestInteface<GetPostsData> {}
@@ -20,7 +19,7 @@ export interface GetPostData {
 
 interface UpdatePostData extends GetPostData {}
 
-export interface PostData extends Omit<PostModel, "_id" | "_v"> {
+export interface PostData extends PostType {
   id: string
   rating: number
 }

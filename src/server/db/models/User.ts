@@ -2,7 +2,8 @@ import mongoose from "mongoose"
 import { sanitize } from "../../utils"
 import { MongooseModel } from "./utils"
 
-export interface UserModel extends MongooseModel {
+export interface UserModel extends UserType, MongooseModel {}
+export interface UserType {
   avatar: string
   bio: string
   displayName: string

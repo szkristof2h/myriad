@@ -4,8 +4,8 @@ import { MongooseModel } from "./utils"
 
 const { ObjectId, Schema } = mongoose
 
-export interface CommentModel extends Comment, MongooseModel {}
-export interface Comment {
+export interface CommentModel extends CommentType, MongooseModel {}
+export interface CommentType {
   createdAt: Date
   idParent: string
   idUser: string

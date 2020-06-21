@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState, useContext } from "react"
 import { Canceler } from "axios"
 import { get, APIRequestInteface, post } from "../utils/api"
 import { ErrorContext } from "./ErrorContext"
-import { UserModel } from "src/server/db/models/User"
+import { UserType } from "src/server/db/models/User"
 
 interface GetUserInterface extends APIRequestInteface<GetUserData> {}
 interface UpdateUserInterface extends APIRequestInteface<UpdateUserData> {}
@@ -14,7 +14,7 @@ interface GetUserData {
 
 interface UpdateUserData extends GetUserData {}
 
-export interface UserData extends Omit<UserModel, "_id" | "_v" | "idGoogle"> {
+export interface UserData extends Omit<UserType, "idGoogle"> {
   id: string
   isBlocked: boolean
   isFollowed: boolean
