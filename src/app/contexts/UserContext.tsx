@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState, useContext } from "react"
 import { Canceler } from "axios"
 import { get, APIRequestInteface, post } from "../utils/api"
 import { ErrorContext } from "./ErrorContext"
+import { UserModel } from "src/server/db/models/User"
 
 interface GetUserInterface extends APIRequestInteface<GetUserData> {}
 interface UpdateUserInterface extends APIRequestInteface<UpdateUserData> {}
@@ -13,15 +14,10 @@ interface GetUserData {
 
 interface UpdateUserData extends GetUserData {}
 
-export interface UserData {
+export interface UserData extends Omit<UserModel, "_id" | "_v" | "idGoogle"> {
   id: string
-  avatar: string
-  bio: string
-  displayName: string
-  firstName: string
-  isBlocked?: boolean
-  isFollowed?: boolean
-  lastName: string
+  isBlocked: boolean
+  isFollowed: boolean
 }
 
 export interface User extends UserData {}
@@ -46,15 +42,16 @@ interface UserContextInterface {
 }
 
 const emptyUser = {
-  _id: "",
+  id: "",
   avatar: "",
   bio: "",
   displayName: "",
   googleId: "",
   firstName: "",
-  id: "",
   lastName: "",
   isLoggedIn: false,
+  isBlocked: false,
+  isFollowed: false,
 }
 
 // TODO: Should find a better & easier way to provide an initial state to react contexts
@@ -65,20 +62,11 @@ const initialState: UserContextInterface = {
     cancel: (message?: string) => {},
     setUserContext: () => new Promise(() => {}),
   }),
-  updateCurrentUser: (variables) => ({
+  updateCurrentUser: variables => ({
     cancel: (message?: string) => {},
     setCurrentUserContext: () => new Promise(() => {}),
   }),
-  user: {
-    id: "",
-    avatar: "",
-    bio: "",
-    displayName: "",
-    firstName: "",
-    isBlocked: false,
-    isFollowed: false,
-    lastName: "",
-  },
+  user: emptyUser,
 }
 const UserContext = createContext<UserContextInterface>(initialState)
 
