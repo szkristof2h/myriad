@@ -8,7 +8,7 @@ import React, {
 } from "react"
 import { Route, RouteComponentProps } from "react-router-dom"
 import { NavigationContext } from "./contexts/NavigationContext"
-import { PostsContext, PostData } from "./contexts/PostsContext"
+import { PostsContext } from "./contexts/PostsContext"
 import { UserContext } from "./contexts/UserContext"
 import useWindowSize from "./hooks/useWindowSize"
 import Loader from "./Loader"
@@ -88,7 +88,6 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
   const {
     focused,
     getPosts,
-    ids,
     posts,
     previousUrl,
     setFocused,
@@ -176,18 +175,16 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
           {isLoading ? (
             <Loader />
           ) : (
-            ids.map((id, i) => {
-              const post = posts?.find(post => post.id === id)
-
+            posts.map((post, i) => {
               return (
                 post &&
                 positions?.[i] && (
                   <Post
-                    key={id}
+                    key={post.id}
                     col={positions[i][0] + 1 + offset}
                     row={positions[i][1] + 1 + offset}
                     openPost={() => {
-                      openPost(id)
+                      openPost(post.id)
                     }}
                     size={positions[i][2]}
                     {...post}

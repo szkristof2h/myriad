@@ -12,6 +12,7 @@ export interface PostModel extends MongooseModel {
   downs: number
   link: string
   images: string[]
+  idPostedBy: string
   postedById: string
   postedByName: string
   ratio: number
@@ -50,7 +51,8 @@ const postSchema = new Schema({
     },
     required: [true, "You should give your post a thumbnail!"],
   },
-  postedById: ObjectId,
+  idPostedBy: ObjectId,
+  postedById: ObjectId, // TODO: remove
   postedByName: String,
   ratio: { type: Number, index: true },
   tags: { type: [String], index: true },

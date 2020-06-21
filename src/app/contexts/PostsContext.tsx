@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState } from "react"
 import { Canceler } from "axios"
 import { ErrorContext } from "./ErrorContext"
 import { get, post, APIRequestInteface } from "../utils/api"
+import { PostModel } from "src/server/db/models/Post"
+import { MongooseModel } from "src/server/db/models/utils"
 
 // TODO: add error type
 export interface GetPostsInterface extends APIRequestInteface<GetPostsData> {}
@@ -9,7 +11,6 @@ export interface GetPostInterface extends APIRequestInteface<GetPostData> {}
 interface UpdatePostInterface extends APIRequestInteface<UpdatePostData> {}
 
 export interface GetPostsData {
-  ids: string[]
   posts: PostData[]
 }
 
@@ -19,17 +20,9 @@ export interface GetPostData {
 
 interface UpdatePostData extends GetPostData {}
 
-export interface PostData {
+export interface PostData extends Omit<PostModel, "_id" | "_v"> {
   id: string
-  title: string
-  description: string
-  images: string[]
-  comments: number
-  downs: number
-  link: string
-  postedByName: string
-  rating?: number
-  ups: number
+  rating: number
 }
 
 export interface Post extends PostData {
@@ -43,7 +36,6 @@ export interface Post extends PostData {
 
 interface PostContextInterface {
   focused: string
-  ids: string[]
   getPost: (
     id: string
   ) => { cancel: Canceler; setPostContext: () => Promise<void> }
@@ -54,7 +46,6 @@ interface PostContextInterface {
   posts: PostData[]
   previousUrl: string
   setFocused: (id: string) => void
-  setIds: (ids: string[]) => void
   setPosts: (posts: Post[]) => void
   setPreviousUrl: (urL: string) => void
   updatePost: (
@@ -63,10 +54,20 @@ interface PostContextInterface {
   ) => { cancel: Canceler; setPostContext: () => Promise<void> }
 }
 
+const makeId = () => {
+  var text = ""
+  var possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+  for (var i = 0; i < 20; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length))
+
+  return text
+}
+
 // Should find a better & easier way to provide an initial state to react contexts
 const initialState: PostContextInterface = {
   focused: "",
-  ids: [],
   getPost: (id: string) => ({
     cancel: (message?: string) => {},
     setPostContext: () => new Promise(() => {}),
@@ -78,7 +79,6 @@ const initialState: PostContextInterface = {
   posts: [],
   previousUrl: "",
   setFocused: (id: string) => {},
-  setIds: (ids: string[]) => {},
   setPosts: (posts: Post[]) => {},
   setPreviousUrl: (urL: string) => {},
   updatePost: (id: string, variables) => ({
@@ -92,20 +92,25 @@ const PostsContext = createContext<PostContextInterface>(initialState)
 const samplePost = {
   description: "",
   comments: 0,
+  date: new Date(),
   downs: 0,
-  link: "",
-  ups: 0,
+  idPostedBy: "",
   images: ["sample"],
+  link: "",
+  postedById: "",
   rating: 0,
+  ratio: 0,
+  tags: [],
   title: "Submit a post!",
+  ups: 0,
 }
 
 const PostsProvider = ({ children }) => {
   const [focused, setFocused] = useState("")
   const [previousUrl, setPreviousUrl] = useState("")
   const [posts, setPosts] = useState<PostData[]>([])
-  const [ids, setIds] = useState<string[]>([])
   const { addError } = useContext(ErrorContext)
+  const limits = [1, 16, 28] // use some kind of constant for this... env?
 
   const getPosts: PostContextInterface["getPosts"] = (url, type = "") => {
     const { getData, cancel, getHasFailed }: GetPostsInterface = get<
@@ -119,19 +124,17 @@ const PostsProvider = ({ children }) => {
         return addError({ posts: [`get posts request failed`] })
 
       const {
-        data: { error, ids, posts },
+        data: { error, posts },
       } = response
 
       if (error) return addError(error.message, error.type)
 
-      const fillerPosts: PostData[] = ids
-        .filter(id => id.length === 20)
-        .map(id => ({ id, postedByName: type, ...samplePost }))
+      const missingPosts = limits.reduce((a, v) => a + v) - posts.length
+      const fillerPosts: PostData[] = new Array(missingPosts)
+        .fill("")
+        .map(_ => ({ id: makeId(), postedByName: type, ...samplePost }))
 
-      setPosts(() => {
-        setIds(ids)
-        return [...posts, ...fillerPosts]
-      })
+      setPosts([...posts, ...fillerPosts])
     }
 
     return { cancel, setPostsContext }
@@ -199,11 +202,9 @@ const PostsProvider = ({ children }) => {
         focused,
         getPost,
         getPosts,
-        ids: ids,
         posts,
         previousUrl,
         setFocused,
-        setIds: setIds,
         setPosts,
         setPreviousUrl,
         updatePost,

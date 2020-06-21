@@ -13,7 +13,7 @@ import {
 } from "../types"
 import { Rating, RatingType } from "../models/Rating"
 import FollowedList from "../models/FollowedList"
-import { GetPostsData } from "../../../app/contexts/PostsContext"
+import { GetPostsData, GetPostData } from "../../../app/contexts/PostsContext"
 
 const tiers = [0.7, 0.4, -1]
 const limits = [1, 16, 28]
@@ -41,14 +41,15 @@ const getPost = async (req: Request, res: Response) => {
     .select("value")
     .lean()
     .exec()
-
-  setResponseData(res, {
+  const responseData: GetPostData = {
     post: {
       ...postWithout_id,
-      ...(rating ? { rating: rating.value } : {}),
+      ...(rating ? { rating: rating.value } : { rating: 0 }),
       id: _id,
     },
-  })
+  }
+
+  setResponseData(res, responseData)
 }
 
 const getCriteria = (params: {
@@ -69,28 +70,24 @@ const getCriteria = (params: {
 }
 
 const getPosts = async (req: Request, res: Response) => {
+  interface Posts {
+    posts: PostModel[]
+    ids: string[]
+  }
+
   setErrorType(res, "GET_POSTS")
 
   const idUser = res.locals?.user?.id
   const criteria = getCriteria(req.params)
-  const mergePosts = async (
-    posts: GetPostsData,
-    tier: number,
-    offset: number
-  ) => {
+  const mergePosts = async (posts: Posts, tier: number, offset: number) => {
     if (tier === 3) return posts
 
     const newPosts = await getDBPosts(tier, posts.ids, offset, criteria)
     const newOffset = getOffset(newPosts.length, offset, tier)
-    const newPostsWithout_id = newPosts.map(newPost => {
-      const { _id, ...post } = newPost
-
-      return { ...post, id: _id }
-    })
 
     return mergePosts(
       {
-        posts: [...posts.posts, ...newPostsWithout_id],
+        posts: [...posts.posts, ...newPosts],
         ids: [...posts.ids, ...newPosts.map(post => post._id)],
       },
       tier + 1,
@@ -98,29 +95,29 @@ const getPosts = async (req: Request, res: Response) => {
     )
   }
 
-  const { posts, ids }: GetPostsData = await mergePosts(
-    { posts: [], ids: [] },
-    0,
-    0
-  )
-  const missingPosts = limits.reduce((a, v) => a + v) - ids.length
-  const fillingIds = new Array(missingPosts).fill("").map(_ => makeId()) // TODO: better name?
-
+  const { posts, ids }: Posts = await mergePosts({ posts: [], ids: [] }, 0, 0)
   const ratings: RatingType[] | null =
-    idUser && ids.length > 0
+    idUser && posts.length > 0
       ? await Rating.find({ idUser }).in("idPost", ids).exec()
       : null
 
   const postsWithRatings = posts.map(post => {
-    const rating = ratings?.find(rating => rating.idPost === post.id)
+    const rating = ratings?.find(rating => rating.idPost === post._id)
 
     return { ...post, rating: rating?.value ?? 0 }
   })
+  const responseData: GetPostsData = {
+    posts: postsWithRatings.map(post => {
+      const { _id, _v, ...postWithout_id } = post
 
-  setResponseData(res, {
-    posts: postsWithRatings,
-    ids: [...ids, ...fillingIds],
-  })
+      return {
+        ...postWithout_id,
+        id: _id,
+      }
+    }),
+  }
+
+  setResponseData(res, responseData)
 }
 
 // Search the db for posts that's in one of the 3 rating tiers and not already chosen,
@@ -174,17 +171,6 @@ const getNotifications = (req, res) => {
       )
     )
   // .catch(e => res.json(handleErrors(GET_NOTIFICATIONS_ERROR, e)));
-}
-
-const makeId = () => {
-  var text = ""
-  var possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-
-  for (var i = 0; i < 20; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length))
-
-  return text
 }
 
 const postRating = (req, res) => {
