@@ -36,20 +36,20 @@ const StyledHeaderContainer = styled.div({
   },
 })
 
-const StyledPost = styled.div`
-  border: 1px solid black;
-  display: grid;
-  grid-template-rows: 4fr 1fr;
-  font-size: 1rem;
-  color: white;
-  &:hover {
-    cursor: pointer;
-    ${StyledDetailsContainer} {
-      display: grid;
-      gridtemplatecolumns: 1fr 1fr;
-    }
-  }
-`
+const StyledPost = styled.div({
+  border: "1px solid black",
+  display: "grid",
+  gridTemplateRows: "4fr 1fr",
+  fontSize: "1rem",
+  color: "white",
+  "&:hover": {
+    cursor: "pointer",
+    [`${StyledDetailsContainer}`]: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+    },
+  },
+})
 
 const StyledNavigationButton = styled(Button)({
   position: "absolute",

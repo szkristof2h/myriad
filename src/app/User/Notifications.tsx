@@ -30,7 +30,9 @@ const Notifications = () => {
     const { cancel, setPostsContext } = getPosts(
       `notifications/${posts.length ?? 0}/0`
     )
+
     ;(async () => await setPostsContext())()
+
     setIsLoading(false)
     return cancel
   }
@@ -51,15 +53,18 @@ const Notifications = () => {
         Updates
       </Header>
       <Suspense fallback={<div className="">Loading updates...</div>}>
-        {posts.map(post => (
-          <Post
-            key={post.id}
-            openPost={() => openPost(post.id)}
-            type="notification"
-            size={5}
-            {...post}
-          />
-        ))}
+        {posts.map(
+          post =>
+            post.id.length > 20 && (
+              <Post
+                key={post.id}
+                openPost={() => openPost(post.id)}
+                type="notification"
+                size={5}
+                {...post}
+              />
+            )
+        )}
       </Suspense>
       {posts.length != 0 ? (
         <Button
