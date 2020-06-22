@@ -93,7 +93,7 @@ const samplePost = {
   comments: 0,
   date: new Date(),
   downs: 0,
-  idPostedBy: "",
+  idUser: "",
   images: ["sample"],
   link: "",
   postedById: "",

@@ -12,8 +12,8 @@ export interface PostType {
   comments: number
   downs: number
   link: string
+  idUser: string
   images: string[]
-  idPostedBy: string
   postedById: string
   postedByName: string
   ratio: number
@@ -41,6 +41,7 @@ const postSchema = new Schema({
     },
     required: [true, "You should give your post a link!"],
   },
+  idUser: ObjectId,
   images: {
     type: [String],
     validate: {
@@ -52,8 +53,6 @@ const postSchema = new Schema({
     },
     required: [true, "You should give your post a thumbnail!"],
   },
-  idPostedBy: ObjectId,
-  postedById: ObjectId, // TODO: remove
   postedByName: String,
   ratio: { type: Number, index: true },
   tags: { type: [String], index: true },

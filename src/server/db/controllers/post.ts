@@ -1,4 +1,4 @@
-import { Request, Response } from "express"
+import { Request, Response, NextFunction } from "express"
 import { isArray } from "util"
 import Post, { PostModel } from "../models/Post"
 import { toObject, setErrorType, setResponseData } from "../../utils"
@@ -12,7 +12,7 @@ import {
   GET_NOTIFICATIONS_ERROR,
 } from "../types"
 import { Rating, RatingType } from "../models/Rating"
-import FollowedList from "../models/FollowedList"
+import FollowList, { FollowListModel } from "../models/FollowList"
 import { GetPostsData, GetPostData } from "../../../app/contexts/PostsContext"
 
 const tiers = [0.7, 0.4, -1]
@@ -100,7 +100,6 @@ const getPosts = async (req: Request, res: Response) => {
     idUser && posts.length > 0
       ? await Rating.find({ idUser }).in("idPost", ids).exec()
       : null
-
   const postsWithRatings = posts.map(post => {
     const rating = ratings?.find(rating => rating.idPost === post._id)
 
@@ -143,34 +142,55 @@ const getDBPosts = async (
 const getOffset = (length: number, offset: number, tier: number) =>
   offset + limits[tier] - length
 
-const getNotifications = (req, res) => {
+const getNotifications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  setErrorType(res, "GET_NOTIFICATIONS_ERROR")
   const { skip = 0 } = req.params
-  const userId = res.locals.user.id
+  const idUser = req.user?.id
 
-  FollowedList.find({ from: userId })
+  const followList: FollowListModel[] = await FollowList.find({ idUser })
+    .lean()
     .exec()
-    .then(follows =>
-      follows.length == 0
-        ? false
-        : Post.find()
-            .in(
-              "postedById",
-              follows.map(f => f.to)
-            )
-            .sort("-data")
-            .skip(Number(skip))
-            .limit(20)
-            .lean()
-            .exec()
+
+  if (!followList) {
+    setResponseData(res, { posts: [] })
+    next()
+  }
+
+  const posts: PostModel[] = await Post.where("idUser")
+    .in(followList.map(followItem => followItem.idFollowing))
+    .sort("-createdAt")
+    .skip(Number(skip))
+    .limit(20)
+    .lean()
+    .exec()
+
+  if (!posts.length) {
+    setResponseData(res, { posts: [] })
+    next()
+  }
+
+  const ratings: RatingType[] = await Rating.find({ idUser })
+    .in(
+      "idPost",
+      posts.map(post => post._id)
     )
-    .then(posts =>
-      res.json(
-        posts
-          ? { ...toObject(posts, "_id"), ids: posts.map(p => p._id) }
-          : { ids: [] }
-      )
-    )
-  // .catch(e => res.json(handleErrors(GET_NOTIFICATIONS_ERROR, e)));
+    .lean()
+    .exec()
+  const postsWithRatings = posts.map(post => {
+    const rating = ratings?.find(rating => rating.idPost === post._id)
+    const { _id, _v, ...postWithout_id } = post
+
+    return { ...postWithout_id, rating: rating?.value ?? 0, id: _id }
+  })
+  const responseData: GetPostsData = {
+    posts: postsWithRatings,
+  }
+
+  setResponseData(res, responseData)
 }
 
 const postRating = (req, res) => {
@@ -235,7 +255,7 @@ const getTags = async (req: Request, res: Response) => {
   setResponseData(res, { tags })
 }
 
-const postPost = (req, res) => {
+const postPost = (req: Request, res: Response) => {
   const tags =
     !req.body.tags ||
     !req.body.tags.includes(",") ||
@@ -244,7 +264,7 @@ const postPost = (req, res) => {
       : req.body.tags
           .split(",")
           .map(t => t.toLowerCase().trim().replace(/\//g, ""))
-  const userId = res.locals.user.id
+  const idUser = req.user?.id
   const displayName = res.locals.user.displayName
   const link = `http${
     req.body.link.includes("https://") ? "s" : ""
@@ -259,7 +279,7 @@ const postPost = (req, res) => {
     downs: 0,
     link: link,
     images: req.body.images,
-    postedById: userId,
+    idUser,
     postedByName: displayName,
     ratio: getRating(0, 0),
     tags: tags,

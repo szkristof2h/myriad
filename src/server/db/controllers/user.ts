@@ -18,7 +18,7 @@ import {
 } from "../types"
 import User, { UserModel } from "../models/User"
 import BlockedList from "../models/BlockedList"
-import FollowedList from "../models/FollowedList"
+import FollowList from "../models/FollowList"
 import { UserData } from "../../../app/contexts/UserContext"
 
 export function block(req, res) {
@@ -82,7 +82,7 @@ export function follow(req, res) {
         ? ""
         : Promise.reject({ errors: { id: { message: USER_NOT_FOUND } } })
     )
-    .then(() => FollowedList.findOne({ from: userId, to: targetUser }).exec())
+    .then(() => FollowList.findOne({ from: userId, to: targetUser }).exec())
     .then(b =>
       b
         ? Promise.reject({
@@ -91,7 +91,7 @@ export function follow(req, res) {
         : ""
     )
     .then(() => {
-      const newFollow = new FollowedList({ from: userId, to: targetUser })
+      const newFollow = new FollowList({ from: userId, to: targetUser })
       return newFollow.save()
     })
     .then(() =>
@@ -124,7 +124,7 @@ const getUser = async (req: Request, res: Response) => {
   const { _id, ...user } = userFromDB
 
   if (idUser) {
-    const isFollowed = !!FollowedList.findOne({
+    const isFollowed = !!FollowList.findOne({
       from: idUser,
       to: user.id,
     })
@@ -212,7 +212,7 @@ export function unfollow(req, res) {
   const userId = res.locals && res.locals.user ? res.locals.user.id : null
   const { targetUser } = req.body
 
-  FollowedList.findOneAndDelete({ from: userId, to: targetUser })
+  FollowList.findOneAndDelete({ from: userId, to: targetUser })
     .exec()
     .then(follow =>
       follow
