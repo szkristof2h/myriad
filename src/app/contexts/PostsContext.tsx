@@ -42,10 +42,12 @@ interface PostContextInterface {
     url: string,
     type?: string
   ) => { cancel: Canceler; setPostsContext: () => Promise<void> }
+  notifications: PostData[]
   posts: PostData[]
   previousUrl: string
   setFocused: (id: string) => void
   setPosts: (posts: Post[]) => void
+  setNotifications: (posts: Post[]) => void
   setPreviousUrl: (urL: string) => void
   updatePost: (
     id: string,
@@ -75,10 +77,12 @@ const initialState: PostContextInterface = {
     cancel: (message?: string) => {},
     setPostsContext: () => new Promise(() => {}),
   }),
+  notifications: [],
   posts: [],
   previousUrl: "",
   setFocused: (id: string) => {},
   setPosts: (posts: Post[]) => {},
+  setNotifications: (posts: Post[]) => {},
   setPreviousUrl: (urL: string) => {},
   updatePost: (id: string, variables) => ({
     cancel: (message?: string) => {},
@@ -108,6 +112,7 @@ const PostsProvider = ({ children }) => {
   const [focused, setFocused] = useState("")
   const [previousUrl, setPreviousUrl] = useState("")
   const [posts, setPosts] = useState<PostData[]>([])
+  const [notifications, setNotifications] = useState<PostData[]>([])
   const { addError } = useContext(ErrorContext)
   const limits = [1, 16, 28] // use some kind of constant for this... env?
 
@@ -123,17 +128,19 @@ const PostsProvider = ({ children }) => {
         return addError({ posts: [`get posts request failed`] })
 
       const {
-        data: { error, posts },
+        data: { error, posts: newPosts },
       } = response
 
       if (error) return addError(error.message, error.type)
 
-      const missingPosts = limits.reduce((a, v) => a + v) - posts.length
+      const missingPosts = limits.reduce((a, v) => a + v) - newPosts.length
       const fillerPosts: PostData[] = new Array(missingPosts)
         .fill("")
         .map(_ => ({ id: makeId(), postedByName: type, ...samplePost }))
 
-      setPosts([...posts, ...fillerPosts])
+      if (url.split("/")[0] === "notifications")
+        setNotifications([...new Set([...notifications, ...newPosts])])
+      else setPosts([...newPosts, ...fillerPosts])
     }
 
     return { cancel, setPostsContext }
@@ -201,9 +208,11 @@ const PostsProvider = ({ children }) => {
         focused,
         getPost,
         getPosts,
+        notifications,
         posts,
         previousUrl,
         setFocused,
+        setNotifications,
         setPosts,
         setPreviousUrl,
         updatePost,

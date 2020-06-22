@@ -12,7 +12,7 @@ const Notifications = () => {
   const history = useHistory()
   const [isLoading, setIsLoading] = useState(true)
   const { refresh } = useContext(NavigationContext)
-  const { getPosts, posts, setFocused } = useContext(PostsContext)
+  const { getPosts, notifications, setFocused } = useContext(PostsContext)
 
   const openPost = (id: string) => {
     setFocused(id)
@@ -28,7 +28,7 @@ const Notifications = () => {
     setIsLoading(true)
 
     const { cancel, setPostsContext } = getPosts(
-      `notifications/${posts.length ?? 0}/0`
+      `notifications/${notifications.length ?? 0}/0`
     )
 
     ;(async () => await setPostsContext())()
@@ -53,7 +53,7 @@ const Notifications = () => {
         Updates
       </Header>
       <Suspense fallback={<div className="">Loading updates...</div>}>
-        {posts.map(
+        {notifications.map(
           post =>
             post.id.length > 20 && (
               <Post
@@ -66,7 +66,7 @@ const Notifications = () => {
             )
         )}
       </Suspense>
-      {posts.length != 0 ? (
+      {notifications.length != 0 ? (
         <Button
           type="primary"
           as={Link}
