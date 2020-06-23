@@ -50,25 +50,17 @@ export function block(req, res) {
   // .catch(e => res.json(handleErrors(BLOCK_USER_ERROR, e)))
 }
 
-export function checkDisplayName(req, res) {
+const checkDisplayName = async (req: Request, res: Response) => {
+  setErrorType(res, "GET_CHECK_DISPLAYNAME")
   const { displayName } = req.params.displayName ? req.params : req.body
 
-  return User.findOne({ displayName: displayName.toLowerCase() })
-    .exec()
-    .then(u =>
-      !u
-        ? res
-          ? res.json({ status: "Name is available!" })
-          : true
-        : Promise.reject({
-            errors: {
-              displayName: { message: "That display name is already in use!" },
-            },
-          })
-    )
-  // .catch(e =>
-  //   res ? res.json(handleErrors(CHECK_DISPLAY_NAME_ERROR, e)) : false
-  // )
+  const user = await User.findOne({
+    displayName: displayName.toLowerCase(),
+  }).exec()
+
+  if (user) throw Error("Displayname is already in use")
+
+  setResponseData(res, {})
 }
 
 export function follow(req, res) {
@@ -146,45 +138,42 @@ const getUser = async (req: Request, res: Response) => {
 }
 
 export function setDisplayName(req, res) {
-  const { displayName } = req.body
-  const userId = res.locals.user.id
-
-  if (
-    !displayName ||
-    typeof displayName !== "string" ||
-    displayName.length < 3 ||
-    displayName.length > 20
-  )
-    // return res.json(
-    //   handleErrors(SET_DISPLAY_NAME_ERROR, {
-    //     errors: { displayName: { message: "Invalid display name!" } },
-    //   })
-    // )
-
-    checkDisplayName(req, null).then(r =>
-      r
-        ? User.findById(userId)
-            .exec()
-            .then(user => {
-              if (user.displayName)
-                return Promise.reject({
-                  errors: {
-                    profile: {
-                      message: "You've already set your display name!",
-                    },
-                  },
-                })
-
-              user.displayName = displayName.toLowerCase()
-              return user.save()
-            })
-            .then(() => res.json({ status: "Successfully set display name!" }))
-        : Promise.reject({
-            errors: {
-              displayName: { message: "That display name is already in use!" },
-            },
-          })
-    )
+  // const { displayName } = req.body
+  // const userId = res.locals.user.id
+  // if (
+  //   !displayName ||
+  //   typeof displayName !== "string" ||
+  //   displayName.length < 3 ||
+  //   displayName.length > 20
+  // )
+  //   // return res.json(
+  //   //   handleErrors(SET_DISPLAY_NAME_ERROR, {
+  //   //     errors: { displayName: { message: "Invalid display name!" } },
+  //   //   })
+  //   // )
+  //   checkDisplayName(req, null).then(r =>
+  //     r
+  //       ? User.findById(userId)
+  //           .exec()
+  //           .then(user => {
+  //             if (user.displayName)
+  //               return Promise.reject({
+  //                 errors: {
+  //                   profile: {
+  //                     message: "You've already set your display name!",
+  //                   },
+  //                 },
+  //               })
+  //             user.displayName = displayName.toLowerCase()
+  //             return user.save()
+  //           })
+  //           .then(() => res.json({ status: "Successfully set display name!" }))
+  //       : Promise.reject({
+  //           errors: {
+  //             displayName: { message: "That display name is already in use!" },
+  //           },
+  //         })
+  //   )
   // .catch(e => res.json(handleErrors(SET_DISPLAY_NAME_ERROR, e)))
 }
 
@@ -286,4 +275,4 @@ export function updateProfile(req, res) {
   // .catch(e => (res ? res.json(handleErrors(UPDATE_PROFILE_ERROR, e)) : false))
 }
 
-export { getUser }
+export { checkDisplayName, getUser }
