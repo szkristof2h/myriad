@@ -1,11 +1,10 @@
 import React, { FC, useContext, useEffect } from "react"
-import { Link, Redirect, Route, Switch, useRouteMatch } from "react-router-dom"
+import { Link, Redirect, useRouteMatch } from "react-router-dom"
 import { UserContext, GetUserData, emptyUser } from "../contexts/UserContext"
 import Loader from "../Loader"
 import { Header, Base } from "../Typography/Typography.style"
 import StyledProfile from "./Profile.style"
 import { Button } from "../components"
-import EditProfile from "./EditProfile"
 import useGetData from "../hooks/useGetData"
 
 interface Props {
@@ -16,15 +15,12 @@ interface Props {
 }
 
 const Profile: FC<Props> = ({ params }) => {
-  const hasMatchedEdit = useRouteMatch("/profile/edit")
-
-  if (hasMatchedEdit) return <Redirect to="/edit" /> // convert to route?
-
   const name = params?.name ?? ""
   const { currentUser, isLoading: isLoadingCurrentUser, logout } = useContext(
     UserContext
   )
   const isOwnProfile = !name || name === currentUser?.displayName
+
   // TODO: find a better way than returning an object
   const { cancel, data, isLoading, refetch } = name
     ? useGetData<GetUserData>(`user/${name}`)
@@ -63,7 +59,7 @@ const Profile: FC<Props> = ({ params }) => {
     isBlocked,
     isFollowed,
   } = getUserFields()
-  const isEditing = !name && (!currentUser?.displayName || hasMatchedEdit)
+  const isEditing = !name && !currentUser?.displayName
 
   useEffect(() => {
     return cancel("unmounting")
@@ -71,7 +67,7 @@ const Profile: FC<Props> = ({ params }) => {
 
   if (isLoadingCurrentUser || isLoading) return <Loader />
 
-  if (isEditing) return <Redirect to="/edit" />
+  if (isEditing) return <Redirect to="/profile/edit" />
 
   const handleClick = async (e: React.MouseEvent, type) => {
     e.preventDefault()
@@ -86,7 +82,7 @@ const Profile: FC<Props> = ({ params }) => {
     // setIsLoading(false)
   }
 
-  const renderProfile = (
+  return (
     <StyledProfile>
       <div className="avatar">
         <img className="image" src={avatar ?? ""} alt="avatar" />
@@ -159,23 +155,6 @@ const Profile: FC<Props> = ({ params }) => {
         </Button>
       )}
     </StyledProfile>
-  )
-
-  return (
-    <Switch>
-      <Route
-        path="/profile/edit"
-        render={() => (
-          <EditProfile
-            avatar={avatar}
-            bio={bio}
-            displayName={displayName}
-            refetch={refetch}
-          />
-        )}
-      />
-      <Route path={["/profile", "/user/:name"]} render={() => renderProfile} />
-    </Switch>
   )
 }
 

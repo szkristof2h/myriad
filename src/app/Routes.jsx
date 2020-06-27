@@ -26,6 +26,9 @@ const Posts = lazy(() => import("./Posts.tsx" /* webpackChunkName: "Posts" */))
 const Profile = lazy(() =>
   import("./User/Profile.tsx" /* webpackChunkName: "Profile" */)
 )
+const EditProfile = lazy(() =>
+  import("./User/EditProfile.tsx" /* webpackChunkName: "EditProfile" */)
+)
 const Submit = lazy(() =>
   import("./Post/Submit.tsx" /* webpackChunkName: "Submit" */)
 )
@@ -50,7 +53,11 @@ export default function App() {
                   />
                   <Route path="/messages" render={() => <Conversations />} />
                   <Route
-                    path={["/profile", "/profile/edit", "/user/:name"]}
+                    path={"/profile/edit"}
+                    render={() => <EditProfile />}
+                  />
+                  <Route
+                    path={["/profile", "/user/:name"]}
                     render={({ match }) => <Profile params={match.params} />}
                   />
                   {/* <Route
