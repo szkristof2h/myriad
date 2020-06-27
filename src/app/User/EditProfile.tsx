@@ -1,23 +1,14 @@
-import React, { FC } from 'react'
-import { Link } from 'react-router-dom'
-import StyledEditProfile from './EditProfile.style'
+import React, { FC, useState, useContext, useEffect } from "react"
+import { Link, Redirect } from "react-router-dom"
+import StyledEditProfile from "./EditProfile.style"
 import { Button, Input, TextArea } from "../components"
-import { Header } from '../Typography/Typography.style'
+import { Header } from "../Typography/Typography.style"
+import useGetData from "../hooks/useGetData"
+import { UserContext } from "../contexts/UserContext"
+import Loader from "../Loader"
 
-interface Props {
-  handleCheck: (e: React.MouseEvent) => Promise<void>
-  handleSubmit: (e: React.MouseEvent) => Promise<void>
-  isNameAvailable: boolean | null
-  newProfile: {
-    avatar: string
-    bio: string
-    displayName: string
-  }
-  setNewProfile: (newProfile: {
-    avatar: string
-    bio: string
-    displayName: string
-  }) => void
+export interface IsNameAvailableData {
+  isNameAvailable: boolean
 }
 
 type inputFieldTypes = {
@@ -26,21 +17,55 @@ type inputFieldTypes = {
   displayName?: string
 }
 
-const EditProfile: FC<Props> = ({
-  handleCheck,
-  handleSubmit,
-  newProfile,
-  isNameAvailable,
-  setNewProfile,
-}) => {
-  const handleInput = (value: inputFieldTypes) =>
-    setNewProfile({ ...newProfile, ...value })
-  const { avatar, bio, displayName } = newProfile
-  const checkButtonType = isNameAvailable
-    ? "confirm"
-    : isNameAvailable !== null
+const EditProfile: FC = () => {
+  const { currentUser, isLoading: isLoadingCurrentUser, refetch } = useContext(
+    UserContext
+  )
+
+  const [newProfile, setNewProfile] = useState({
+    avatar: "",
+    bio: "",
+    displayName: "",
+  })
+  const displayName = currentUser?.displayName
+  const {
+    avatar: newAvatar,
+    bio: newBio,
+    displayName: newDisplayName,
+  } = newProfile
+
+  // TODO: add some kind of throttling
+  const { data, isLoading } = useGetData<IsNameAvailableData>(
+    !!newDisplayName ? `user/displayName/${newDisplayName}` : ""
+  )
+
+  useEffect(() => {
+    if (currentUser && !newAvatar && !newBio && !newDisplayName)
+      // init form values
+      setNewProfile({
+        avatar: currentUser.avatar,
+        bio: currentUser.bio,
+        displayName: currentUser.displayName,
+      })
+  }, [currentUser])
+
+  if (isLoadingCurrentUser) return <Loader />
+  if (!currentUser) return <Redirect to="/login" />
+  const isNameAvailable = data?.isNameAvailable
+  const checkButtonType = !displayName
+    ? "primary"
+    : !isNameAvailable
     ? "danger"
-    : "primary"
+    : "confirm"
+
+  const handleInput = (value: inputFieldTypes) => {
+    if (!isLoading) setNewProfile({ ...newProfile, ...value })
+  }
+
+  const handleSubmit = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    refetch()
+  }
 
   return (
     <StyledEditProfile>
@@ -48,31 +73,20 @@ const EditProfile: FC<Props> = ({
         Edit your profile
       </Header>
       <Header centered size={1}>
-        Display Name (can only set once)*
+        Display Name (can only be set once)*
       </Header>
       <Input
         onChange={e =>
           handleInput({ displayName: e.currentTarget.value ?? "" })
         }
-        value={displayName}
+        value={newDisplayName}
+        disabled={!!displayName}
       />
-      <Button
-      type={checkButtonType}
-        as={Link}
-        onClick={async (e: React.MouseEvent) => await handleCheck(e)}
-        to="check/displayName"
-      >
-        {isNameAvailable
-          ? "Available"
-          : isNameAvailable === false
-          ? "Already in use"
-          : "Check availability"}
-      </Button>
       <Header centered>Avatar</Header>
-      <img className="avatar" src={avatar} />
+      <img className="avatar" src={newAvatar} />
       <Input
         onChange={e => handleInput({ avatar: e.currentTarget.value })}
-        value={avatar}
+        value={newAvatar}
       />
       <Header centered size={1}>
         Bio
@@ -80,13 +94,13 @@ const EditProfile: FC<Props> = ({
       <TextArea
         onChange={e => handleInput({ bio: e.currentTarget.value })}
         rows="1"
-        value={bio}
+        value={newBio}
       />
       <Button
         as={Link}
         type="primary"
         onClick={async e => await handleSubmit(e)}
-        to="check/displayName"
+        to="profile/update"
       >
         Save
       </Button>

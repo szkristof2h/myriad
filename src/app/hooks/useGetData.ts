@@ -20,7 +20,7 @@ const useGetData = <T = any>(url: string): GetData<T> => {
   useEffect(() => {
     if (url) {
       setIsLoading(true)
-      console.log("requesting", url)
+
       const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<T>(
         url,
         addError
