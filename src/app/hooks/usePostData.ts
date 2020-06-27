@@ -1,16 +1,19 @@
 import { useEffect, useState, useContext } from "react"
-import { APIRequestInteface, get } from "../requests/api"
+import { post, APIPostRequestInteface } from "../requests/api"
 import { ErrorContext } from "../contexts/ErrorContext"
 import { Canceler } from "axios"
 
-export interface GetData<T> {
+export interface PostData<T> {
   cancel: Canceler
   data: T | undefined
   isLoading: boolean
   refetch: () => void
 }
 
-const useGetData = <T = any>(url: string): GetData<T> => {
+const usePostData = <T = any, V = any>(
+  url: string,
+  variables: V
+): PostData<T> => {
   const [data, setData] = useState<T | undefined>()
   const [isLoading, setIsLoading] = useState(false)
   const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {})
@@ -18,26 +21,25 @@ const useGetData = <T = any>(url: string): GetData<T> => {
   const { addError } = useContext(ErrorContext)
 
   useEffect(() => {
-    if (url) {
-      setIsLoading(true)
+    setIsLoading(true)
 
-      const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<T>(
-        url,
-        addError
-      )
+    const { postData, cancel, getHasFailed }: APIPostRequestInteface<T> = post<
+      T,
+      V
+    >(url, variables, addError)
 
-      setCancel(() => cancel)
-      ;(async () => {
-        const response = await getData()
+    setCancel(() => cancel)
+    ;(async () => {
+      const response = await postData()
 
-        setData(response?.data)
-        if (response?.data?.error)
-          addError({ user: [response.data.error.message] })
-        if (getHasFailed()) addError({ request: [`get request failed`] })
+      setData(response?.data)
+      if (response?.data?.error)
+        addError({ user: [response.data.error.message] })
 
-        setIsLoading(false)
-      })()
-    }
+      if (getHasFailed()) addError({ request: [`post request failed`] })
+
+      setIsLoading(false)
+    })()
 
     return () => {
       cancel()
@@ -53,4 +55,4 @@ const useGetData = <T = any>(url: string): GetData<T> => {
   }
 }
 
-export default useGetData
+export default usePostData

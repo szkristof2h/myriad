@@ -8,6 +8,12 @@ export interface APIRequestInteface<T> {
   getHasFailed: () => boolean
 }
 
+export interface APIPostRequestInteface<T> {
+  postData: () => Promise<AxiosResponse<T & APIResponseError> | undefined>
+  cancel: Canceler
+  getHasFailed: () => boolean
+}
+
 const siteUrl = config.url
 const get = <T = any, R = AxiosResponse<T & APIResponseError>>(
   url: string,
@@ -17,7 +23,6 @@ const get = <T = any, R = AxiosResponse<T & APIResponseError>>(
   const getHasFailed = () => hasFailed
   const source = axios.CancelToken.source()
   const cancel = () => source.cancel()
-
   const data = async () => {
     try {
       const getData: Promise<R> = axios.get(`${siteUrl}/get/${url}`, {
@@ -34,18 +39,18 @@ const get = <T = any, R = AxiosResponse<T & APIResponseError>>(
   return { getData: data, cancel, getHasFailed }
 }
 
-const post = <T = any, R = AxiosResponse<T>>(
+const post = <T = any, V = any, R = AxiosResponse<T>>(
   url: string,
-  variables,
+  variables: V,
   handleErrors
 ) => {
-  let hasFailed
+  let hasFailed: boolean = false
   const getHasFailed = () => hasFailed
   const source = axios.CancelToken.source()
   const cancel = () => source.cancel()
   const data = async () => {
     try {
-      const getData: Promise<R> = axios.post(
+      const postData: Promise<R> = axios.post(
         `${siteUrl}/post/${url}`,
         variables,
         {
@@ -53,15 +58,14 @@ const post = <T = any, R = AxiosResponse<T>>(
         }
       )
 
-      // TODO: it should return data
-      return await getData
+      return await postData
     } catch (e) {
       if (!axios.isCancel(e)) handleErrors()
       hasFailed = true
     }
   }
 
-  return { getData: data, cancel, getHasFailed }
+  return { postData: data, cancel, getHasFailed }
 }
 
 export { get, post }
