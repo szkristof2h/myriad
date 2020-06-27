@@ -1,4 +1,5 @@
 import { callback, redirect } from "./google"
+import { setResponseData } from "../utils"
 
 const google = {
   callback,
@@ -8,7 +9,8 @@ const google = {
 const logout = (req, res) => {
   req.session.destroy(error => {
     if (error) console.warn(error)
-    res.redirect("/")
+
+    setResponseData(res, "")
   })
 }
 

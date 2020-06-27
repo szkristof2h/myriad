@@ -73,7 +73,7 @@ export const init = app => {
 
   app.get("/auth/google", google.redirect)
   app.get("/auth/google/callback", google.callback)
-  app.get("/logout", logout)
+  app.postAsync("/post/logout", logout)
 
   // Routes
   app.postAsync("/get/images", authenticate, getSiteImages)

@@ -98,7 +98,7 @@ export function follow(req, res) {
   // .catch(e => res.json(handleErrors(FOLLOW_USER_ERROR, e)))
 }
 
-const getUser = async (req: Request, res: Response) => {
+const getUser = async (req: Request, res: Response, next: NextFunction) => {
   const idUser = req.user?.id
   const isLoggedIn = !!idUser
   const profileName = req.params?.name ? res.locals.user?.displayName : null
@@ -110,7 +110,17 @@ const getUser = async (req: Request, res: Response) => {
 
   setErrorType(res, "GET_USER_ERROR")
 
-  if (!search) throw Error("NOT_LOGGED_IN") // TODO: shouldn't be an error
+  if (!search) {
+    setResponseData(res, {
+      error: {
+        shouldShow: false,
+        type: "profile",
+        message: "You're not logged in",
+      },
+    })
+
+    return next()
+  }
 
   const userFromDB: UserModel = await User.findOne(search)
     .select("-idGoogle -social")

@@ -79,6 +79,7 @@ const EditProfile: FC = () => {
 
     await startPost()
 
+    // redirect?
     setNewProfile({ avatar: "", bio: "", displayName: "" })
     refetch()
   }

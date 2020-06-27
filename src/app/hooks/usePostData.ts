@@ -15,7 +15,7 @@ const usePostData = <T = any, V = any>(
   url: string,
   variables: V
 ): PostData<T> => {
-  const [data, setData] = useState<T | undefined>()
+  const [data, setData] = useState<T>()
   const [isLoading, setIsLoading] = useState(false)
   const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {})
   const [shouldRefetch, setShouldRefetch] = useState(false)
@@ -35,7 +35,7 @@ const usePostData = <T = any, V = any>(
 
     setData(response?.data)
 
-    if (response?.data?.error)
+    if (response?.data?.error?.shouldShow)
       addError(response.data.error.message, response.data.error.type)
 
     if (getHasFailed()) addError({ request: [`post request failed`] })

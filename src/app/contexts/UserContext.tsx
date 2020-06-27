@@ -3,8 +3,11 @@ import { APIRequestInteface, post } from "../requests/api"
 import { ErrorContext } from "./ErrorContext"
 import { UserType } from "src/server/db/models/User"
 import useGetData from "../hooks/useGetData"
+import usePostData from "../hooks/usePostData"
 
-interface LogoutInterface extends APIRequestInteface<{}> {}
+interface PostLogoutData {
+  success: boolean
+}
 
 export interface GetUserData {
   user: UserData
@@ -21,7 +24,7 @@ export interface User extends UserData {}
 interface UserContextInterface {
   currentUser: User | undefined
   isLoading: boolean
-  logout: () => void
+  logout: () => Promise<void>
   refetch: () => void
 }
 
@@ -42,27 +45,20 @@ export const emptyUser = {
 const initialState: UserContextInterface = {
   currentUser: undefined,
   isLoading: true,
-  logout: () => {},
+  logout: () => new Promise(() => {}),
   refetch: () => {},
 }
 const UserContext = createContext<UserContextInterface>(initialState)
 
 const UserProvider = ({ children }) => {
-  const { addError } = useContext(ErrorContext)
   const { data: currentUserData, isLoading, refetch } = useGetData<GetUserData>(
     "user"
   )
+  const { startPost } = usePostData<PostLogoutData, null>(`logout`, null)
 
   const logout = async () => {
-    const { getData, getHasFailed }: LogoutInterface = post<{}>(
-      "logout",
-      null,
-      () => addError({ user: ["some error message here"] })
-    )
-
-    await getData()
-
-    if (getHasFailed()) addError({ user: [`get user request failed`] })
+    await startPost()
+    refetch()
   }
 
   return (

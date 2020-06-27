@@ -67,6 +67,7 @@ const Profile: FC<Props> = ({ params }) => {
 
   if (isLoadingCurrentUser || isLoading) return <Loader />
 
+  if (isOwnProfile && !currentUser?.id) return <Redirect to="/login" />
   if (isEditing) return <Redirect to="/profile/edit" />
 
   const handleClick = async (e: React.MouseEvent, type) => {
@@ -147,7 +148,10 @@ const Profile: FC<Props> = ({ params }) => {
         <Button
           as={Link}
           type="danger"
-          onClick={logout}
+          onClick={async e => {
+            e.preventDefault()
+            await logout()
+          }}
           className={`button`}
           to="/logout"
         >
