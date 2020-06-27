@@ -1,20 +1,12 @@
-import React, { FC, useContext, useEffect, useState } from "react"
-import {
-  Link,
-  Redirect,
-  Route,
-  Switch,
-  useHistory,
-  useRouteMatch,
-} from "react-router-dom"
-import { ErrorContext } from "../contexts/ErrorContext"
-import { UserContext, CurrentUserType, User } from "../contexts/UserContext"
+import React, { FC, useContext, useEffect } from "react"
+import { Link, Redirect, Route, Switch, useRouteMatch } from "react-router-dom"
+import { UserContext, GetUserData, emptyUser } from "../contexts/UserContext"
 import Loader from "../Loader"
 import { Header, Base } from "../Typography/Typography.style"
 import StyledProfile from "./Profile.style"
 import { Button } from "../components"
 import EditProfile from "./EditProfile"
-import { APIRequestInteface, get } from "../utils/api"
+import useGetData from "../hooks/useGetData"
 
 interface Props {
   params?: {
@@ -23,126 +15,76 @@ interface Props {
   }
 }
 
-type GetIsNameAvailable = (name: string) => Promise<void>
-interface IsNameAvailableRequest
-  extends APIRequestInteface<IsNameAvailableData> {}
-interface IsNameAvailableData {
-  data: { isNameAvailable: boolean }
-}
-
 const Profile: FC<Props> = ({ params }) => {
   const hasMatchedEdit = useRouteMatch("/profile/edit")
-  let history = useHistory()
-  const { currentUser, getUser, logout, updateCurrentUser, user } = useContext(
+
+  if (hasMatchedEdit) return <Redirect to="/edit" /> // convert to route?
+
+  const name = params?.name ?? ""
+  const { currentUser, isLoading: isLoadingCurrentUser, logout } = useContext(
     UserContext
   )
-  const { addError } = useContext(ErrorContext)
-  const [isNameAvailable, setIsNameAvailable] = useState<boolean | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const id = params?.name ?? ""
-  const {
-    avatar = "",
-    bio = "",
-    displayName = "",
-    isBlocked = false,
-    isFollowed = false,
-  } = id === currentUser?.id ? currentUser : user
-  const [newProfile, setNewProfile] = useState({ avatar, bio, displayName })
-  const isEditing = !id && (!displayName || hasMatchedEdit)
-
-  useEffect(() => {
-    setIsLoading(true)
-    const { cancel, setUserContext } = getUser(id, !!id)
-    ;(async () => await setUserContext())()
-
-    setIsLoading(false)
-    return cancel
-  }, [id])
-
-  useEffect(() => {
-    setIsNameAvailable(null)
-  }, [displayName])
-
-  const getIsNameAvailable: GetIsNameAvailable = async (name: string) => {
-    const { getData, getHasFailed }: IsNameAvailableRequest = get<
-      IsNameAvailableData
-    >(`user/displayName/${name}`, () =>
-      addError({ profile: ["some error message here"] })
-    )
-
-    const response = await getData()
-
-    if (getHasFailed() || !response)
-      return addError({ profile: [`get is name available request failed`] })
+  const isOwnProfile = !name || name === currentUser?.displayName
+  // TODO: find a better way than returning an object
+  const { cancel, data, isLoading, refetch } = name
+    ? useGetData<GetUserData>(`user/${name}`)
+    : {
+        cancel: (message: string) => {},
+        data: { user: emptyUser },
+        isLoading: false,
+        refetch: () => {},
+      }
+  const getUserFields = () => {
+    if (!isOwnProfile && !data) return emptyUser
 
     const {
-      data: { error },
-    } = response
+      avatar = "",
+      bio = "",
+      displayName = "",
+      id,
+      isBlocked = false,
+      isFollowed = false,
+    } = isOwnProfile && currentUser ? currentUser : data?.user ?? emptyUser
 
-    if (!error) setIsNameAvailable(true)
-    else {
-      addError(error.message, error.type)
-      setIsNameAvailable(false)
+    return {
+      avatar,
+      bio,
+      displayName,
+      id,
+      isBlocked,
+      isFollowed,
     }
   }
+  const {
+    avatar,
+    bio,
+    displayName,
+    id,
+    isBlocked,
+    isFollowed,
+  } = getUserFields()
+  const isEditing = !name && (!currentUser?.displayName || hasMatchedEdit)
 
-  const handleCheck = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    await getIsNameAvailable(displayName)
-  }
+  useEffect(() => {
+    return cancel("unmounting")
+  }, [])
+
+  if (isLoadingCurrentUser || isLoading) return <Loader />
+
+  if (isEditing) return <Redirect to="/edit" />
 
   const handleClick = async (e: React.MouseEvent, type) => {
     e.preventDefault()
 
-    if (isLoading) return
+    // if (isLoading) return
 
-    setIsLoading(true)
+    // setIsLoading(true)
 
-    const { setCurrentUserContext } = updateCurrentUser({ id, type }, "rate")
+    // const { setCurrentUserContext } = updateCurrentUser({ id, type }, "rate")
 
-    params && params.name && (await setCurrentUserContext())
-    setIsLoading(false)
+    // params && params.name && (await setCurrentUserContext())
+    // setIsLoading(false)
   }
-
-  const handleSubmit = async (e: React.MouseEvent) => {
-    e.preventDefault()
-
-    if (isLoading) return
-
-    setIsLoading(true)
-
-    if (!currentUser) {
-      setIsLoading(false)
-      return
-    }
-
-    // add validation
-    const newValues = Object.keys(newProfile).reduce(
-      (acc, key) =>
-        newProfile[key] === currentUser[key]
-          ? acc
-          : { ...acc, [key]: newProfile[key] },
-      {}
-    )
-
-    if (Object.keys(newValues).length === 0) {
-      addError({ profile: ["You haven't change any of your data."] })
-      setIsLoading(false)
-      return
-    }
-
-    const { setCurrentUserContext } = updateCurrentUser(
-      newValues,
-      `user/profile`
-    )
-    const success = await setCurrentUserContext()
-    setIsLoading(false)
-    setNewProfile({ avatar, bio, displayName })
-    success && history.push("/profile")
-  }
-
-  if (isLoading) return <Loader />
-  if (isEditing && !hasMatchedEdit) return <Redirect to="/edit" />
 
   const renderProfile = (
     <StyledProfile>
@@ -153,14 +95,14 @@ const Profile: FC<Props> = ({ params }) => {
         {displayName}
       </Header>
       <Base className="bio">{bio}</Base>
-      {id !== user.id && (
+      {!isOwnProfile && (
         <Button
           as={Link}
           active={isFollowed}
           type="primary"
           className={`button`}
           to={`${isFollowed ? "un" : ""}follow`}
-          onClick={(e) => handleClick(e, "follow")}
+          onClick={e => handleClick(e, "follow")}
         >
           {(isFollowed ? "Unf" : "F") + "ollow!"}
         </Button>
@@ -173,7 +115,7 @@ const Profile: FC<Props> = ({ params }) => {
       >
         Posts
       </Button>
-      {id !== user.id && (
+      {!isOwnProfile && (
         <Button
           type="primary"
           as={Link}
@@ -183,7 +125,7 @@ const Profile: FC<Props> = ({ params }) => {
           Send a message
         </Button>
       )}
-      {id === user.id && (
+      {isOwnProfile && (
         <Button
           type="primary"
           as={Link}
@@ -193,19 +135,19 @@ const Profile: FC<Props> = ({ params }) => {
           Edit profile
         </Button>
       )}
-      {id !== user.id && (
+      {!isOwnProfile && (
         <Button
           as={Link}
           type="danger"
           active={isBlocked}
           className={`button`}
           to={`/${isBlocked ? "un" : ""}block`}
-          onClick={(e) => handleClick(e, "block")}
+          onClick={e => handleClick(e, "block")}
         >
           {(isBlocked ? "Unb" : "B") + "lock!"}
         </Button>
       )}
-      {id === user.id && (
+      {isOwnProfile && (
         <Button
           as={Link}
           type="danger"
@@ -225,11 +167,10 @@ const Profile: FC<Props> = ({ params }) => {
         path="/profile/edit"
         render={() => (
           <EditProfile
-            isNameAvailable={isNameAvailable}
-            newProfile={newProfile}
-            handleCheck={handleCheck}
-            handleSubmit={handleSubmit}
-            setNewProfile={setNewProfile}
+            avatar={avatar}
+            bio={bio}
+            displayName={displayName}
+            refetch={refetch}
           />
         )}
       />

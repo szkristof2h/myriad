@@ -4,17 +4,17 @@ import { ErrorContext } from "../contexts/ErrorContext"
 import { Canceler } from "axios"
 
 export interface GetData<T> {
-  cancel: Canceler | undefined
+  cancel: Canceler
   data: T | undefined
   isLoading: boolean
-  refresh: () => void
+  refetch: () => void
 }
 
 const useGetData = <T = any>(url: string): GetData<T> => {
   const [data, setData] = useState<T | undefined>()
   const [isLoading, setIsLoading] = useState(false)
-  const [cancel, setCancel] = useState<Canceler>()
-  const [shouldRefresh, setShouldRefresh] = useState(false)
+  const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {})
+  const [shouldRefetch, setShouldRefetch] = useState(false)
   const { addError } = useContext(ErrorContext)
 
   useEffect(() => {
@@ -39,13 +39,13 @@ const useGetData = <T = any>(url: string): GetData<T> => {
       cancel()
       setIsLoading(false)
     }
-  }, [shouldRefresh, url])
+  }, [shouldRefetch, url])
 
   return {
     cancel,
     data,
     isLoading,
-    refresh: () => setShouldRefresh(true),
+    refetch: () => setShouldRefetch(true),
   }
 }
 
