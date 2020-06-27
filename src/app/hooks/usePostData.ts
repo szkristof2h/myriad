@@ -8,6 +8,7 @@ export interface PostData<T> {
   data: T | undefined
   isLoading: boolean
   refetch: () => void
+  startPost: () => Promise<void>
 }
 
 const usePostData = <T = any, V = any>(
@@ -20,7 +21,7 @@ const usePostData = <T = any, V = any>(
   const [shouldRefetch, setShouldRefetch] = useState(false)
   const { addError } = useContext(ErrorContext)
 
-  useEffect(() => {
+  const startPost = async () => {
     setIsLoading(true)
 
     const { postData, cancel, getHasFailed }: APIPostRequestInteface<T> = post<
@@ -29,18 +30,20 @@ const usePostData = <T = any, V = any>(
     >(url, variables, addError)
 
     setCancel(() => cancel)
-    ;(async () => {
-      const response = await postData()
 
-      setData(response?.data)
-      if (response?.data?.error)
-        addError({ user: [response.data.error.message] })
+    const response = await postData()
 
-      if (getHasFailed()) addError({ request: [`post request failed`] })
+    setData(response?.data)
 
-      setIsLoading(false)
-    })()
+    if (response?.data?.error)
+      addError(response.data.error.message, response.data.error.type)
 
+    if (getHasFailed()) addError({ request: [`post request failed`] })
+
+    setIsLoading(false)
+  }
+
+  useEffect(() => {
     return () => {
       cancel()
       setIsLoading(false)
@@ -52,6 +55,7 @@ const usePostData = <T = any, V = any>(
     data,
     isLoading,
     refetch: () => setShouldRefetch(true),
+    startPost,
   }
 }
 

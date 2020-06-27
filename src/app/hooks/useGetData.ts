@@ -32,7 +32,9 @@ const useGetData = <T = any>(url: string): GetData<T> => {
 
         setData(response?.data)
         if (response?.data?.error)
-          addError({ user: [response.data.error.message] })
+          addError({
+            [response.data.error.type]: [response.data.error.message],
+          })
         if (getHasFailed()) addError({ request: [`get request failed`] })
 
         setIsLoading(false)

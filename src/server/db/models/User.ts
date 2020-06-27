@@ -9,7 +9,6 @@ export interface UserType {
   displayName: string
   idGoogle: string
   firstName: string
-  id: string
   lastName: string
 }
 

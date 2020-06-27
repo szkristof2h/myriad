@@ -1,5 +1,5 @@
 import isURL from "validator/lib/isURL"
-import { Request, Response } from "express"
+import { Request, Response, NextFunction } from "express"
 import {
   handleErrors,
   sanitize,
@@ -19,7 +19,12 @@ import {
 import User, { UserModel } from "../models/User"
 import BlockedList from "../models/BlockedList"
 import FollowList from "../models/FollowList"
-import { UserData } from "../../../app/contexts/UserContext"
+import { UserData, GetUserData } from "../../../app/contexts/UserContext"
+import {
+  IsNameAvailableData,
+  UpdateProfileData,
+  UpdateProfileVariables,
+} from "src/app/User/EditProfile"
 
 export function block(req, res) {
   const { targetUser } = req.body
@@ -53,14 +58,15 @@ export function block(req, res) {
 const checkDisplayName = async (req: Request, res: Response) => {
   setErrorType(res, "GET_CHECK_DISPLAYNAME")
   const { displayName } = req.params.displayName ? req.params : req.body
-
   const user = await User.findOne({
     displayName: displayName.toLowerCase(),
-  }).exec()
+  })
+    .lean()
+    .exec()
 
-  if (user) throw Error("Displayname is already in use")
+  const responseData: IsNameAvailableData = { isNameAvailable: !user }
 
-  setResponseData(res, {})
+  setResponseData(res, responseData)
 }
 
 export function follow(req, res) {
@@ -107,34 +113,41 @@ const getUser = async (req: Request, res: Response) => {
   if (!search) throw Error("NOT_LOGGED_IN") // TODO: shouldn't be an error
 
   const userFromDB: UserModel = await User.findOne(search)
-    .select("-googleId -social")
+    .select("-idGoogle -social")
     .lean()
     .exec()
 
   if (!userFromDB) throw Error("INVALID_ID")
 
-  const { _id, ...user } = userFromDB
+  const { _id, _v, ...user } = userFromDB
+  const isFollowed = idUser
+    ? !!FollowList.findOne({
+        from: idUser,
+        to: _id,
+      })
+        .lean()
+        .exec()
+    : false
+  const isBlocked = idUser
+    ? !!BlockedList.findOne({
+        by: idUser,
+        user: _id,
+      })
+        .lean()
+        .exec()
+    : false
 
-  if (idUser) {
-    const isFollowed = !!FollowList.findOne({
-      from: idUser,
-      to: user.id,
-    })
-      .lean()
-      .exec()
-    const isBlocked = !!BlockedList.findOne({
-      by: idUser,
-      user: user.id,
-    })
-      .lean()
-      .exec()
-
-    setResponseData<UserData>(res, {
+  const responseData: GetUserData = {
+    user: {
+      id: _id,
+      isFollowed,
+      isBlocked,
       ...user,
-      ...{ isFollowed, isBlocked },
       ...(idUser ? { isLoggedIn } : {}),
-    })
+    },
   }
+
+  setResponseData(res, responseData)
 }
 
 export function setDisplayName(req, res) {
@@ -221,58 +234,146 @@ export function unfollow(req, res) {
   // .catch(e => res.json(handleErrors(FOLLOW_USER_ERROR, e)))
 }
 
-export function updateProfile(req, res) {
-  let { avatar, bio } = req.body
-  const userId = res.locals.user.id
-  const newProfile = {}
-  bio = sanitize(bio)
+const updateProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  setErrorType(res, "UPDATE_PROFILE")
 
-  // if (!avatar && !bio)
-  //   return res.json(
-  //     handleErrors(UPDATE_PROFILE_ERROR, {
-  //       errors: {
-  //         profile: {
-  //           message:
-  //             "You cannot update your profile without changing anything!",
-  //         },
-  //       },
-  //     })
-  //   )
+  if (!req.session) throw Error("Please login...") // TODO: ???
 
-  // if (avatar)
-  //   if (!isURL(avatar))
-  //     return res.json(
-  //       handleErrors(UPDATE_PROFILE_ERROR, {
-  //         errors: { avatar: { message: "Invalid url for avatar!" } },
-  //       })
-  //     )
-  // //   else newProfile.avatar = avatar
+  const { avatar, bio, displayName }: UpdateProfileVariables = req.body
+  const idUser = req.user?.id
+  const hasDisplayName = !!req.user?.displayName
 
-  // if (bio)
-  //   if (bio.length < 3)
-  //     return res.json(
-  //       handleErrors(UPDATE_PROFILE_ERROR, {
-  //         errors: {
-  //           bio: { message: "Your profile bio should be > 3 characters long!" },
-  //         },
-  //       })
-  //     )
-  //   else if (bio.length > 200)
-  //     return res.json(
-  //       handleErrors(UPDATE_PROFILE_ERROR, {
-  //         errors: {
-  //           bio: {
-  //             message: "Your profile bio should be < 200 characters long!",
-  //           },
-  //         },
-  //       })
-  //     )
-  //   else newProfile.bio = bio
+  const user = await User.findById(idUser).exec()
 
-  User.findByIdAndUpdate(userId, newProfile)
-    .exec()
-    .then(() => res.json({ status: "Successfully updated profile" }))
-  // .catch(e => (res ? res.json(handleErrors(UPDATE_PROFILE_ERROR, e)) : false))
+  if (!hasDisplayName && !displayName) {
+    setResponseData(res, {
+      error: {
+        type: "profile",
+        message:
+          "You cannot update your profile without setting a displayname!",
+      },
+    })
+
+    return next()
+  }
+
+  if (hasDisplayName && displayName) {
+    setResponseData(res, {
+      error: {
+        type: "profile",
+        message: "Once set, you cannot change your displayname!",
+      },
+    })
+
+    return next()
+  }
+
+  if (!hasDisplayName && displayName) {
+    const sanitizedDisplayName = sanitize(displayName)
+
+    if (sanitizedDisplayName.length < 3) {
+      res.json(
+        setResponseData(res, {
+          error: {
+            type: "profile",
+            message:
+              "Your displayname shouldn't be less than 3 characters long!",
+          },
+        })
+      )
+
+      return next()
+    } else if (sanitizedDisplayName.length > 50) {
+      res.json(
+        setResponseData(res, {
+          error: {
+            type: "profile",
+            message:
+              "Your displayname should not be more than 50 characters long!",
+          },
+        })
+      )
+
+      return next()
+    }
+
+    user.displayName = sanitizedDisplayName
+  }
+
+  if (!avatar && !bio && hasDisplayName) {
+    setResponseData(res, {
+      error: {
+        type: "profile",
+        message: "You cannot update your profile without changing anything!",
+      },
+    })
+
+    return next()
+  }
+
+  if (avatar) {
+    if (!isURL(avatar)) {
+      // TODO: should check if can load image
+      setResponseData(res, {
+        error: {
+          type: "profile",
+          message: "Invalid url for avatar!",
+        },
+      })
+
+      return next()
+    }
+
+    user.avatar = avatar
+  }
+
+  if (bio) {
+    const sanitzedBio = sanitize(bio)
+
+    if (sanitzedBio.length < 3) {
+      res.json(
+        setResponseData(res, {
+          error: {
+            type: "profile",
+            message: "Your profile bio should be > 3 characters long!",
+          },
+        })
+      )
+
+      return next()
+    } else if (sanitzedBio.length > 200) {
+      res.json(
+        setResponseData(res, {
+          error: {
+            type: "profile",
+            message: "Your profile bio should be < 200 characters long!",
+          },
+        })
+      )
+
+      return next()
+    }
+
+    user.bio = sanitzedBio
+  }
+
+  await user.save()
+
+  if (displayName)
+    req.session.user = {
+      id: idUser,
+      displayName,
+    }
+
+  const responseData: UpdateProfileData = {
+    isUpdateSuccessful: true,
+  }
+
+  setResponseData(res, responseData)
 }
 
-export { checkDisplayName, getUser }
+export { checkDisplayName, getUser, updateProfile }

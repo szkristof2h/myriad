@@ -6,6 +6,17 @@ import { Header } from "../Typography/Typography.style"
 import useGetData from "../hooks/useGetData"
 import { UserContext } from "../contexts/UserContext"
 import Loader from "../Loader"
+import usePostData from "../hooks/usePostData"
+
+export interface UpdateProfileData {
+  isUpdateSuccessful: boolean
+}
+
+export interface UpdateProfileVariables {
+  avatar?: string
+  bio?: string
+  displayName?: string
+}
 
 export interface IsNameAvailableData {
   isNameAvailable: boolean
@@ -21,7 +32,6 @@ const EditProfile: FC = () => {
   const { currentUser, isLoading: isLoadingCurrentUser, refetch } = useContext(
     UserContext
   )
-
   const [newProfile, setNewProfile] = useState({
     avatar: "",
     bio: "",
@@ -38,6 +48,10 @@ const EditProfile: FC = () => {
   const { data, isLoading } = useGetData<IsNameAvailableData>(
     !!newDisplayName ? `user/displayName/${newDisplayName}` : ""
   )
+  const { isLoading: isLoadingUpdate, startPost } = usePostData<
+    IsNameAvailableData,
+    UpdateProfileVariables
+  >(`user/profile`, newProfile)
 
   useEffect(() => {
     if (currentUser && !newAvatar && !newBio && !newDisplayName)
@@ -49,8 +63,6 @@ const EditProfile: FC = () => {
       })
   }, [currentUser])
 
-  if (isLoadingCurrentUser) return <Loader />
-  if (!currentUser) return <Redirect to="/login" />
   const isNameAvailable = data?.isNameAvailable
   const checkButtonType = !displayName
     ? "primary"
@@ -64,8 +76,15 @@ const EditProfile: FC = () => {
 
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault()
+
+    await startPost()
+
+    setNewProfile({ avatar: "", bio: "", displayName: "" })
     refetch()
   }
+
+  if (isLoadingCurrentUser) return <Loader /> // integrate loading into box
+  if (!currentUser) return <Redirect to="/login" />
 
   return (
     <StyledEditProfile>
