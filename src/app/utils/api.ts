@@ -9,7 +9,10 @@ export interface APIRequestInteface<T> {
 }
 
 const siteUrl = config.url
-const get = <T = any, R = AxiosResponse<T>>(url: string, handleErrors) => {
+const get = <T = any, R = AxiosResponse<T & APIResponseError>>(
+  url: string,
+  handleErrors?
+) => {
   let hasFailed
   const getHasFailed = () => hasFailed
   const source = axios.CancelToken.source()
@@ -21,7 +24,6 @@ const get = <T = any, R = AxiosResponse<T>>(url: string, handleErrors) => {
         cancelToken: source.token,
       })
 
-      // TODO: it should return data
       return await getData
     } catch (e) {
       if (!axios.isCancel(e)) handleErrors()
