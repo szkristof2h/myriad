@@ -102,7 +102,7 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
     history.push(
       id.length != 20
         ? `/post/${id}`
-        : currentUser?.isLoggedIn
+        : currentUser?.id
         ? currentUser?.displayName
           ? "/add"
           : "/profile"

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { ErrorContext } from "../contexts/ErrorContext"
 import StyledConversations, { MessageContainer } from "./Conversations.style"
 import { Header, Base } from "../Typography/Typography.style"
-import { APIRequestInteface, get } from "../utils/api"
+import { APIRequestInteface, get } from "../requests/api"
 
 interface GetMessagesInterface
   extends APIRequestInteface<GetConversationsData> {}

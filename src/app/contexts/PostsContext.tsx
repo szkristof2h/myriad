@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from "react"
 import { Canceler } from "axios"
 import { ErrorContext } from "./ErrorContext"
-import { get, post, APIRequestInteface } from "../utils/api"
+import { get, post, APIRequestInteface } from "../requests/api"
 import { PostType } from "src/server/db/models/Post"
 
 // TODO: add error type

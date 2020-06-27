@@ -7,7 +7,7 @@ import { Button } from "../components"
 import { Base } from "../Typography/Typography.style"
 import { TextArea } from "../components"
 import StyledComments from "./Comments.style"
-import { get, post, APIRequestInteface } from "../utils/api"
+import { get, post, APIRequestInteface } from "../requests/api"
 import { CommentType } from "src/server/db/models/Comment"
 
 interface GetCommentsInterface extends APIRequestInteface<GetCommentsData> {}
@@ -140,7 +140,7 @@ const Comments: FC<Props> = ({
           Load more...
         </Button>
       )}
-      {currentUser?.isLoggedIn && (
+      {currentUser?.id && (
         <TextArea
           onChange={e => setNewComment(e.currentTarget.value)}
           placeholder="Write a comment!"
@@ -148,12 +148,12 @@ const Comments: FC<Props> = ({
           value={newComment}
         />
       )}
-      {currentUser?.isLoggedIn && (
+      {currentUser?.id && (
         <Button type="primary" as={Link} onClick={handleSubmit} to="">
           {type === "messages" ? "Send Message" : "Send"}
         </Button>
       )}
-      {!currentUser?.isLoggedIn && (
+      {!currentUser?.id && (
         <Button type="danger" as={Link} to="/login">
           You have to be logged in to post a comment
         </Button>

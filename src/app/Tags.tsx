@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
-import { get, APIRequestInteface } from "./utils/api"
+import { get, APIRequestInteface } from "./requests/api"
 import { Link } from "react-router-dom"
 import { ErrorContext } from "./contexts/ErrorContext"
 import { StyledTags } from "./Tags.style"
@@ -49,7 +49,7 @@ const Tags = () => {
 
   return (
     <StyledTags className="tags">
-      {tags?.map((tag) => (
+      {tags?.map(tag => (
         <li key={`tag:${tag}`} className="tag">
           <Link className="tag__link" to={`/tag/${tag}`}>
             #{tag.trim()}

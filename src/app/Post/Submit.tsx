@@ -7,7 +7,7 @@ import { Box } from "../components/Box.style"
 import { Input, Button } from "../components"
 import { Header, Error, Warning } from "../Typography/Typography.style"
 import getYoutubeId from "../../util/getYoutubeId"
-import { post, APIRequestInteface } from "../utils/api"
+import { post, APIRequestInteface } from "../requests/api"
 import validateField from "./utils"
 import { PostData } from "../contexts/PostsContext"
 
@@ -93,7 +93,7 @@ const reducer = (state: SubmitFields, action: ActionType) => {
         ...state,
         tags: state.tags
           .split(",")
-          .filter((tag) => tag !== action.payload)
+          .filter(tag => tag !== action.payload)
           .join(","),
       }
     case "reset":
@@ -164,7 +164,7 @@ const Submit: FC<Props> = () => {
           const wrapper = parser.parseFromString(html, "text/html")
           // @ts-ignore
           const imgs = [...wrapper.getElementsByTagName("img")]
-            .map((a) => a.src)
+            .map(a => a.src)
             .filter((img, i, self) => self.indexOf(img) === i)
           dispatch({ type: "changeImages", payload: imgs })
           setIsImageLoading(false)
@@ -191,7 +191,7 @@ const Submit: FC<Props> = () => {
     dispatch({ type: "reset" })
     // initialize validation errors
     const validationErrors = {}
-    Object.keys(validationMessage).forEach((key) => {
+    Object.keys(validationMessage).forEach(key => {
       const field = state["field" + key.slice(0, 1).toUpperCase + key.slice(1)]
       // @ts-ignore
       const validationError = validateField(key, [field, "", ""])
@@ -202,7 +202,7 @@ const Submit: FC<Props> = () => {
   const handleSubmit = (e: React.MouseEvent) => {
     e.preventDefault()
     const isValid =
-      Object.keys(validationMessage).filter((key) => validationMessage[key])
+      Object.keys(validationMessage).filter(key => validationMessage[key])
         .length === 0
 
     if (!isValid) return addError({ submit: ["Some fields aren't valid"] })
@@ -256,13 +256,13 @@ const Submit: FC<Props> = () => {
 
   const removeNotExistingSelectedImages = () => {
     const notExistingimages = fieldSelectedImages.filter(
-      (image) => !images.includes(image)
+      image => !images.includes(image)
     )
 
     if (notExistingimages.length > 0)
       dispatch({
         type: "changeImages",
-        payload: fieldSelectedImages.filter((image) =>
+        payload: fieldSelectedImages.filter(image =>
           notExistingimages.includes(image)
         ),
       })
@@ -322,7 +322,7 @@ const Submit: FC<Props> = () => {
       dispatch({
         type: "changeSelectedImages",
         payload: images.includes(clickedImage)
-          ? images.filter((image) => image !== clickedImage)
+          ? images.filter(image => image !== clickedImage)
           : [...images, clickedImage],
       })
     }
@@ -335,11 +335,11 @@ const Submit: FC<Props> = () => {
     ) {
       dispatch({
         type: "changeImages",
-        payload: images.filter((img) => img !== index),
+        payload: images.filter(img => img !== index),
       })
       dispatch({
         type: "changeSelectedImages",
-        payload: images.filter((img) => img !== index),
+        payload: images.filter(img => img !== index),
       })
     }
   }
@@ -352,7 +352,7 @@ const Submit: FC<Props> = () => {
       type: "removeTag",
       payload: tags
         .split(",")
-        .filter((tag) => tag !== tagToRemove)
+        .filter(tag => tag !== tagToRemove)
         .join(","),
     })
   }
@@ -385,11 +385,11 @@ const Submit: FC<Props> = () => {
   const handleOnImageError = (image: string) => {
     dispatch({
       type: "changeImages",
-      payload: images.filter((img) => img !== image),
+      payload: images.filter(img => img !== image),
     })
     dispatch({
       type: "changeSelectedImages",
-      payload: images.filter((img) => img !== image),
+      payload: images.filter(img => img !== image),
     })
   }
 
@@ -404,7 +404,7 @@ const Submit: FC<Props> = () => {
         </Header>
         <Input
           className="input input--text"
-          onChange={(e) => handleInput(e, "changeTitle", "title")}
+          onChange={e => handleInput(e, "changeTitle", "title")}
           value={fieldTitle}
         />
         <Header className="label" size={1} centered>
@@ -412,7 +412,7 @@ const Submit: FC<Props> = () => {
         </Header>
         <Input
           className="input input--text"
-          onChange={(e) => handleInput(e, "changeDescription", "description")}
+          onChange={e => handleInput(e, "changeDescription", "description")}
           value={fieldDescription}
         />
         <Header className="label" size={1} centered>
@@ -420,7 +420,7 @@ const Submit: FC<Props> = () => {
         </Header>
         <Input
           className="input input--text"
-          onChange={(e) => handleInput(e, "changeUrl", "url")}
+          onChange={e => handleInput(e, "changeUrl", "url")}
           placeholder="Will automatically load images from the url to choose from"
           value={fieldUrl}
         />
@@ -441,7 +441,7 @@ const Submit: FC<Props> = () => {
             Loading images from {fieldUrl}...
           </Warning>
         )}
-        {images.map((image) => (
+        {images.map(image => (
           <Link
             key={image}
             className={`image-container ${
@@ -449,12 +449,12 @@ const Submit: FC<Props> = () => {
                 ? "image-container--active"
                 : ""
             }`}
-            onClick={(e) => handleSelect(e, image)}
+            onClick={e => handleSelect(e, image)}
             to=""
           >
             <img
               onError={() => handleOnImageError(image)}
-              onLoad={(e) => handleOnImageLoad(e, image)}
+              onLoad={e => handleOnImageLoad(e, image)}
               className="image"
               src={image}
             />
@@ -468,7 +468,7 @@ const Submit: FC<Props> = () => {
         {fieldUrl && (
           <Input
             className="input input--text"
-            onChange={(e) => handleImageInput(e)}
+            onChange={e => handleImageInput(e)}
             placeholder="Add a custom image or choose from above (after filling link)"
             value={fieldCustomImage}
           />
@@ -480,8 +480,8 @@ const Submit: FC<Props> = () => {
           <ul className="input input--text tag-list">
             {fieldTag
               .split(",")
-              .filter((tag) => tag)
-              .map((tag) => (
+              .filter(tag => tag)
+              .map(tag => (
                 <li
                   key={tag}
                   className="tag"
@@ -494,38 +494,38 @@ const Submit: FC<Props> = () => {
         )}
         <Input
           className="input input--text input--tags"
-          onChange={(e) =>
+          onChange={e =>
             e.currentTarget.value.slice(-1) !== "," &&
             handleInput(e, "changeTag", "tag")
           }
-          onKeyPress={(e) => handleTagInput(e)}
+          onKeyPress={e => handleTagInput(e)}
           value={fieldTag}
         />
-        {Object.keys(validationMessage).filter((k) => validationMessage[k])
+        {Object.keys(validationMessage).filter(k => validationMessage[k])
           .length !== 0 ? (
           <Button type="danger" as="ul" className="button">
-            {validationMessage.title?.map((e) => (
+            {validationMessage.title?.map(e => (
               <li key={e} className="error">
                 {e}
               </li>
             ))}
-            {validationMessage.description.map((e) => (
+            {validationMessage.description.map(e => (
               <li key={e} className="error">
                 {e}
               </li>
             ))}
             {fieldUrl &&
-              validationMessage.images.map((e) => (
+              validationMessage.images.map(e => (
                 <li key={e} className="error">
                   {e}
                 </li>
               ))}
-            {validationMessage.url.map((e) => (
+            {validationMessage.url.map(e => (
               <li key={e} className="error">
                 {e}
               </li>
             ))}
-            {validationMessage.tags.map((e) => (
+            {validationMessage.tags.map(e => (
               <li key={e} className="error">
                 {e}
               </li>
@@ -536,7 +536,7 @@ const Submit: FC<Props> = () => {
             type="primary"
             as={Link}
             className={"button"}
-            onClick={(e) => handleSubmit(e)}
+            onClick={e => handleSubmit(e)}
             to="/add"
           >
             Post
