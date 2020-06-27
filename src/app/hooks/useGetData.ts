@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react"
-import { APIRequestInteface, get } from "../utils/api"
+import { APIRequestInteface, get } from "../requests/api"
 import { ErrorContext } from "../contexts/ErrorContext"
 import { Canceler } from "axios"
 
@@ -19,14 +19,18 @@ const useGetData = <T = any>(url: string): GetData<T> => {
 
   useEffect(() => {
     setIsLoading(true)
-    const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<T>(url) // TODO: error handling
+    const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<T>(
+      url,
+      addError
+    )
 
     setCancel(() => cancel)
     ;(async () => {
       const response = await getData()
 
       setData(response?.data)
-      // TODO: response.error
+      if (response?.data?.error)
+        addError({ user: [response.data.error.message] })
       if (getHasFailed()) addError({ user: [`get user request failed`] })
 
       setIsLoading(false)
