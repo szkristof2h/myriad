@@ -18,23 +18,27 @@ const useGetData = <T = any>(url: string): GetData<T> => {
   const { addError } = useContext(ErrorContext)
 
   useEffect(() => {
-    setIsLoading(true)
-    const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<T>(
-      url,
-      addError
-    )
+    if (url) {
+      setIsLoading(true)
+      console.log("requesting", url)
+      const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<T>(
+        url,
+        addError
+      )
 
-    setCancel(() => cancel)
-    ;(async () => {
-      const response = await getData()
+      setCancel(() => cancel)
+      ;(async () => {
+        const response = await getData()
 
-      setData(response?.data)
-      if (response?.data?.error)
-        addError({ user: [response.data.error.message] })
-      if (getHasFailed()) addError({ user: [`get user request failed`] })
+        setData(response?.data)
+        if (response?.data?.error)
+          addError({ user: [response.data.error.message] })
+        if (getHasFailed()) addError({ user: [`get user request failed`] })
 
-      setIsLoading(false)
-    })()
+        setIsLoading(false)
+      })()
+    }
+
     return () => {
       cancel()
       setIsLoading(false)
