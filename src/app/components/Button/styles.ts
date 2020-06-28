@@ -6,7 +6,7 @@ import { Props } from "./index"
 interface ButtonProps extends Props {}
 
 const Button = styled("div")((props: ButtonProps) => {
-  const { active, rated, type } = props
+  const { active, isLoading, rated, type } = props
 
   const primaryStyle = {
     padding: `${theme.base.gutter / 2}px`,
@@ -131,6 +131,10 @@ const Button = styled("div")((props: ButtonProps) => {
     },
   }
 
+  const loadingStyle = {
+    background: "gray",
+  }
+
   const styles = {
     primary: primaryStyle,
     danger: { ...primaryStyle, ...dangerStyle },
@@ -145,7 +149,10 @@ const Button = styled("div")((props: ButtonProps) => {
     mehBig: { ...primaryStyle, ...rateBigStyle },
   }
 
-  return styles[type]
+  return {
+    ...styles[type],
+    ...(isLoading ? loadingStyle : {}),
+  }
 })
 
 export default Button
