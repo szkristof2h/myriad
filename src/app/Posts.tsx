@@ -1,21 +1,25 @@
 import React, {
   FC,
   lazy,
-  Suspense,
   useContext,
   useEffect,
   useState,
+  Suspense,
 } from "react"
 import { Route, RouteComponentProps } from "react-router-dom"
-import { NavigationContext } from "./contexts/NavigationContext"
-import { PostsContext } from "./contexts/PostsContext"
+import { PostsContext, PostData, samplePost } from "./contexts/PostsContext"
 import { UserContext } from "./contexts/UserContext"
 import useWindowSize from "./hooks/useWindowSize"
-import Loader from "./Loader"
 import StyledPosts from "./Posts.style"
 import Tags from "./Tags"
+import GridPost from "./Post/GridPost"
+import Loader from "./Loader"
 
-const Post = lazy(() => import("./Post/Post" /* webpackChunkName: "Post" */))
+const Post = lazy(() =>
+  import(
+    "./Post/Post" /* webpackPreload: true */ /* webpackChunkName: "Post" */
+  )
+)
 
 // TODO: move to utils
 const setPos = (): [number[][], number] => {
@@ -81,22 +85,36 @@ interface Props extends RouteComponentProps {
   userName: string
 }
 
-const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
-  const [mounted, setMounted] = useState(true)
-  const [offset, setOffset] = useState(0)
-  const { refresh, setRefresh } = useContext(NavigationContext)
-  const {
-    focused,
-    getPosts,
-    posts,
-    previousUrl,
-    setFocused,
-    setPreviousUrl,
-  } = useContext(PostsContext)
-  const [positions, setPositions] = useState<number[][]>()
-  const [isLoading, setIsLoading] = useState(true)
+const makeId = () => {
+  var text = ""
+  var possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+  for (var i = 0; i < 20; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length))
+
+  return text
+}
+
+const Posts: FC<Props> = ({ fullUrl, history, tag, userName }) => {
+  const limits = [1, 16, 28] // use some kind of constant for this... env?
   const { currentUser } = useContext(UserContext)
+  const { getPosts, isLoadingPosts, posts, setFocused } = useContext(
+    PostsContext
+  )
+  const [positions, offset] = setPos()
+  const [previousUrl, setPreviousUrl] = useState("")
   const { width, height } = useWindowSize()
+  const missingPosts = limits.reduce((a, v) => a + v) - (posts?.length ?? 0)
+  const postsFilledToLimit: PostData[] = [
+    ...(isLoadingPosts ? [] : posts),
+    ...new Array(missingPosts).fill({}).map(_ => ({
+      ...samplePost,
+      id: makeId(),
+      postedByName: "",
+    })),
+  ]
+
   const openPost = (id: string) => {
     setFocused(id)
     history.push(
@@ -115,106 +133,66 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, url, userName }) => {
   }
 
   useEffect(() => {
-    setMounted(true)
-    // Initialized post positions
-    const positions = setPos()
-    setOffset(positions[1])
-    setPositions(positions[0])
-    return () => {
-      setFocused("")
-      setMounted(false)
-      setRefresh(false)
-    }
-  }, [])
-
-  useEffect(() => {
     const type =
-      fullUrl &&
-      fullUrl.split("/").length == 3 &&
       fullUrl.split("/")[1] === "post"
         ? "post"
         : tag
         ? tag
         : userName
         ? userName
-        : ""
-    ;`posts${userName ? "/user" : ""}${
-      tag ? "/" + tag.trim() : userName ? "/" + userName : ""
-    }`
+        : "posts"
 
-    // Checks if url was the previous one (and is not refreshing) to avoid loading unnecessarily
-    if ((type !== "post" || !previousUrl) && (previousUrl !== url || refresh)) {
-      setPositions([]) // reset position
-      setIsLoading(true)
-
-      const { cancel, setPostsContext } = getPosts(
+    console.log({ type })
+    console.log({ previousUrl })
+    if (type !== "post" || !previousUrl) {
+      getPosts(
         `posts${userName ? "/user" : ""}${
           tag ? "/" + tag.trim() : userName ? "/" + userName : ""
-        }`,
-        type
+        }`
       )
-      ;(async () => await setPostsContext())()
-
-      if (mounted) {
-        const postion = setPos()
-        setOffset(postion[1])
-        setPositions(postion[0])
-        setIsLoading(false)
-        setPreviousUrl(url)
-        setRefresh(false)
-      }
-
-      return cancel
+      setPreviousUrl(fullUrl)
     }
-  }, [refresh, tag, userName])
+  }, [fullUrl])
 
   return (
     <>
       <StyledPosts width={width} height={height}>
-        <Suspense fallback={<Loader />}>
-          {isLoading ? (
-            <Loader />
-          ) : (
-            posts.map((post, i) => {
-              return (
-                post &&
-                positions?.[i] && (
-                  <Post
-                    key={post.id}
-                    col={positions[i][0] + 1 + offset}
-                    row={positions[i][1] + 1 + offset}
-                    openPost={() => {
-                      openPost(post.id)
-                    }}
-                    size={positions[i][2]}
-                    {...post}
-                  />
-                )
-              )
-            })
-          )}
-        </Suspense>
-      </StyledPosts>
-      <Route
-        exact
-        path="/post/:idPost"
-        render={({ match }) => {
-          const idPost = match.params.idPost
-          const post = posts.find(post => post.id === idPost)
+        {postsFilledToLimit.map((post, i) => {
+          const { id, downs, images, postedByName, rating, title, ups } = post
+
           return (
-            <Suspense fallback={<Loader />}>
-              {post && (
-                <Post
-                  {...post}
-                  dismiss={closePost}
-                  id={idPost}
-                  type="standAlone"
-                />
-              )}
-            </Suspense>
+            positions?.[i] && (
+              <GridPost
+                key={post.id}
+                col={positions[i][0] + 1 + offset}
+                downs={downs}
+                id={id}
+                images={images}
+                isLoading={isLoadingPosts}
+                openPost={() => {
+                  openPost(post.id)
+                }}
+                postedByName={postedByName}
+                rating={rating}
+                row={positions[i][1] + 1 + offset}
+                size={positions[i][2]}
+                title={title}
+                ups={ups}
+              />
+            )
           )
-        }}
-      />
+        })}
+      </StyledPosts>
+      <Suspense fallback={<Loader />}>
+        <Route
+          exact
+          path="/post/:idPost"
+          render={({ match }) => {
+            const idPost = match.params.idPost
+            return <Post dismiss={closePost} id={idPost} />
+          }}
+        />
+      </Suspense>
       <Tags />
     </>
   )

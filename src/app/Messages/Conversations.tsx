@@ -70,10 +70,10 @@ const Conversations = () => {
       {conversations.map(conversation => {
         return (
           <MessageContainer key={conversation.id}>
-            <Base as={Link} to={`message/${conversation.conversationPartner}`}>
+            <Base to={`message/${conversation.conversationPartner}`}>
               {conversation?.text}
             </Base>
-            <Base as={Link} to={`user/${conversation.conversationPartner}`}>
+            <Base to={`user/${conversation.conversationPartner}`}>
               {conversation?.conversationPartner}
             </Base>
             <Base style={{ ["&:hover"]: { textDecoration: "initial" } }}>

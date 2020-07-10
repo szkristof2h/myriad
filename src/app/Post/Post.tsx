@@ -7,23 +7,17 @@ import React, {
   useState,
   useRef,
 } from "react"
-import { Link } from "react-router-dom"
 import Star from "react-feather/dist/icons/star"
 import { Facebook, Twitter } from "react-feather"
-import { PostsContext, Post as PostProps } from "../contexts/PostsContext"
+import { PostsContext, GetPostData, samplePost } from "../contexts/PostsContext"
 import config from "../config"
 import Meh from "../images/Meh.jsx"
 import Popup from "../Popup"
-// @ts-ignore
-import sample from "../images/add.svg"
 import { Button } from "../components"
 import { Header, UserHeader } from "../Typography/Typography.style"
 import {
   StyledNavigationButton,
-  StyledPost,
   StyledPostOpen,
-  StyledDetailsContainer,
-  StyledHeaderContainer,
   StyledImageContainer,
   StyledMainImage,
   StyledMainVideo,
@@ -32,71 +26,58 @@ import {
 } from "./Post.style"
 import getYoutubeId from "../../util/getYoutubeId"
 import theme from "../theme"
+import useGetData from "../hooks/useGetData"
+import usePostData from "../hooks/usePostData"
+import { PostRateData, PostRateVariables } from "./GridPost"
+import Loader from "../Loader.style"
 
 const Comments = lazy(() =>
   import("../Comments/Comments" /* webpackChunkName: "Comments" */)
 )
-
 const siteUrl = config.url
 
-const Post: FC<PostProps> = ({
-  id,
-  col,
-  comments,
-  description,
-  dismiss,
-  downs,
-  images,
-  link,
-  openPost,
-  postedByName,
-  rating = 0,
-  row,
-  size = 0,
-  title,
-  type,
-  ups,
-}) => {
-  const [isLoading, setIsLoading] = useState(false) // specify what is loading
-  const [commentCount, setCommentCount] = useState(comments)
-  const [mounted, setMounted] = useState(false)
-  const [imageIndex, setImageIndex] = useState(0)
-  const [videoId, setVideoId] = useState(false)
-  const [videoSize, setVideoSize] = useState({ width: 0, height: 0 })
-  const { getPost, updatePost } = useContext(PostsContext)
-  const ref = useRef(null)
-  const url = `${siteUrl}/${id}`
+interface Props {
+  id: string
+  dismiss: () => void
+}
 
+const Post: FC<Props> = ({ id, dismiss }) => {
+  const [imageIndex, setImageIndex] = useState(0)
+  const [idVideo, setIdVideo] = useState("")
+  const [videoSize, setVideoSize] = useState({ width: 0, height: 0 })
+  const { refetchPosts } = useContext(PostsContext)
+  const ref = useRef(null)
+  const { data, isLoading, refetch } = useGetData<GetPostData>(`post/${id}`)
+  const { startPost, isLoading: isLoadingRating } = usePostData<
+    PostRateData,
+    PostRateVariables
+  >(`logout`)
   const rate = async (rating: number, e: React.MouseEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-
-    if (!isLoading) return
-
-    const { setPostContext } = updatePost("post/rating", { id, rating })
-
-    await setPostContext()
-    setIsLoading(false)
+    await startPost({ id, rating })
+    refetch()
+    refetchPosts() // TODO: shouldn't refetch all post just because the rating changes on a single one
   }
-
-  const handleClick = (e: React.MouseEvent) =>
-    e.target === e.currentTarget && openPost && openPost()
-
   const handleImageStep = (e: React.MouseEvent, step: number) => {
     e.preventDefault()
     setImageIndex(index => index + step)
   }
+  const url = `${siteUrl}/${id}`
+  const {
+    createdAt,
+    description,
+    downs,
+    link,
+    images,
+    postedByName,
+    rating,
+    tags,
+    title,
+    ups,
+  } = data?.post ?? samplePost
 
   useEffect(() => {
-    setMounted(true)
-    return () => {
-      setMounted(false)
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    images && setVideoId(getYoutubeId(link))
+    images && setIdVideo(getYoutubeId(link))
     if (images && ref && ref.current)
       setVideoSize({
         // @ts-ignore
@@ -106,152 +87,69 @@ const Post: FC<PostProps> = ({
       })
   }, [images, imageIndex])
 
-  useEffect(() => {
-    if (!title && mounted) {
-      setIsLoading(true)
-      const { cancel, setPostContext } = getPost(id)
-      ;(async () => await setPostContext())()
+  const renderMedia = () => {
+    if (isLoading) return <Loader />
 
-      setIsLoading(false)
-      return cancel
-    }
-  }, [mounted, id])
-
-  const classType = `post ${
-    type && type !== "notification"
-      ? "stand-alone"
-      : size < 6
-      ? "sub2"
-      : size < 18
-      ? "sub1"
-      : "main"
-  }`
-
-  const styleSize = classType.includes("main")
-    ? 2
-    : classType.includes("sub2")
-    ? -1
-    : 1
-
-  const renderGridPost = () => (
-    <StyledPost
-      onClick={handleClick}
-      style={{
-        background: `gray url('${
-          id.length != 20 ? images[0] : sample
-        }') no-repeat center`,
-        backgroundSize:
-          id.length == 20 ? `70px 70px` : !type ? "cover" : "auto auto",
-        gridColumn: `${!type ? "" + col + " / span " + size : "initial"}`,
-        gridRow: `${!type ? "" + row + " / span " + size : "initial"}`,
-      }}
-    >
-      <StyledDetailsContainer>
-        <StyledHeaderContainer>
-          <Header centered size={styleSize} onClick={handleClick}>
-            {title}
-          </Header>
-          {postedByName && (
-            <UserHeader centered size={1}>
-              @ {postedByName}
-            </UserHeader>
-          )}
-        </StyledHeaderContainer>
-        {title !== "Submit a post!" && type !== "notification" && (
-          <Button
-            active={rating === 1}
-            type={"impressed"}
-            onClick={e => rate(1, e)}
-            to={"impressed"}
-            as={Link}
+    return (
+      <>
+        {images && imageIndex > 0 && (
+          <StyledNavigationButton
+            to="/"
+            type="arrow"
+            onClick={(e: React.MouseEvent) => handleImageStep(e, -1)}
+            style={{
+              left: `${theme.base.gutter * 2}px`,
+            }}
           >
-            <Star
-              className={"icon"}
-              strokeWidth="1.5px"
-              color="white"
-              fill={rating > 0 ? "white" : "none"}
-            />
-            <Header size={styleSize}>{ups}</Header>
-          </Button>
+            {"<"}
+          </StyledNavigationButton>
         )}
-        {title !== "Submit a post!" && type !== "notification" && (
-          <Button
-            as={Link}
-            active={rating === -1}
-            type={"meh"}
-            onClick={e => rate(-1, e)}
-            to={"meh"}
+        {idVideo ? (
+          <StyledMainVideo
+            width={videoSize.width}
+            height={(videoSize.width / 16) * 9}
+            src={`https://www.youtube.com/embed/${idVideo}`}
+            frameBorder="0"
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <StyledMainImage src={images ? images[imageIndex] : ""} />
+        )}
+        {images && imageIndex < images.length - 1 && (
+          <StyledNavigationButton
+            to="/"
+            type="arrow"
+            onClick={(e: React.MouseEvent) => handleImageStep(e, 1)}
+            style={{
+              right: `${theme.base.gutter * 2}px`,
+            }}
           >
-            <Meh className={"icon"} strokeWidth="1.5px" color="white" />
-            <Header size={styleSize}>{downs}</Header>
-          </Button>
+            {">"}
+          </StyledNavigationButton>
         )}
-      </StyledDetailsContainer>
-    </StyledPost>
-  )
+      </>
+    )
+  }
 
-  const renderStandAlone = () => (
+  return (
     <Popup show={true} dismiss={dismiss} dismissible={true} type="post">
       <StyledPostOpen>
-        <StyledImageContainer ref={ref}>
-          {images && imageIndex > 0 && (
-            <StyledNavigationButton
-              as={Link}
-              to="/"
-              type="arrow"
-              onClick={(e: React.MouseEvent) => handleImageStep(e, -1)}
-              style={{
-                left: `${theme.base.gutter * 2}px`,
-              }}
-            >
-              {"<"}
-            </StyledNavigationButton>
-          )}
-          {videoId ? (
-            <StyledMainVideo
-              width={videoSize.width}
-              height={(videoSize.width / 16) * 9}
-              src={`https://www.youtube.com/embed/${videoId}`}
-              frameBorder="0"
-              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          ) : (
-            <StyledMainImage src={images ? images[imageIndex] : ""} />
-          )}
-          {images && imageIndex < images.length - 1 && (
-            <StyledNavigationButton
-              as={Link}
-              to="/"
-              type="arrow"
-              onClick={(e: React.MouseEvent) => handleImageStep(e, 1)}
-              style={{
-                right: `${theme.base.gutter * 2}px`,
-              }}
-            >
-              {">"}
-            </StyledNavigationButton>
-          )}
-        </StyledImageContainer>
+        <StyledImageContainer ref={ref}>{renderMedia()}</StyledImageContainer>
         <Header centered size={3} as="a" href={link} target="_blank">
           {title}
         </Header>
-        <UserHeader
-          as={Link}
-          centered={1}
-          size={1}
-          to={`/user/${postedByName}`}
-        >
+        <UserHeader centered={1} size={1} to={`/user/${postedByName}`}>
           @{postedByName}
         </UserHeader>
         <StyledSummary>{description}</StyledSummary>
         <StyledButtonContainer>
           <Button
-            as={Link}
-            type={"impressedBig"}
-            rated={rating === 1}
+            isLoading={isLoadingRating}
             onClick={e => rate(1, e)}
+            isRated={rating === 1}
             to={"impressed"}
+            type={"impressedBig"}
           >
             <Star
               // @ts-ignore
@@ -266,11 +164,11 @@ const Post: FC<PostProps> = ({
             <Header size={2}>{ups}</Header>
           </Button>
           <Button
-            as={Link}
-            type={"mehBig"}
-            rated={rating === -1}
+            isLoading={isLoadingRating}
             onClick={e => rate(-1, e)}
+            isRated={rating === -1}
             to={"meh"}
+            type={"mehBig"}
           >
             <Meh
               // @ts-ignore
@@ -304,20 +202,11 @@ const Post: FC<PostProps> = ({
           </a>
         </StyledButtonContainer>
         <Suspense fallback={<div>Loading comments...</div>}>
-          <Comments
-            commentCount={commentCount}
-            setCommentCount={setCommentCount}
-            idParent={id}
-            type={"post"}
-          />
+          <Comments idParent={id} type={"post"} />
         </Suspense>
       </StyledPostOpen>
     </Popup>
   )
-
-  return !type || type === "notification"
-    ? renderGridPost()
-    : renderStandAlone()
 }
 
 export default Post

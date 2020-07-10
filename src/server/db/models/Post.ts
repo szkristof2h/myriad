@@ -7,14 +7,13 @@ const { ObjectId, Schema } = mongoose
 
 export interface PostModel extends PostType, MongooseModel {}
 export interface PostType {
-  date: Date
+  createdAt: Date
   description: string
   comments: number
   downs: number
   link: string
   idUser: string
   images: string[]
-  postedById: string
   postedByName: string
   ratio: number
   tags: string[]
@@ -23,7 +22,7 @@ export interface PostType {
 }
 
 const postSchema = new Schema({
-  date: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now },
   description: {
     type: String,
     maxlength: [300, "The description can't be longer than 300 characters!"],
