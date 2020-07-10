@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState } from "react"
-import { ErrorContext } from "./ErrorContext"
+import React, { createContext, useState } from "react"
 import { APIRequestInteface } from "../requests/api"
 import { PostType } from "src/server/db/models/Post"
 import useGetData from "../hooks/useGetData"

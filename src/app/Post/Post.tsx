@@ -64,6 +64,7 @@ const Post: FC<Props> = ({ id, dismiss }) => {
   }
   const url = `${siteUrl}/${id}`
   const {
+    comments: commentCount,
     createdAt,
     description,
     downs,
@@ -202,7 +203,7 @@ const Post: FC<Props> = ({ id, dismiss }) => {
           </a>
         </StyledButtonContainer>
         <Suspense fallback={<div>Loading comments...</div>}>
-          <Comments idParent={id} type={"post"} />
+          <Comments idParent={id} type={"post"} commentCount={commentCount} />
         </Suspense>
       </StyledPostOpen>
     </Popup>

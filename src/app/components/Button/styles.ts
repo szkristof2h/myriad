@@ -8,7 +8,7 @@ interface ButtonProps extends Props {}
 
 const Button = styled(Link).withConfig({
   shouldForwardProp: prop =>
-    !["isActive", "isLoading", "isRated"].includes(prop),
+    !["isActive", "isLoading", "isDisabled", "isRated"].includes(prop),
 })((props: ButtonProps) => {
   const { isActive, isLoading, isRated, type } = props
 

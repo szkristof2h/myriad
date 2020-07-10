@@ -1,18 +1,26 @@
-import React, { FC, useContext, useEffect, useState } from "react"
-import { Link } from "react-router-dom"
-import { ErrorContext } from "../contexts/ErrorContext"
+import React, { FC, useContext, useState } from "react"
 import { UserContext } from "../contexts/UserContext"
 import Comment from "./Comment"
 import { Button } from "../components"
 import { Base } from "../Typography/Typography.style"
 import { TextArea } from "../components"
 import StyledComments from "./Comments.style"
-import { get, post, APIRequestInteface } from "../requests/api"
 import { CommentType } from "src/server/db/models/Comment"
+import useGetData from "../hooks/useGetData"
+import Loader from "../Loader"
+import usePostData from "../hooks/usePostData"
 
-interface GetCommentsInterface extends APIRequestInteface<GetCommentsData> {}
 export interface GetCommentsData {
   comments: CommentData[]
+}
+
+export interface PostCommentData {
+  status: "success" | "failed"
+}
+
+export interface PostCommentVariables {
+  idParent: string
+  text: string
 }
 
 export interface CommentData extends CommentType {
@@ -23,111 +31,55 @@ export interface CommentData extends CommentType {
 interface Props {
   idParent: string
   commentCount?: number
-  setCommentCount?: (count: number) => number | void
   type: "post" | "messages"
 }
 
-const Comments: FC<Props> = ({
-  commentCount,
-  setCommentCount,
-  idParent,
-  type,
-}) => {
-  const [comments, setComments] = useState<CommentData[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+const Comments: FC<Props> = ({ commentCount, idParent, type }) => {
   const [newComment, setNewComment] = useState("")
-  const { addError } = useContext(ErrorContext)
+  const [url, setUrl] = useState(
+    `${type === "post" ? "comments" : "message"}/${idParent}/0/20`
+  )
   const { currentUser } = useContext(UserContext)
-
-  const getComments = () => {
-    setIsLoading(true)
-    const { getData, cancel, getHasFailed }: GetCommentsInterface = get<
-      GetCommentsData
-    >(
-      `${type === "post" ? "comments" : "message"}/${idParent}/${
-        comments.length
-      }/20`,
-      () => addError({ comments: ["some error message here"] })
-    )
-
-    const setAllComments = async () => {
-      const response = await getData()
-
-      if (getHasFailed() || !response)
-        return addError({ comments: [`get comments request failed`] })
-
-      const {
-        data: { error, comments: newComments },
-      } = response
-
-      if (error) return addError(error.message, error.type)
-
-      setComments([...comments, ...newComments])
-    }
-
-    setIsLoading(false)
-    return { cancel, setAllComments }
-  }
+  const { data, isLoading, refetch } = useGetData<GetCommentsData>(url)
+  const {
+    startPost: startPostRequest,
+    isLoading: isLoadingSubmit,
+  } = usePostData<PostCommentData, PostCommentVariables>(
+    `${type === "post" ? "comment" : "message"}`
+  )
+  const comments = data?.comments
 
   const handleLoadMore = async (e: React.MouseEvent) => {
     e.preventDefault()
-    if (!isLoading) {
-      const { setAllComments } = getComments()
-      await setAllComments()
-    }
+
+    if (!isLoading)
+      setUrl(
+        `${type === "post" ? "comments" : "message"}/${idParent}/${
+          comments?.length
+        }/20`
+      )
   }
 
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault()
-    if (isLoading) return false
-    setIsLoading(true)
-    const { getData, cancel, getHasFailed }: GetCommentsInterface = post<
-      GetCommentsData
-    >(
-      `${type === "post" ? "comment" : "message"}`,
-      {
-        [type === "post" ? "idParent" : "postedByName"]: idParent,
+
+    if (!isLoading && !isLoadingSubmit) {
+      await startPostRequest({
+        idParent,
         text: newComment,
-      },
-      () => addError({ comments: ["some error message here"] })
-    )
-
-    // TODO: probably there's reason to make this its own function
-    const addComment = async () => {
-      const response = await getData()
-      if (getHasFailed() || !response)
-        return addError({ comments: [`post comment request failed`] })
-
-      const {
-        data: { error, comments: newComments },
-      } = response
-
-      if (error) return addError(error.message, error.type)
-
-      setComments([...comments, ...newComments])
-      setNewComment("")
-      commentCount && setCommentCount?.(commentCount + 1)
+      })
+      refetch()
     }
-
-    await addComment()
-    setIsLoading(false) // TODO: should use unique loading state, otherwise might get not real loading state
   }
-
-  useEffect(() => {
-    if (!isLoading) {
-      const { cancel, setAllComments } = getComments()
-      ;(async () => await setAllComments())()
-
-      return cancel
-    }
-  }, [idParent])
 
   return (
     <StyledComments>
       {comments?.length == 0 ? (
         <Base>There are no comments yet!</Base>
+      ) : isLoading ? (
+        <Loader />
       ) : (
-        comments.map(comment => (
+        comments?.map(comment => (
           <Comment
             key={comment.id}
             userName={comment.displayName}
@@ -135,11 +87,14 @@ const Comments: FC<Props> = ({
           />
         ))
       )}
-      {commentCount && commentCount !== 0 && comments.length < commentCount && (
-        <Button type="transparent" as={Link} onClick={handleLoadMore} to="">
-          Load more...
-        </Button>
-      )}
+      {commentCount &&
+        commentCount !== 0 &&
+        comments &&
+        comments.length < commentCount && (
+          <Button type="transparent" onClick={handleLoadMore} to="">
+            Load more...
+          </Button>
+        )}
       {currentUser?.id && (
         <TextArea
           onChange={e => setNewComment(e.currentTarget.value)}
@@ -149,12 +104,17 @@ const Comments: FC<Props> = ({
         />
       )}
       {currentUser?.id && (
-        <Button type="primary" as={Link} onClick={handleSubmit} to="">
+        <Button
+          type="primary"
+          onClick={handleSubmit}
+          to=""
+          isLoading={isLoadingSubmit || isLoading}
+        >
           {type === "messages" ? "Send Message" : "Send"}
         </Button>
       )}
       {!currentUser?.id && (
-        <Button type="danger" as={Link} to="/login">
+        <Button type="danger" to="/login">
           You have to be logged in to post a comment
         </Button>
       )}
