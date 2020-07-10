@@ -54,10 +54,10 @@ const UserProvider = ({ children }) => {
   const { data: currentUserData, isLoading, refetch } = useGetData<GetUserData>(
     "user"
   )
-  const { startPost } = usePostData<PostLogoutData, null>(`logout`, null)
+  const { startPost } = usePostData<PostLogoutData, null>(`logout`)
 
   const logout = async () => {
-    await startPost()
+    await startPost(null)
     refetch()
   }
 
