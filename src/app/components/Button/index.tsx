@@ -10,7 +10,7 @@ export interface Props {
   isDisabled?: boolean
   isLoading?: boolean
   onClick?: (e: React.MouseEvent) => void
-  rated?: boolean // used only for rating buttons, might be unnecessary
+  isRated?: boolean // used only for rating buttons, might be unnecessary
   style?: CSSProperties
   to?: string
   type:

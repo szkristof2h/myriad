@@ -7,9 +7,10 @@ import { Link } from "react-router-dom"
 interface ButtonProps extends Props {}
 
 const Button = styled(Link).withConfig({
-  shouldForwardProp: prop => !["isActive", "isLoading"].includes(prop),
+  shouldForwardProp: prop =>
+    !["isActive", "isLoading", "isRated"].includes(prop),
 })((props: ButtonProps) => {
-  const { isActive, isLoading, rated, type } = props
+  const { isActive, isLoading, isRated, type } = props
 
   const primaryStyle = {
     padding: `${theme.base.gutter / 2}px`,
@@ -85,9 +86,9 @@ const Button = styled(Link).withConfig({
     alignItems: "center",
     height: "26px",
     padding: "1px 2px",
-    background: rated ? theme.color.rateActive : theme.color[type],
+    background: isRated ? theme.color.rateActive : theme.color[type],
     ["&:hover"]: {
-      background: rated
+      background: isRated
         ? theme.color.rateActiveHover
         : theme.color[type + "Hover"],
     },
@@ -114,22 +115,22 @@ const Button = styled(Link).withConfig({
       width: "40px",
     },
     [`${Header}`]: {
-      color: rated ? theme.color.black : theme.color.gray,
+      color: isRated ? theme.color.black : theme.color.gray,
       padding: `0 ${theme.base.gutter / 2}px 0 0`,
     },
     ["&:hover"]: {
       background: "none",
       [`& > ${Header}`]: {
-        color: !rated ? theme.color.black : theme.color.gray,
+        color: !isRated ? theme.color.black : theme.color.gray,
         textDecoration: "none !important",
       },
       ["& > .icon"]: {
-        stroke: rated
+        stroke: isRated
           ? "gray"
           : type === "impressedBig"
           ? "yellow"
           : theme.color.black,
-        fill: rated ? "none" : type === "impressedBig" ? "yellow" : "none",
+        fill: isRated ? "none" : type === "impressedBig" ? "yellow" : "none",
       },
     },
   }
