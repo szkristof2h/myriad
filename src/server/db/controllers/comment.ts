@@ -12,7 +12,7 @@ import User from "../models/User"
 import Post from "../models/Post"
 import Conversation, { ConversationModel } from "../models/Conversation"
 import { GetConversationsData } from "src/app/Messages/Conversations"
-import { GetCommentsData } from "src/app/Comments/Comments"
+import { GetCommentsData, PostCommentData } from "src/app/Comments/Comments"
 
 const getComments = async (req: Request, res: Response) => {
   setErrorType(res, "GET_COMMENTS")
@@ -162,30 +162,29 @@ const getMessages = async (req: Request, res: Response) => {
   setResponseData(res, responseData)
 }
 
-export function postComment(req, res) {
-  // const { postedOn, text } = req.body
-  // const { displayName } = res.locals.user
-  // const userId = res.locals.user.id
-  // const newComment = new Comment({
-  //   text,
-  //   poster: userId,
-  //   postedById: [userId],
-  //   postedByName: [displayName],
-  //   postedOn,
-  //   type: "comment",
-  // })
-  // Post.findOneAndUpdate({ _id: postedOn }, { $inc: { comments: 1 } })
-  //   .select("_id")
-  //   .exec()
-  //   .then(p =>
-  //     !p
-  //       ? Promise.reject({
-  //           errors: { postId: { message: "Post wasn't found!" } },
-  //         })
-  //       : newComment.save()
-  //   )
-  //   .then(c => res.json({ comments: { [c._id]: c }, ids: c._id }))
-  //   .catch(e => res.json(handleErrors(POST_COMMENT_ERROR, e)))
+const postComment = async (req: Request, res: Response) => {
+  const idUser = req.user?.id
+  const idParent = req.body.idParent
+  const text = req.body.text
+
+  setErrorType(res, "GET_MESSAGES_ERROR")
+
+  const newComment = new Comment({
+    idParent,
+    idUser,
+    text,
+    type: "comment",
+  })
+
+  await Post.findOneAndUpdate({ _id: idParent }, { $inc: { comments: 1 } })
+    .select("_id")
+    .lean()
+    .exec()
+
+  newComment.save()
+
+  const responseData: PostCommentData = { status: "success" }
+  setResponseData(res, responseData)
 }
 
 export function postMessage(req, res) {
@@ -216,4 +215,4 @@ export function postMessage(req, res) {
   //   .catch(e => res.json(handleErrors(POST_COMMENT_ERROR, e)))
 }
 
-export { getComments, getConversations, getMessages }
+export { getComments, getConversations, getMessages, postComment }
