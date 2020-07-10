@@ -13,7 +13,6 @@ const StyledDetailsContainer = styled.div({
 })
 
 const StyledHeaderContainer = styled.div({
-  display: "grid",
   gridColumn: "1 / span 2",
   justifyItems: "center",
   alignItems: "center",

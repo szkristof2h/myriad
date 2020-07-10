@@ -142,8 +142,6 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, userName }) => {
         ? userName
         : "posts"
 
-    console.log({ type })
-    console.log({ previousUrl })
     if (type !== "post" || !previousUrl) {
       getPosts(
         `posts${userName ? "/user" : ""}${

@@ -85,6 +85,7 @@ const GridPost: FC<Props> = ({
     <StyledPost
       onClick={handleClick}
       style={{
+        // add loader bg when isLoading === true
         background: `gray url('${
           id.length !== 20 ? images[0] : sample
         }') no-repeat center`,
