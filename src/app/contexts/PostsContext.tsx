@@ -39,7 +39,6 @@ interface PostContextInterface {
   previousUrl: string
   refetchPosts: () => void
   setFocused: (id: string) => void
-  setPosts: (posts: Post[]) => void
   setNotifications: (posts: Post[]) => void
   setPreviousUrl: (urL: string) => void
 }
@@ -54,7 +53,6 @@ const initialState: PostContextInterface = {
   previousUrl: "",
   refetchPosts: () => {},
   setFocused: (id: string) => {},
-  setPosts: (posts: Post[]) => {},
   setNotifications: (posts: Post[]) => {},
   setPreviousUrl: (urL: string) => {},
 }
@@ -82,9 +80,7 @@ const PostsProvider = ({ children }) => {
   const [focused, setFocused] = useState("")
   const [previousUrl, setPreviousUrl] = useState("")
   const [url, setUrl] = useState("posts")
-  const [posts, setPosts] = useState<PostData[]>([])
   const [notifications, setNotifications] = useState<PostData[]>([])
-  const { addError } = useContext(ErrorContext)
   const {
     data: postsData,
     isLoading: isLoadingPosts,
@@ -107,7 +103,6 @@ const PostsProvider = ({ children }) => {
         refetchPosts,
         setFocused,
         setNotifications,
-        setPosts,
         setPreviousUrl,
       }}
     >
