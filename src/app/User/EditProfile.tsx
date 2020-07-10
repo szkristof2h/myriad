@@ -51,7 +51,7 @@ const EditProfile: FC = () => {
   const { isLoading: isLoadingUpdate, startPost } = usePostData<
     IsNameAvailableData,
     UpdateProfileVariables
-  >(`user/profile`, newProfile)
+  >(`user/profile`)
 
   useEffect(() => {
     if (currentUser && !newAvatar && !newBio && !newDisplayName)
@@ -77,7 +77,7 @@ const EditProfile: FC = () => {
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault()
 
-    await startPost()
+    await startPost(newProfile)
 
     // redirect?
     setNewProfile({ avatar: "", bio: "", displayName: "" })
@@ -117,7 +117,6 @@ const EditProfile: FC = () => {
         value={newBio}
       />
       <Button
-        as={Link}
         type="primary"
         onClick={async e => await handleSubmit(e)}
         to="profile/update"

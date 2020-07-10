@@ -94,8 +94,7 @@ const Profile: FC<Props> = ({ params }) => {
       <Base className="bio">{bio}</Base>
       {!isOwnProfile && (
         <Button
-          as={Link}
-          active={isFollowed}
+          isActive={isFollowed}
           type="primary"
           className={`button`}
           to={`${isFollowed ? "un" : ""}follow`}
@@ -104,39 +103,23 @@ const Profile: FC<Props> = ({ params }) => {
           {(isFollowed ? "Unf" : "F") + "ollow!"}
         </Button>
       )}
-      <Button
-        type="primary"
-        as={Link}
-        className="button"
-        to={`/posts/${displayName}`}
-      >
+      <Button type="primary" className="button" to={`/posts/${displayName}`}>
         Posts
       </Button>
       {!isOwnProfile && (
-        <Button
-          type="primary"
-          as={Link}
-          className="button"
-          to={`/message/${id}`}
-        >
+        <Button type="primary" className="button" to={`/message/${id}`}>
           Send a message
         </Button>
       )}
       {isOwnProfile && (
-        <Button
-          type="primary"
-          as={Link}
-          className="button"
-          to={`/profile/edit`}
-        >
+        <Button type="primary" className="button" to={`/profile/edit`}>
           Edit profile
         </Button>
       )}
       {!isOwnProfile && (
         <Button
-          as={Link}
           type="danger"
-          active={isBlocked}
+          isActive={isBlocked}
           className={`button`}
           to={`/${isBlocked ? "un" : ""}block`}
           onClick={e => handleClick(e, "block")}
@@ -146,7 +129,6 @@ const Profile: FC<Props> = ({ params }) => {
       )}
       {isOwnProfile && (
         <Button
-          as={Link}
           type="danger"
           onClick={async e => {
             e.preventDefault()

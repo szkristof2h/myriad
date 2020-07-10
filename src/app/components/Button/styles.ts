@@ -2,15 +2,18 @@ import styled from "styled-components"
 import theme from "../../theme"
 import { Header } from "../../Typography/Typography.style"
 import { Props } from "./index"
+import { Link } from "react-router-dom"
 
 interface ButtonProps extends Props {}
 
-const Button = styled("div")((props: ButtonProps) => {
-  const { active, isLoading, rated, type } = props
+const Button = styled(Link).withConfig({
+  shouldForwardProp: prop => !["isActive", "isLoading"].includes(prop),
+})((props: ButtonProps) => {
+  const { isActive, isLoading, rated, type } = props
 
   const primaryStyle = {
     padding: `${theme.base.gutter / 2}px`,
-    backgroundColor: !active ? theme.color.brown : theme.color.brownLight,
+    backgroundColor: !isActive ? theme.color.brown : theme.color.brownLight,
     textAlign: "center",
     color: theme.color.white,
     fontFamily: theme.font.style.button,
@@ -23,7 +26,7 @@ const Button = styled("div")((props: ButtonProps) => {
   }
 
   const dangerStyle = {
-    background: !active ? theme.color.error : theme.color.errorActive,
+    background: !isActive ? theme.color.error : theme.color.errorActive,
     ["&:hover"]: {
       background: theme.color.errorHover,
     },
@@ -43,7 +46,7 @@ const Button = styled("div")((props: ButtonProps) => {
   }
 
   const confirmStyle = {
-    background: !active ? theme.color.ok : theme.color.okActive,
+    background: !isActive ? theme.color.ok : theme.color.okActive,
     ["&:hover"]: {
       background: theme.color.okHover,
     },
