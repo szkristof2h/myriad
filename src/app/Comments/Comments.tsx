@@ -68,6 +68,7 @@ const Comments: FC<Props> = ({ commentCount, idParent, type }) => {
         idParent,
         text: newComment,
       })
+      setNewComment("")
       refetch()
     }
   }
@@ -87,14 +88,16 @@ const Comments: FC<Props> = ({ commentCount, idParent, type }) => {
           />
         ))
       )}
-      {commentCount &&
-        commentCount !== 0 &&
-        comments &&
-        comments.length < commentCount && (
-          <Button type="transparent" onClick={handleLoadMore} to="">
-            Load more...
-          </Button>
-        )}
+      {!!commentCount && comments && comments.length < commentCount && (
+        <Button
+          type="transparent"
+          onClick={handleLoadMore}
+          to=""
+          isLoading={isLoading}
+        >
+          Load more...
+        </Button>
+      )}
       {currentUser?.id && (
         <TextArea
           onChange={e => setNewComment(e.currentTarget.value)}
