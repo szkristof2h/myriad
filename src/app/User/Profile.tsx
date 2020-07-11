@@ -61,6 +61,7 @@ const Profile: FC<Props> = ({ params }) => {
   } = getUserFields()
   const isEditing = !name && !currentUser?.displayName
 
+  // TODO: unnecessary???
   useEffect(() => {
     return cancel("unmounting")
   }, [])
@@ -107,7 +108,11 @@ const Profile: FC<Props> = ({ params }) => {
         Posts
       </Button>
       {!isOwnProfile && (
-        <Button type="primary" className="button" to={`/message/${id}`}>
+        <Button
+          type="primary"
+          className="button"
+          to={`/message/${displayName}`}
+        >
           Send a message
         </Button>
       )}

@@ -101,7 +101,7 @@ export function follow(req, res) {
 const getUser = async (req: Request, res: Response, next: NextFunction) => {
   const idUser = req.user?.id
   const isLoggedIn = !!idUser
-  const profileName = req.params?.name ? res.locals.user?.displayName : null
+  const profileName = req.params?.name
   const search = profileName
     ? { displayName: profileName }
     : idUser
@@ -131,27 +131,27 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
 
   const { _id, _v, ...user } = userFromDB
   const isFollowed = idUser
-    ? !!FollowList.findOne({
+    ? FollowList.findOne({
         from: idUser,
         to: _id,
       })
         .lean()
         .exec()
-    : false
+    : []
   const isBlocked = idUser
-    ? !!BlockedList.findOne({
+    ? BlockedList.findOne({
         by: idUser,
         user: _id,
       })
         .lean()
         .exec()
-    : false
+    : []
 
   const responseData: GetUserData = {
     user: {
       id: _id,
-      isFollowed,
-      isBlocked,
+      isFollowed: !!isFollowed.length,
+      isBlocked: !!isBlocked.length,
       ...user,
       ...(idUser ? { isLoggedIn } : {}),
     },
