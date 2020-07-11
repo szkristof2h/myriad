@@ -3,6 +3,7 @@ import StyledConversations, { MessageContainer } from "./Conversations.style"
 import { Header, Base } from "../Typography/Typography.style"
 import useGetData from "../hooks/useGetData"
 import Loader from "../Loader"
+import { Link } from "react-router-dom"
 
 export interface GetConversationsData {
   conversations: {
@@ -39,10 +40,13 @@ const Conversations = () => {
         conversations?.map(conversation => {
           return (
             <MessageContainer key={conversation.id}>
-              <Base to={`message/${conversation.conversationPartner}`}>
+              <Base
+                to={`message/${conversation.conversationPartner}`}
+                as={Link}
+              >
                 {conversation?.text}
               </Base>
-              <Base to={`user/${conversation.conversationPartner}`}>
+              <Base to={`user/${conversation.conversationPartner}`} as={Link}>
                 {conversation?.conversationPartner}
               </Base>
               <Base style={{ ["&:hover"]: { textDecoration: "initial" } }}>

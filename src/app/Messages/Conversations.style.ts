@@ -24,7 +24,7 @@ const StyledConversations = styled(Box)({
     padding: `${theme.base.gutter / 2}px`,
     maxHeight: "1.8em",
     overflow: "hidden",
-    "&:hover": {
+    "&:hover:not(:last-child)": {
       textDecoration: "underline",
     },
   },
