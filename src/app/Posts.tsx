@@ -148,7 +148,9 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, userName }) => {
           tag ? "/" + tag.trim() : userName ? "/" + userName : ""
         }`
       )
-      setPreviousUrl(fullUrl)
+
+      // TODO: instead of setting prevUrl to home it should set it according to the post's tags to make it more relevant
+      setPreviousUrl(type === "post" ? "/" : fullUrl)
     }
   }, [fullUrl])
 
