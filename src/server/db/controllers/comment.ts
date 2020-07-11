@@ -1,5 +1,4 @@
-import { Request, Response } from "express"
-import mongoose from "mongoose"
+import { Request, Response, NextFunction } from "express"
 import { setErrorType, setResponseData } from "../../utils"
 import {
   GET_COMMENTS_ERROR,
@@ -151,9 +150,11 @@ const getMessages = async (req: Request, res: Response) => {
     return {
       conversationPartner: conversationPartner[0]._id,
       id: _id,
-      idUsers: conversation[0].idUsers,
       ...messageWithout_id,
-      displayName,
+      displayName:
+        messageWithout_id.idUser.toString() === idUser
+          ? displayName
+          : conversationPartnerName,
     }
   })
 
@@ -176,43 +177,77 @@ const postComment = async (req: Request, res: Response) => {
     type: "comment",
   })
 
+  newComment.save()
+
   await Post.findOneAndUpdate({ _id: idParent }, { $inc: { comments: 1 } })
     .select("_id")
     .lean()
     .exec()
 
-  newComment.save()
+  const responseData: PostCommentData = { status: "success" }
+
+  setResponseData(res, responseData)
+}
+
+const postMessage = async (req: Request, res: Response, next: NextFunction) => {
+  const idUser = req.user?.id
+  const targetName = req.body.idParent
+  const text = req.body.text
+
+  setErrorType(res, "GET_MESSAGES_ERROR")
+
+  const targetUser: { _id: string }[] = await User.find({
+    displayName: targetName,
+  })
+    .select("_id")
+    .lean()
+    .exec()
+
+  if (targetUser.length === 0) throw Error("USER_NOT_FOUND")
+
+  const isUserBlocked = await BlockedList.find({
+    idUser: targetUser[0]._id,
+    idBlocked: idUser,
+  }).exec()
+
+  if (isUserBlocked.length !== 0) {
+    const responseData: PostCommentData = { status: "failed" }
+    setResponseData(res, responseData)
+    return next()
+  }
+
+  const conversations: ConversationModel[] = await Conversation.where("idUsers")
+    .all([targetUser[0]._id, idUser])
+    .lean()
+    .exec()
+  let idConversation // TODO: make it work without let
+
+  if (!conversations.length) {
+    const newConversation = new Conversation({
+      idUsers: [targetUser[0]._id, idUser],
+    }).save()
+
+    console.log(newConversation)
+    idConversation = newConversation._id
+  } else {
+    await Conversation.findByIdAndUpdate(conversations[0]._id, {
+      updatedAt: Date.now(),
+    })
+
+    idConversation = conversations[0]._id
+  }
+
+  const newMessage = new Comment({
+    idParent: idConversation,
+    idUser,
+    text,
+    type: "message",
+  })
+
+  newMessage.save()
 
   const responseData: PostCommentData = { status: "success" }
   setResponseData(res, responseData)
 }
 
-export function postMessage(req, res) {
-  // const { postedByName, text } = req.body
-  // const { displayName } = res.locals.user
-  // const userId = res.locals.user.id
-  // const newComment = new Comment({ text, poster: userId, type: "message" })
-  // User.findOne({ displayName: postedByName })
-  //   .exec()
-  //   .then(u =>
-  //     !u
-  //       ? Promise.reject({ errors: { user: { message: "User not found!" } } })
-  //       : BlockedList.findOne({ by: u._id, user: userId })
-  //           .exec()
-  //           .then(r => {
-  //             if (r)
-  //               return Promise.reject({
-  //                 errors: { user: { message: "You are blocked by user!" } },
-  //               })
-  //             newComment.postedById = [userId, u._id].sort()
-  //             newComment.postedByName = newComment.postedById.map(id =>
-  //               id + "" === userId + "" ? displayName : u.displayName
-  //             )
-  //             return newComment.save()
-  //           })
-  //   )
-  //   .then(c => res.json({ comments: { [c._id]: c }, ids: c._id }))
-  //   .catch(e => res.json(handleErrors(POST_COMMENT_ERROR, e)))
-}
-
-export { getComments, getConversations, getMessages, postComment }
+export { getComments, getConversations, getMessages, postComment, postMessage }
