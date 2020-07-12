@@ -18,7 +18,7 @@ const useGetData = <T = any>(url: string): GetData<T> => {
   const { addError } = useContext(ErrorContext)
 
   useEffect(() => {
-    if (url) {
+    if (url && shouldRefetch) {
       setIsLoading(true)
 
       const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<T>(
@@ -36,6 +36,7 @@ const useGetData = <T = any>(url: string): GetData<T> => {
         if (getHasFailed()) addError({ request: [`get request failed`] })
 
         setIsLoading(false)
+        setShouldRefetch(false)
       })()
     }
 
