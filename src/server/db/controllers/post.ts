@@ -161,7 +161,7 @@ const getNotifications = async (
   }
 
   const posts: PostModel[] = await Post.where("idUser")
-    .in(followList.map(followItem => followItem.idFollowing))
+    .in(followList.map(followItem => followItem.idTarget))
     .sort("-createdAt")
     .skip(Number(skip))
     .limit(20)
