@@ -275,27 +275,35 @@ const updateProfile = async (
     const sanitizedDisplayName = sanitize(displayName)
 
     if (sanitizedDisplayName.length < 3) {
-      res.json(
-        setResponseData(res, {
-          error: {
-            type: "profile",
-            message:
-              "Your displayname shouldn't be less than 3 characters long!",
-          },
-        })
-      )
+      setResponseData(res, {
+        error: {
+          type: "profile",
+          message: "Your displayname shouldn't be less than 3 characters long!",
+        },
+      })
 
       return next()
     } else if (sanitizedDisplayName.length > 50) {
-      res.json(
-        setResponseData(res, {
-          error: {
-            type: "profile",
-            message:
-              "Your displayname should not be more than 50 characters long!",
-          },
-        })
-      )
+      setResponseData(res, {
+        error: {
+          type: "profile",
+          message:
+            "Your displayname should not be more than 50 characters long!",
+        },
+      })
+
+      return next()
+    }
+
+    const isDisplayNameUnique = await User.find({ displayName }).lean().exec()
+
+    if (isDisplayNameUnique.length > 0) {
+      setResponseData(res, {
+        error: {
+          type: "profile",
+          message: "That displayname is not available!",
+        },
+      })
 
       return next()
     }
@@ -334,25 +342,21 @@ const updateProfile = async (
     const sanitzedBio = sanitize(bio)
 
     if (sanitzedBio.length < 3) {
-      res.json(
-        setResponseData(res, {
-          error: {
-            type: "profile",
-            message: "Your profile bio should be > 3 characters long!",
-          },
-        })
-      )
+      setResponseData(res, {
+        error: {
+          type: "profile",
+          message: "Your profile bio should be > 3 characters long!",
+        },
+      })
 
       return next()
     } else if (sanitzedBio.length > 200) {
-      res.json(
-        setResponseData(res, {
-          error: {
-            type: "profile",
-            message: "Your profile bio should be < 200 characters long!",
-          },
-        })
-      )
+      setResponseData(res, {
+        error: {
+          type: "profile",
+          message: "Your profile bio should be < 200 characters long!",
+        },
+      })
 
       return next()
     }
