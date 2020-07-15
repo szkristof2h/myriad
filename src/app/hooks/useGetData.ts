@@ -13,12 +13,17 @@ export interface GetData<T> {
 const useGetData = <T = any>(url: string): GetData<T> => {
   const [data, setData] = useState<T | undefined>()
   const [isLoading, setIsLoading] = useState(false)
-  const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {})
+  const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {
+    var b = 42
+  })
   const [shouldRefetch, setShouldRefetch] = useState(false)
+  const [previousUrl, setPreviousUrl] = useState("")
   const { addError } = useContext(ErrorContext)
 
   useEffect(() => {
-    if (url && shouldRefetch) {
+    let didCancel = false
+
+    if (previousUrl !== url || shouldRefetch) {
       setIsLoading(true)
 
       const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<T>(
@@ -30,17 +35,22 @@ const useGetData = <T = any>(url: string): GetData<T> => {
       ;(async () => {
         const response = await getData()
 
-        setData(response?.data)
         if (response?.data?.error?.shouldShow)
           addError(response.data.error.type, response.data.error.message)
         if (getHasFailed()) addError({ request: [`get request failed`] })
 
-        setIsLoading(false)
-        setShouldRefetch(false)
+        if (!didCancel) {
+          setData(response?.data)
+          setIsLoading(false)
+          setShouldRefetch(false)
+        }
       })()
     }
 
+    if (!didCancel) setPreviousUrl(url)
+
     return () => {
+      didCancel = true
       cancel()
       setIsLoading(false)
     }

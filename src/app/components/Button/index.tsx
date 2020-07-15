@@ -31,6 +31,7 @@ export interface Props {
 const Button: FC<Props> = props => {
   const { isDisabled, isLoading, onClick } = props
   const handleOnClick = (e: React.MouseEvent) => {
+    if (isLoading || isDisabled) e.preventDefault()
     if (!isLoading && !isDisabled) onClick?.(e)
   }
 

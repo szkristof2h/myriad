@@ -7,7 +7,6 @@ export interface PostData<T, V> {
   cancel: Canceler
   data: T | undefined
   isLoading: boolean
-  refetch: () => void
   startPost: (variables: V) => Promise<void>
 }
 
@@ -15,7 +14,6 @@ const usePostData = <T = any, V = any>(url: string): PostData<T, V> => {
   const [data, setData] = useState<T>()
   const [isLoading, setIsLoading] = useState(false)
   const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {})
-  const [shouldRefetch, setShouldRefetch] = useState(false)
   const { addError } = useContext(ErrorContext)
 
   const startPost = async (variables: V) => {
@@ -45,13 +43,12 @@ const usePostData = <T = any, V = any>(url: string): PostData<T, V> => {
       cancel()
       setIsLoading(false)
     }
-  }, [shouldRefetch, url])
+  }, [url])
 
   return {
     cancel,
     data,
     isLoading,
-    refetch: () => setShouldRefetch(true),
     startPost,
   }
 }
