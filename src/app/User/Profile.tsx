@@ -6,12 +6,45 @@ import { Header, Base } from "../Typography/Typography.style"
 import StyledProfile from "./Profile.style"
 import { Button } from "../components"
 import useGetData from "../hooks/useGetData"
+import usePostData from "../hooks/usePostData"
 
 interface Props {
   params?: {
     name?: string
     edit?: boolean
   }
+}
+
+export interface PostBlockData {
+  status: "success" | "failed"
+}
+
+interface PostBlockVariables {
+  idTarget: string
+}
+
+export interface PostUnBlockData {
+  status: "success" | "failed"
+}
+
+interface PostUnBlockVariables {
+  idTarget: string
+}
+
+export interface PostFollowData {
+  status: "success" | "failed"
+}
+
+interface PostFollowVariables {
+  idTarget: string
+}
+
+export interface PostUnFollowData {
+  status: "success" | "failed"
+}
+
+interface PostUnFollowVariables {
+  idTarget: string
 }
 
 const Profile: FC<Props> = ({ params }) => {
@@ -22,14 +55,10 @@ const Profile: FC<Props> = ({ params }) => {
   const isOwnProfile = !name || name === currentUser?.displayName
 
   // TODO: find a better way than returning an object
-  const { cancel, data, isLoading, refetch } = name
-    ? useGetData<GetUserData>(`user/${name}`)
-    : {
-        cancel: (message: string) => {},
-        data: { user: emptyUser },
-        isLoading: false,
-        refetch: () => {},
-      }
+  const { cancel, data, isLoading, refetch } = useGetData<GetUserData>(
+    name ? `user/${name}` : ""
+  )
+
   const getUserFields = () => {
     if (!isOwnProfile && !data) return emptyUser
 
@@ -60,28 +89,49 @@ const Profile: FC<Props> = ({ params }) => {
     isFollowed,
   } = getUserFields()
   const isEditing = !name && !currentUser?.displayName
+  const {
+    startPost: startPostBlockRequest,
+    isLoading: isLoadingBlock,
+  } = usePostData<PostBlockData, PostBlockVariables>(`user/block`)
+  const {
+    startPost: startPostUnBlockRequest,
+    isLoading: isLoadingUnBlock,
+  } = usePostData<PostUnBlockData, PostUnBlockVariables>(`user/unblock`)
+  const {
+    startPost: startPostFollowRequest,
+    isLoading: isLoadingFollow,
+  } = usePostData<PostFollowData, PostFollowVariables>(`user/follow`)
+  const {
+    startPost: startPostUnFollowRequest,
+    isLoading: isLoadingUnFollow,
+  } = usePostData<PostUnFollowData, PostUnFollowVariables>(`user/unfollow`)
 
-  // TODO: unnecessary???
-  useEffect(() => {
-    return cancel("unmounting")
-  }, [])
+  if (!isLoadingCurrentUser && !isLoading && isOwnProfile && !currentUser?.id)
+    return <Redirect to="/login" />
 
-  if (isLoadingCurrentUser || isLoading) return <Loader />
+  if (!isLoadingCurrentUser && isEditing) return <Redirect to="/profile/edit" />
 
-  if (isOwnProfile && !currentUser?.id) return <Redirect to="/login" />
-  if (isEditing) return <Redirect to="/profile/edit" />
-
-  const handleClick = async (e: React.MouseEvent, type) => {
+  const handleClick = async (
+    e: React.MouseEvent,
+    type: "block" | "unblock" | "follow" | "unfollow"
+  ) => {
     e.preventDefault()
 
-    // if (isLoading) return
+    if (
+      !isLoadingBlock &&
+      !isLoadingUnBlock &&
+      !isLoadingFollow &&
+      !isLoadingUnFollow
+    ) {
+      if (type === "block") await startPostBlockRequest({ idTarget: id })
+      else if (type === "unblock")
+        await startPostUnBlockRequest({ idTarget: id })
+      else if (type === "follow") await startPostFollowRequest({ idTarget: id })
+      else if (type === "unfollow")
+        await startPostUnFollowRequest({ idTarget: id })
 
-    // setIsLoading(true)
-
-    // const { setCurrentUserContext } = updateCurrentUser({ id, type }, "rate")
-
-    // params && params.name && (await setCurrentUserContext())
-    // setIsLoading(false)
+      refetch()
+    }
   }
 
   return (
@@ -96,10 +146,11 @@ const Profile: FC<Props> = ({ params }) => {
       {!isOwnProfile && (
         <Button
           isActive={isFollowed}
+          isLoading={isLoadingFollow || isLoadingUnFollow}
           type="primary"
           className={`button`}
           to={`${isFollowed ? "un" : ""}follow`}
-          onClick={e => handleClick(e, "follow")}
+          onClick={e => handleClick(e, isFollowed ? "unfollow" : "follow")}
         >
           {(isFollowed ? "Unf" : "F") + "ollow!"}
         </Button>
@@ -125,9 +176,10 @@ const Profile: FC<Props> = ({ params }) => {
         <Button
           type="danger"
           isActive={isBlocked}
+          isLoading={isLoadingBlock || isLoadingUnBlock}
           className={`button`}
           to={`/${isBlocked ? "un" : ""}block`}
-          onClick={e => handleClick(e, "block")}
+          onClick={e => handleClick(e, isBlocked ? "unblock" : "block")}
         >
           {(isBlocked ? "Unb" : "B") + "lock!"}
         </Button>

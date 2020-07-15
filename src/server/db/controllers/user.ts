@@ -1,11 +1,6 @@
 import isURL from "validator/lib/isURL"
 import { Request, Response, NextFunction } from "express"
-import {
-  handleErrors,
-  sanitize,
-  setErrorType,
-  setResponseData,
-} from "../../utils"
+import { sanitize, setErrorType, setResponseData } from "../../utils"
 import {
   BLOCK_USER_ERROR,
   CHECK_DISPLAY_NAME_ERROR,
@@ -17,42 +12,53 @@ import {
   UPDATE_PROFILE_ERROR,
 } from "../types"
 import User, { UserModel } from "../models/User"
-import BlockedList from "../models/BlockedList"
-import FollowList from "../models/FollowList"
-import { UserData, GetUserData } from "../../../app/contexts/UserContext"
+import BlockedList, { BlockedListModel } from "../models/BlockedList"
+import FollowList, { FollowListModel } from "../models/FollowList"
+import { GetUserData } from "../../../app/contexts/UserContext"
 import {
   IsNameAvailableData,
   UpdateProfileData,
   UpdateProfileVariables,
 } from "src/app/User/EditProfile"
+import {
+  PostFollowData,
+  PostUnBlockData,
+  PostUnFollowData,
+  PostBlockData,
+} from "src/app/User/Profile"
 
-export function block(req, res) {
-  const { targetUser } = req.body
-  const userId = res.locals.user.id
+const block = async (req: Request, res: Response, next: NextFunction) => {
+  setErrorType(res, "POST_Block_ERROR")
+  const { idTarget } = req.body
+  const idUser = req.user?.id
 
-  User.findById(targetUser)
+  const user: UserModel = await User.findById(idTarget).lean().exec()
+
+  if (!user) throw Error("USER_NOT_FOUND")
+
+  const block: BlockedListModel[] = await BlockedList.find({ idUser, idTarget })
+    .lean()
     .exec()
-    .then(user =>
-      user
-        ? ""
-        : Promise.reject({ errors: { id: { message: USER_NOT_FOUND } } })
-    )
-    .then(() => BlockedList.findOne({ by: userId, user: targetUser }).exec())
-    .then(b =>
-      b
-        ? Promise.reject({
-            errors: { blocked: { message: "User already blocked!" } },
-          })
-        : ""
-    )
-    .then(() => {
-      const newBlock = new BlockedList({ by: userId, user: targetUser })
-      return newBlock.save()
+
+  if (block.length !== 0) {
+    setResponseData(res, {
+      error: {
+        shouldShow: false,
+        type: "profile",
+        message: "Already blocking user.",
+      },
     })
-    .then(() =>
-      res.json({ status: "User successfully blocked!", type: "blocked" })
-    )
-  // .catch(e => res.json(handleErrors(BLOCK_USER_ERROR, e)))
+
+    return next()
+  }
+
+  const newBlock = new BlockedList({ idUser, idTarget })
+
+  newBlock.save()
+
+  const responseData: PostBlockData = { status: "success" }
+
+  setResponseData(res, responseData)
 }
 
 const checkDisplayName = async (req: Request, res: Response) => {
@@ -68,34 +74,38 @@ const checkDisplayName = async (req: Request, res: Response) => {
 
   setResponseData(res, responseData)
 }
+const follow = async (req: Request, res: Response, next: NextFunction) => {
+  setErrorType(res, "POST_FOLLOW_ERROR")
+  const { idTarget } = req.body
+  const idUser = req.user?.id
 
-export function follow(req, res) {
-  const { targetUser } = req.body
-  const userId = res.locals && res.locals.user ? res.locals.user.id : null
+  const user: UserModel = await User.findById(idTarget).lean().exec()
 
-  User.findById(targetUser)
+  if (!user) throw Error("USER_NOT_FOUND")
+
+  const follow: FollowListModel[] = await FollowList.find({ idUser, idTarget })
+    .lean()
     .exec()
-    .then(user =>
-      user
-        ? ""
-        : Promise.reject({ errors: { id: { message: USER_NOT_FOUND } } })
-    )
-    .then(() => FollowList.findOne({ from: userId, to: targetUser }).exec())
-    .then(b =>
-      b
-        ? Promise.reject({
-            errors: { message: { followed: "User already followed!" } },
-          })
-        : ""
-    )
-    .then(() => {
-      const newFollow = new FollowList({ from: userId, to: targetUser })
-      return newFollow.save()
+
+  if (follow.length !== 0) {
+    setResponseData(res, {
+      error: {
+        shouldShow: false,
+        type: "profile",
+        message: "Already following user.",
+      },
     })
-    .then(() =>
-      res.json({ status: "User successfully followed!", type: "followed" })
-    )
-  // .catch(e => res.json(handleErrors(FOLLOW_USER_ERROR, e)))
+
+    return next()
+  }
+
+  const newFollow = new FollowList({ idUser, idTarget })
+
+  newFollow.save()
+
+  const responseData: PostFollowData = { status: "success" }
+
+  setResponseData(res, responseData)
 }
 
 const getUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -122,31 +132,30 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
     return next()
   }
 
-  const userFromDB: UserModel = await User.findOne(search)
+  const userFromDB: UserModel[] = await User.find(search)
     .select("-idGoogle -social")
     .lean()
     .exec()
 
-  if (!userFromDB) throw Error("INVALID_ID")
+  if (userFromDB.length === 0) throw Error("INVALID_ID")
 
-  const { _id, _v, ...user } = userFromDB
+  const { _id, _v, ...user } = userFromDB[0]
   const isFollowed = idUser
-    ? FollowList.findOne({
-        from: idUser,
-        to: _id,
+    ? await FollowList.find({
+        idUser,
+        idTarget: _id,
       })
         .lean()
         .exec()
     : []
   const isBlocked = idUser
-    ? BlockedList.findOne({
-        by: idUser,
-        user: _id,
+    ? await BlockedList.find({
+        idUser,
+        idTarget: _id,
       })
         .lean()
         .exec()
     : []
-
   const responseData: GetUserData = {
     user: {
       id: _id,
@@ -200,48 +209,28 @@ export function setDisplayName(req, res) {
   // .catch(e => res.json(handleErrors(SET_DISPLAY_NAME_ERROR, e)))
 }
 
-export function unblock(req, res) {
-  const userId = res.locals.user.id
-  const { targetUser } = req.body
+const unblock = async (req: Request, res: Response) => {
+  setErrorType(res, "POST_UNBLOCK_ERROR")
+  const { idTarget } = req.body
+  const idUser = req.user?.id
 
-  BlockedList.findOneAndDelete({ by: userId, user: targetUser })
-    .exec()
-    .then(block =>
-      block
-        ? res.json({ status: "User successfully unblocked!", type: "blocked" })
-        : Promise.reject({
-            errors: {
-              block: {
-                message: "You can't unblock someone if they aren't blocked!",
-              },
-            },
-          })
-    )
-  // .catch(e => res.json(handleErrors(BLOCK_USER_ERROR, e)))
+  await BlockedList.findOneAndDelete({ idUser, idTarget })
+
+  const responseData: PostUnBlockData = { status: "success" }
+
+  setResponseData(res, responseData)
 }
 
-export function unfollow(req, res) {
-  const userId = res.locals && res.locals.user ? res.locals.user.id : null
-  const { targetUser } = req.body
+const unfollow = async (req: Request, res: Response) => {
+  setErrorType(res, "POST_UNFOLLOW_ERROR")
+  const { idTarget } = req.body
+  const idUser = req.user?.id
 
-  FollowList.findOneAndDelete({ from: userId, to: targetUser })
-    .exec()
-    .then(follow =>
-      follow
-        ? res.json({
-            status: "User successfully unfollowed!",
-            type: "followed",
-          })
-        : Promise.reject({
-            errors: {
-              block: {
-                message:
-                  "You can't unfollowed someone if you don't follow them!",
-              },
-            },
-          })
-    )
-  // .catch(e => res.json(handleErrors(FOLLOW_USER_ERROR, e)))
+  await FollowList.findOneAndDelete({ idUser, idTarget })
+
+  const responseData: PostUnFollowData = { status: "success" }
+
+  setResponseData(res, responseData)
 }
 
 const updateProfile = async (
@@ -386,4 +375,12 @@ const updateProfile = async (
   setResponseData(res, responseData)
 }
 
-export { checkDisplayName, getUser, updateProfile }
+export {
+  block,
+  checkDisplayName,
+  follow,
+  getUser,
+  unblock,
+  unfollow,
+  updateProfile,
+}
