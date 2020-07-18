@@ -1,47 +1,48 @@
-import styled from "styled-components";
-import theme from "../theme";
-import { Box } from "../components/Box.style";
+import styled from "styled-components"
+import theme from "../theme"
+import { Box } from "../components/Box.style"
+import Button from "../components/Button/styles"
+import { Header, Base } from "../Typography/Typography.style"
 
-const StyledProfile = styled(Box)`
-  display: grid;
-  grid-template-rows: calc(${theme.font.header2} + ${theme.base.gutter}px) calc(
+export const AvatarWrapper = styled.div({
+  display: "grid",
+  gridColumn: 1,
+  gridRow: "1 / span 2",
+  width: "150px",
+  height: "150px",
+  "> img": {
+    maxWidth: "100%",
+    maxHeight: "100%",
+    justifySelf: "center",
+    alignSelf: "center",
+  },
+})
+
+export const Profile = styled(Box)({
+  display: "grid",
+  gridTemplateRows: `calc(${theme.font.header2} + ${theme.base.gutter}px) calc(
       147px - calc(${theme.font.header2} + ${theme.base.gutter}px)
-    );
-  justify-content: center;
-  justify-self: center;
-  grid-row-gap: ${theme.base.gutter / 2}px;
-  word-break: break-all;
-  margin-top: ${theme.base.gutter / 2}px;
-  > .avatar {
-    display: grid;
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    width: 150px;
-    height: 150px;
-    > .image {
-      max-width: 100%;
-      max-height: 100%;
-      justify-self: center;
-      align-self: center;
-    }
-  }
-  > .title {
-    grid-column: 2;
-    min-width: 360px;
-    max-width: 500px;
-    overflow: hidden;
-    padding: 0;
-  }
-  > .bio {
-    grid-column: 2;
-    max-width: 500px;
-    overflow: hidden;
-    text-align: justify;
-    padding: ${theme.base.gutter / 2}px;
-  }
-  > .button {
-    grid-column: 1 / span 2;
-  }
-`;
-
-export default StyledProfile;
+    )`,
+  justifyContent: "center",
+  justifySelf: "center",
+  gridRowGap: `${theme.base.gutter / 2}px`,
+  wordBreak: "break-all",
+  marginTop: `${theme.base.gutter / 2}px`,
+  [`${Header}`]: {
+    gridColumn: 2,
+    minWidth: "360px",
+    maxWidth: "500px",
+    overflow: "hidden",
+    padding: 0,
+  },
+  [`${Base}`]: {
+    gridColumn: 2,
+    maxWidth: "500px",
+    overflow: "hidden",
+    textAlign: "justify",
+    padding: `${theme.base.gutter / 2}px`,
+  },
+  [`${Button}`]: {
+    gridColumn: "1 / span 2",
+  },
+})

@@ -3,7 +3,7 @@ import { Link, Redirect, useRouteMatch } from "react-router-dom"
 import { UserContext, GetUserData, emptyUser } from "../contexts/UserContext"
 import Loader from "../Loader"
 import { Header, Base } from "../Typography/Typography.style"
-import StyledProfile from "./Profile.style"
+import * as Styled from "./Profile.style"
 import { Button } from "../components"
 import useGetData from "../hooks/useGetData"
 import usePostData from "../hooks/usePostData"
@@ -54,8 +54,7 @@ const Profile: FC<Props> = ({ params }) => {
   )
   const isOwnProfile = !name || name === currentUser?.displayName
 
-  // TODO: find a better way than returning an object
-  const { cancel, data, isLoading, refetch } = useGetData<GetUserData>(
+  const { data, isLoading, refetch } = useGetData<GetUserData>(
     name ? `user/${name}` : ""
   )
 
@@ -135,14 +134,12 @@ const Profile: FC<Props> = ({ params }) => {
   }
 
   return (
-    <StyledProfile>
-      <div className="avatar">
-        <img className="image" src={avatar ?? ""} alt="avatar" />
-      </div>
-      <Header centered className="title">
-        {displayName}
-      </Header>
-      <Base className="bio">{bio}</Base>
+    <Styled.Profile>
+      <Styled.AvatarWrapper>
+        <img src={avatar ?? ""} alt="avatar" />
+      </Styled.AvatarWrapper>
+      <Header centered>{displayName}</Header>
+      <Base>{bio}</Base>
       {!isOwnProfile && (
         <Button
           isActive={isFollowed}
@@ -155,20 +152,16 @@ const Profile: FC<Props> = ({ params }) => {
           {(isFollowed ? "Unf" : "F") + "ollow!"}
         </Button>
       )}
-      <Button type="primary" className="button" to={`/posts/${displayName}`}>
+      <Button type="primary" to={`/posts/${displayName}`}>
         Posts
       </Button>
       {!isOwnProfile && (
-        <Button
-          type="primary"
-          className="button"
-          to={`/message/${displayName}`}
-        >
+        <Button type="primary" to={`/message/${displayName}`}>
           Send a message
         </Button>
       )}
       {isOwnProfile && (
-        <Button type="primary" className="button" to={`/profile/edit`}>
+        <Button type="primary" to={`/profile/edit`}>
           Edit profile
         </Button>
       )}
@@ -177,7 +170,6 @@ const Profile: FC<Props> = ({ params }) => {
           type="danger"
           isActive={isBlocked}
           isLoading={isLoadingBlock || isLoadingUnBlock}
-          className={`button`}
           to={`/${isBlocked ? "un" : ""}block`}
           onClick={e => handleClick(e, isBlocked ? "unblock" : "block")}
         >
@@ -191,13 +183,12 @@ const Profile: FC<Props> = ({ params }) => {
             e.preventDefault()
             await logout()
           }}
-          className={`button`}
           to="/logout"
         >
           Logout
         </Button>
       )}
-    </StyledProfile>
+    </Styled.Profile>
   )
 }
 
