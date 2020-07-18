@@ -251,6 +251,7 @@ const updateProfile = async (
   if (!hasDisplayName && !displayName) {
     setResponseData(res, {
       error: {
+        shouldShow: true,
         type: "profile",
         message:
           "You cannot update your profile without setting a displayname!",
@@ -260,9 +261,10 @@ const updateProfile = async (
     return next()
   }
 
-  if (hasDisplayName && displayName) {
+  if (hasDisplayName && displayName && displayName !== user.displayName) {
     setResponseData(res, {
       error: {
+        shouldShow: true,
         type: "profile",
         message: "Once set, you cannot change your displayname!",
       },
@@ -277,6 +279,7 @@ const updateProfile = async (
     if (sanitizedDisplayName.length < 3) {
       setResponseData(res, {
         error: {
+          shouldShow: true,
           type: "profile",
           message: "Your displayname shouldn't be less than 3 characters long!",
         },
@@ -300,6 +303,7 @@ const updateProfile = async (
     if (isDisplayNameUnique.length > 0) {
       setResponseData(res, {
         error: {
+          shouldShow: true,
           type: "profile",
           message: "That displayname is not available!",
         },
