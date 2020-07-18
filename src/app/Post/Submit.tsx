@@ -10,12 +10,10 @@ import getYoutubeId from "../../util/getYoutubeId"
 import { post, APIRequestInteface } from "../requests/api"
 import validateField from "./utils"
 import { PostData } from "../contexts/PostsContext"
+import useGetData from "../hooks/useGetData"
 
-interface PostGetImagesInterface
-  extends APIRequestInteface<PostGetImagesData> {}
-interface PostSubmitInterface extends APIRequestInteface<PostSubmitData> {}
-export interface PostGetImagesData {
-  html: any
+export interface PostGetMediaData {
+  html: string
 }
 export interface PostSubmitData {
   post: PostData
@@ -128,51 +126,33 @@ const Submit: FC<Props> = () => {
     images,
     tags,
   } = state
-  const [isImageLoading, setIsImageLoading] = useState(false)
   const [validationMessage, setValidationMessage] = useState<{
     [key: string]: string[]
   }>(initialValidationMessages)
   const { addError } = useContext(ErrorContext)
+  const idYoutube = getYoutubeId(fieldUrl)
+  const { data: imageData, isLoading: isMediaLoading, refetch } = useGetData<
+    PostGetMediaData
+  >(idYoutube ? `media/${idYoutube}` : "")
 
-  // Move this to input change
-  useEffect(() => {
+  const handleMediaChange = (e: React.FormEvent<HTMLInputElement>) => {
+    handleInput(e, "changeUrl", "url")
+
     const validationError: string[] = []
 
-    if (isURL(fieldUrl) && !isImageLoading) {
-      const videoId = getYoutubeId(fieldUrl)
-      if (!videoId) {
-        setIsImageLoading(true)
-        const { getData, cancel, getHasFailed }: PostGetImagesInterface = post<
-          PostGetImagesData
-        >("/get/images", { url: fieldUrl }, () =>
-          addError({ submitImageLoading: ["some error message here"] })
-        )
-        ;(async () => {
-          const response = await getData()
-          if (getHasFailed() || !response)
-            return addError({
-              submitImageLoading: [`post get images request failed`],
-            })
+    if (isURL(fieldUrl) && !isMediaLoading) {
+      const html = imageData?.html
 
-          const {
-            data: { error, html },
-          } = response
+      if (html && !idYoutube) {
+        const parser = new DOMParser()
+        const document = parser.parseFromString(html, "text/html")
+        const images = Array.from(document.getElementsByTagName("img"))
+          .map(a => a.src)
+          .filter((img, i, self) => self.indexOf(img) === i)
 
-          if (error) return addError(error.message, error.type)
-
-          const parser = new DOMParser()
-          const wrapper = parser.parseFromString(html, "text/html")
-          // @ts-ignore
-          const imgs = [...wrapper.getElementsByTagName("img")]
-            .map(a => a.src)
-            .filter((img, i, self) => self.indexOf(img) === i)
-          dispatch({ type: "changeImages", payload: imgs })
-          setIsImageLoading(false)
-        })()
-
-        return cancel
-      } else {
-        const imageTemplate = `https://img.youtube.com/vi/${videoId}/0.jpg`
+        dispatch({ type: "changeImages", payload: images })
+      } else if (html) {
+        const imageTemplate = `https://img.youtube.com/vi/${idYoutube}/0.jpg`
         dispatch({ type: "changeImages", payload: [imageTemplate] })
       }
     } else {
@@ -184,10 +164,9 @@ const Submit: FC<Props> = () => {
       ? setValidationMessage({ ...validationMessage, url: validationError })
       : setValidationMessage({ ...validationMessage, url: [] })
     dispatch({ type: "changeSelectedImages", payload: [] })
-  }, [fieldUrl])
+  }
 
   useEffect(() => {
-    // rest form
     dispatch({ type: "reset" })
     // initialize validation errors
     const validationErrors = {}
@@ -215,7 +194,7 @@ const Submit: FC<Props> = () => {
       tags,
     }
 
-    setIsImageLoading(true)
+    // @ts-ignore
     const { getData, cancel, getHasFailed }: PostSubmitInterface = post<
       PostSubmitData
     >("/submit", data, () => addError({ submit: ["some error message here"] }))
@@ -234,7 +213,7 @@ const Submit: FC<Props> = () => {
   }
 
   const handleInput = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.FormEvent<HTMLInputElement>,
     actionType: ActionType["type"],
     validationType: FieldTypes
   ) => {
@@ -268,7 +247,7 @@ const Submit: FC<Props> = () => {
       })
   }
 
-  const handleImageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageInput = (e: React.FormEvent<HTMLInputElement>) => {
     const newImage = e.currentTarget.value
     const validationErrors = validateField("images", [
       images,
@@ -420,7 +399,7 @@ const Submit: FC<Props> = () => {
         </Header>
         <Input
           className="input input--text"
-          onChange={e => handleInput(e, "changeUrl", "url")}
+          onChange={e => handleMediaChange(e)}
           placeholder="Will automatically load images from the url to choose from"
           value={fieldUrl}
         />
@@ -429,14 +408,14 @@ const Submit: FC<Props> = () => {
             Choose an image
           </Header>
         )}
-        {images.length === 0 && fieldUrl && !isImageLoading && (
+        {images.length === 0 && fieldUrl && !isMediaLoading && (
           <Error className="image-text">
             Couldn't find any images on the url (you can instead add your own
             choice of url below).
             <br /> Only images bigger than 500*500 px are valid.
           </Error>
         )}
-        {isImageLoading && (
+        {isMediaLoading && (
           <Warning className="label" size={1} centered>
             Loading images from {fieldUrl}...
           </Warning>
@@ -503,7 +482,7 @@ const Submit: FC<Props> = () => {
         />
         {Object.keys(validationMessage).filter(k => validationMessage[k])
           .length !== 0 ? (
-          <Button type="danger" as="ul" className="button">
+          <Button type="danger" className="button">
             {validationMessage.title?.map(e => (
               <li key={e} className="error">
                 {e}
@@ -534,7 +513,6 @@ const Submit: FC<Props> = () => {
         ) : (
           <Button
             type="primary"
-            as={Link}
             className={"button"}
             onClick={e => handleSubmit(e)}
             to="/add"
