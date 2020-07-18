@@ -148,7 +148,7 @@ const Submit: FC<Props> = () => {
         const document = parser.parseFromString(html, "text/html")
         const images = Array.from(document.getElementsByTagName("img"))
           .map(a => a.src)
-          .filter((img, i, self) => self.indexOf(img) === i)
+          .filter((image, i, self) => self.indexOf(image) === i)
 
         dispatch({ type: "changeImages", payload: images })
       } else if (html) {
@@ -168,12 +168,13 @@ const Submit: FC<Props> = () => {
 
   useEffect(() => {
     dispatch({ type: "reset" })
-    // initialize validation errors
     const validationErrors = {}
+
     Object.keys(validationMessage).forEach(key => {
-      const field = state["field" + key.slice(0, 1).toUpperCase + key.slice(1)]
+      const fieldName = "field" + key.slice(0, 1).toUpperCase() + key.slice(1)
+      const value = state[fieldName]
       // @ts-ignore
-      const validationError = validateField(key, [field, "", ""])
+      const validationError = validateField(key, [value, "", ""])
       validationErrors[key] = validationError
     })
   }, [])
@@ -482,7 +483,7 @@ const Submit: FC<Props> = () => {
         />
         {Object.keys(validationMessage).filter(k => validationMessage[k])
           .length !== 0 ? (
-          <Button type="danger" className="button">
+          <Button type="danger" className="button" to="">
             {validationMessage.title?.map(e => (
               <li key={e} className="error">
                 {e}

@@ -1,7 +1,7 @@
 import { FieldTypes } from "./Submit"
 
 const validateField = (type: FieldTypes, fields) => {
-  const errors: { [type: string]: string[] } = { type: [] }
+  const errors: { [type: string]: string[] } = { [type]: [] }
   switch (type) {
     case "description":
       if (!fields[0])
@@ -20,7 +20,7 @@ const validateField = (type: FieldTypes, fields) => {
           "The description shouldn't be more than 300 characters long!",
         ]
       break
-    case "images":
+    case "customImage":
       if (fields[0].includes(fields[1]))
         errors[type] = [...errors[type], "Image is already on the list."]
       else if (fields[2].length > 9)
@@ -53,9 +53,9 @@ const validateField = (type: FieldTypes, fields) => {
       else if (tags.split(",").length > 30)
         errors[type] = [
           ...errors[type],
-          `Your post can't have more than 30 tags: please remove ${tags.split(
-            ","
-          ).length - 30} of them!`,
+          `Your post can't have more than 30 tags: please remove ${
+            tags.split(",").length - 30
+          } of them!`,
         ]
       break
     case "title":
