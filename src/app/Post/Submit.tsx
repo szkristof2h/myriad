@@ -1,5 +1,5 @@
 import React, { FC, useContext, useEffect, useState, useReducer } from "react"
-import { Link, useHistory } from "react-router-dom"
+import { Link, useHistory, Redirect } from "react-router-dom"
 import isURL from "validator/lib/isURL"
 import { ErrorContext } from "../contexts/ErrorContext"
 import StyledSubmit from "./Submit.style"
@@ -11,12 +11,21 @@ import { post, APIRequestInteface } from "../requests/api"
 import validateField from "./utils"
 import { PostData } from "../contexts/PostsContext"
 import useGetData from "../hooks/useGetData"
+import usePostData from "../hooks/usePostData"
 
 export interface PostGetMediaData {
   html: string
 }
 export interface PostSubmitData {
   post: PostData
+}
+
+interface PostSubmitVariables {
+  description: string
+  images: string[]
+  link: string
+  title: string
+  tags: string[]
 }
 
 interface Props {}
@@ -134,6 +143,24 @@ const Submit: FC<Props> = () => {
   const { data: imageData, isLoading: isMediaLoading, refetch } = useGetData<
     PostGetMediaData
   >(idYoutube ? `media/${idYoutube}` : "")
+  const {
+    data: submitData,
+    isLoading: isLoadingSubmit,
+    startPost: startPostRequest,
+  } = usePostData<PostSubmitData, PostSubmitVariables>(`submit`)
+
+  useEffect(() => {
+    dispatch({ type: "reset" })
+    const validationErrors = {}
+
+    Object.keys(validationMessage).forEach(key => {
+      const fieldName = "field" + key.slice(0, 1).toUpperCase() + key.slice(1)
+      const value = state[fieldName]
+      // @ts-ignore
+      const validationError = validateField(key, [value, "", ""])
+      validationErrors[key] = validationError
+    })
+  }, [])
 
   const handleMediaChange = (e: React.FormEvent<HTMLInputElement>) => {
     handleInput(e, "changeUrl", "url")
@@ -166,21 +193,9 @@ const Submit: FC<Props> = () => {
     dispatch({ type: "changeSelectedImages", payload: [] })
   }
 
-  useEffect(() => {
-    dispatch({ type: "reset" })
-    const validationErrors = {}
-
-    Object.keys(validationMessage).forEach(key => {
-      const fieldName = "field" + key.slice(0, 1).toUpperCase() + key.slice(1)
-      const value = state[fieldName]
-      // @ts-ignore
-      const validationError = validateField(key, [value, "", ""])
-      validationErrors[key] = validationError
-    })
-  }, [])
-
-  const handleSubmit = (e: React.MouseEvent) => {
+  const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault()
+
     const isValid =
       Object.keys(validationMessage).filter(key => validationMessage[key])
         .length === 0
@@ -195,22 +210,9 @@ const Submit: FC<Props> = () => {
       tags,
     }
 
-    // @ts-ignore
-    const { getData, cancel, getHasFailed }: PostSubmitInterface = post<
-      PostSubmitData
-    >("/submit", data, () => addError({ submit: ["some error message here"] }))
-    ;(async () => {
-      const response = await getData()
-      if (getHasFailed() || !response)
-        return addError({ submit: [`post submit post request failed`] })
+    await startPostRequest(data)
 
-      const {
-        data: { error, post },
-      } = response
-
-      if (error) return addError(error.message, error.type)
-      history.push(`/submit/${post.id}`)
-    })()
+    history.push(`/submit/${submitData?.post.id}`)
   }
 
   const handleInput = (
@@ -515,6 +517,7 @@ const Submit: FC<Props> = () => {
           <Button
             type="primary"
             className={"button"}
+            isLoading={isLoadingSubmit}
             onClick={e => handleSubmit(e)}
             to="/add"
           >
