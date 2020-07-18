@@ -13,9 +13,7 @@ export interface GetData<T> {
 const useGetData = <T = any>(url: string): GetData<T> => {
   const [data, setData] = useState<T | undefined>()
   const [isLoading, setIsLoading] = useState(false)
-  const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {
-    var b = 42
-  })
+  const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {})
   const [shouldRefetch, setShouldRefetch] = useState(false)
   const [previousUrl, setPreviousUrl] = useState("")
   const { addError } = useContext(ErrorContext)

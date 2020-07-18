@@ -1,6 +1,6 @@
 import React, { FC, useState, useContext, useEffect } from "react"
 import { Link, Redirect } from "react-router-dom"
-import StyledEditProfile from "./EditProfile.style"
+import * as Styled from "./EditProfile.style"
 import { Button, Input, TextArea } from "../components"
 import { Header } from "../Typography/Typography.style"
 import useGetData from "../hooks/useGetData"
@@ -88,7 +88,7 @@ const EditProfile: FC = () => {
   if (!currentUser) return <Redirect to="/login" />
 
   return (
-    <StyledEditProfile>
+    <Styled.EditProfile>
       <Header centered size={2} className="header">
         Edit your profile
       </Header>
@@ -118,12 +118,13 @@ const EditProfile: FC = () => {
       />
       <Button
         type="primary"
+        isLoading={false}
         onClick={async e => await handleSubmit(e)}
         to="profile/update"
       >
         Save
       </Button>
-    </StyledEditProfile>
+    </Styled.EditProfile>
   )
 }
 
