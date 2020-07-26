@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import sanitizeHtml from "sanitize-html"
 import axios from "axios"
-import { handleErrors, setErrorType } from "./utils"
+import { setErrorType, setResponseData } from "./utils"
 import {
   getPosts,
   getPost,
@@ -28,36 +28,18 @@ import {
   checkDisplayName,
 } from "./db/controllers/user"
 import { google, logout } from "./authenticate"
-import User from "./db/models/User"
 
 export const init = app => {
   const getSiteImages = async (req: Request, res: Response) => {
     setErrorType(res, "GET_SITE_IMAGES")
+
     const response = await axios.get(req.body.url)
-    const clean = sanitizeHtml(response.data, {
+    const cleanHTML = sanitizeHtml(response.data, {
       allowedTags: ["img"],
     })
 
-    res.send(clean)
+    setResponseData(res, { html: cleanHTML })
   }
-
-  // const getUserInfo = (req, res, next) => {
-  //   if (!req.user || req.user.id) next()
-
-  //   const user = User.findById(req.user.id).lean().exec()
-
-  //   if (!user) next()
-
-  //   req.user = {
-  //     displayName: user.displayName,
-  //     firstName: user.firstName,
-  //     lastName: user.lastName,
-  //     id: user.id,
-  //   }
-
-  //   next()
-  // }
-  // app.use(getUserInfo)
 
   const authenticate = (req: Request, res: Response, next: NextFunction) => {
     if (req.user)
@@ -76,7 +58,7 @@ export const init = app => {
   app.postAsync("/post/logout", logout)
 
   // Routes
-  app.postAsync("/get/images", authenticate, getSiteImages)
+  app.postAsync("/get/media/:url", authenticate, getSiteImages)
 
   app.getAsync("/get/tags", getTags)
 

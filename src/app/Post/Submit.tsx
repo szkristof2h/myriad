@@ -1,5 +1,5 @@
 import React, { FC, useContext, useEffect, useState, useReducer } from "react"
-import { Link, useHistory, Redirect } from "react-router-dom"
+import { Link, useHistory } from "react-router-dom"
 import isURL from "validator/lib/isURL"
 import { ErrorContext } from "../contexts/ErrorContext"
 import StyledSubmit from "./Submit.style"
@@ -7,7 +7,6 @@ import { Box } from "../components/Box.style"
 import { Input, Button } from "../components"
 import { Header, Error, Warning } from "../Typography/Typography.style"
 import getYoutubeId from "../../util/getYoutubeId"
-import { post, APIRequestInteface } from "../requests/api"
 import validateField from "./utils"
 import { PostData } from "../contexts/PostsContext"
 import useGetData from "../hooks/useGetData"
@@ -25,7 +24,7 @@ interface PostSubmitVariables {
   images: string[]
   link: string
   title: string
-  tags: string[]
+  tags: string
 }
 
 interface Props {}
@@ -57,7 +56,6 @@ interface ActionType {
 }
 
 export type FieldTypes =
-  | "customImage"
   | "description"
   | "images"
   | "tag"
@@ -73,7 +71,7 @@ const initialState: SubmitFields = {
   fieldSelectedImages: [],
   fieldTitle: "",
   fieldUrl: "",
-  images: [""],
+  images: [],
   tags: "",
 }
 
@@ -94,7 +92,7 @@ const reducer = (state: SubmitFields, action: ActionType) => {
     case "changeTitle":
       return { ...state, fieldTitle: action.payload }
     case "changeUrl":
-      return { ...state, url: action.payload }
+      return { ...state, fieldUrl: action.payload }
     case "removeTag":
       return {
         ...state,
@@ -112,14 +110,14 @@ const reducer = (state: SubmitFields, action: ActionType) => {
 
 // quick fix for type errors
 const initialValidationMessages = {
-  customImage: [""],
-  description: [""],
-  images: [""],
-  tag: [""],
-  selectedImages: [""],
-  tags: [""],
-  title: [""],
-  url: [""],
+  customImage: [],
+  description: [],
+  images: [],
+  tag: [],
+  selectedImages: [],
+  tags: [],
+  title: [],
+  url: [],
 }
 
 const Submit: FC<Props> = () => {
@@ -134,20 +132,46 @@ const Submit: FC<Props> = () => {
     fieldUrl,
     images,
     tags,
-  } = state
+  }: SubmitFields = state
   const [validationMessage, setValidationMessage] = useState<{
     [key: string]: string[]
   }>(initialValidationMessages)
   const { addError } = useContext(ErrorContext)
   const idYoutube = getYoutubeId(fieldUrl)
-  const { data: imageData, isLoading: isMediaLoading, refetch } = useGetData<
+  // TODO: add throttle
+  const { data: imageData, isLoading: isMediaLoading } = useGetData<
     PostGetMediaData
-  >(idYoutube ? `media/${idYoutube}` : "")
+  >(
+    `media/${fieldUrl
+      .split("")
+      .map(ch => ch.charCodeAt(0))
+      .join("")}`,
+    { url: `${idYoutube ? idYoutube : fieldUrl}` }
+  )
   const {
     data: submitData,
     isLoading: isLoadingSubmit,
     startPost: startPostRequest,
   } = usePostData<PostSubmitData, PostSubmitVariables>(`submit`)
+  const requiredFields = [
+    "fieldDescription",
+    "fieldSelectedImages",
+    "fieldTitle",
+    "fieldTag",
+    "fieldUrl",
+  ]
+  const isFormEmpty =
+    !fieldCustomImage &&
+    !fieldDescription &&
+    !fieldTag &&
+    !fieldSelectedImages.length &&
+    !fieldTitle &&
+    !fieldUrl &&
+    !images.length &&
+    !tags
+  const hasRequiredFieldMissing = requiredFields.some(
+    fieldName => !state[fieldName]
+  )
 
   useEffect(() => {
     dispatch({ type: "reset" })
@@ -162,14 +186,17 @@ const Submit: FC<Props> = () => {
     })
   }, [])
 
-  const handleMediaChange = (e: React.FormEvent<HTMLInputElement>) => {
-    handleInput(e, "changeUrl", "url")
+  useEffect(() => {
+    if (!isMediaLoading && fieldUrl) {
+      handleMediaChange(fieldUrl)
+    }
+  }, [isMediaLoading, fieldUrl])
 
+  const handleMediaChange = (url: string) => {
     const validationError: string[] = []
 
-    if (isURL(fieldUrl) && !isMediaLoading) {
+    if (isURL(url)) {
       const html = imageData?.html
-
       if (html && !idYoutube) {
         const parser = new DOMParser()
         const document = parser.parseFromString(html, "text/html")
@@ -200,7 +227,7 @@ const Submit: FC<Props> = () => {
       Object.keys(validationMessage).filter(key => validationMessage[key])
         .length === 0
 
-    if (!isValid) return addError({ submit: ["Some fields aren't valid"] })
+    if (!isValid) return addError("submit", "Some fields aren't valid")
 
     const data = {
       description: fieldDescription,
@@ -220,18 +247,16 @@ const Submit: FC<Props> = () => {
     actionType: ActionType["type"],
     validationType: FieldTypes
   ) => {
+    const value = e.currentTarget.value
     dispatch({
       type: actionType,
-      payload: e.currentTarget.value,
+      payload: value,
     })
 
-    const validationErrors = validateField(validationType, [
-      state[
-        "field" +
-          validationType.slice(0, 1).toUpperCase +
-          validationType.slice(1)
-      ],
-    ])
+    const fieldName = `field${validationType
+      .slice(0, 1)
+      .toUpperCase()}${validationType.slice(1)}`
+    const validationErrors = validateField(validationType, [value])
 
     setValidationMessage({ ...validationMessage, ...validationErrors })
   }
@@ -276,7 +301,7 @@ const Submit: FC<Props> = () => {
         type: "changeCustomImage",
         payload: "",
       })
-      addError({ submitImage: [validationErrors.images[0]] })
+      addError("submitImage", validationErrors.images[0])
     } else {
       dispatch({ type: "changeCustomImage", payload: "Image added." })
       dispatch({ type: "changeImages", payload: [...images, newImage] })
@@ -299,7 +324,7 @@ const Submit: FC<Props> = () => {
       validationErrors.selectedImages[0] ===
       "You can't select more than 10 images!"
     )
-      addError({ submitImageSelect: [validationErrors.selectedImages[0]] })
+      addError("submitImageSelect", validationErrors.selectedImages[0])
     else {
       dispatch({
         type: "changeSelectedImages",
@@ -317,11 +342,11 @@ const Submit: FC<Props> = () => {
     ) {
       dispatch({
         type: "changeImages",
-        payload: images.filter(img => img !== index),
+        payload: images.filter((img, i) => i !== index),
       })
       dispatch({
         type: "changeSelectedImages",
-        payload: images.filter(img => img !== index),
+        payload: images.filter((img, i) => i !== index),
       })
     }
   }
@@ -330,12 +355,10 @@ const Submit: FC<Props> = () => {
     const validationErrors = validateField("tags", [tags])
 
     setValidationMessage({ ...validationMessage, ...validationErrors })
+
     dispatch({
       type: "removeTag",
-      payload: tags
-        .split(",")
-        .filter(tag => tag !== tagToRemove)
-        .join(","),
+      payload: tagToRemove,
     })
   }
 
@@ -346,14 +369,12 @@ const Submit: FC<Props> = () => {
     if (e.key === "," || e.key === "Enter") {
       if (fieldTag.length < 3)
         // move to validation?
-        addError({
-          submitTags: ["All tags should be at least 3 character long"],
-        })
+        addError("submitTags", "All tags should be at least 3 character long")
       else {
         if (fieldTag && !tags.split(",").includes(fieldTag))
           dispatch({
             type: "changeTags",
-            payload: `${tags ? `${tags}","` : ""}${fieldTag}`,
+            payload: `${tags ? `${tags},` : ""}${fieldTag}`,
           })
 
         dispatch({
@@ -402,7 +423,7 @@ const Submit: FC<Props> = () => {
         </Header>
         <Input
           className="input input--text"
-          onChange={e => handleMediaChange(e)}
+          onChange={e => handleInput(e, "changeUrl", "url")}
           placeholder="Will automatically load images from the url to choose from"
           value={fieldUrl}
         />
@@ -423,7 +444,7 @@ const Submit: FC<Props> = () => {
             Loading images from {fieldUrl}...
           </Warning>
         )}
-        {images.map(image => (
+        {images.map((image, i) => (
           <Link
             key={image}
             className={`image-container ${
@@ -436,7 +457,7 @@ const Submit: FC<Props> = () => {
           >
             <img
               onError={() => handleOnImageError(image)}
-              onLoad={e => handleOnImageLoad(e, image)}
+              onLoad={e => handleOnImageLoad(e, i)}
               className="image"
               src={image}
             />
@@ -458,9 +479,9 @@ const Submit: FC<Props> = () => {
         <Header className="label" size={1} centered>
           Tags
         </Header>
-        {fieldTag && (
+        {(fieldTag || tags) && (
           <ul className="input input--text tag-list">
-            {fieldTag
+            {tags
               .split(",")
               .filter(tag => tag)
               .map(tag => (
@@ -483,7 +504,8 @@ const Submit: FC<Props> = () => {
           onKeyPress={e => handleTagInput(e)}
           value={fieldTag}
         />
-        {Object.keys(validationMessage).filter(k => validationMessage[k])
+        {!isFormEmpty &&
+        Object.keys(validationMessage).filter(k => validationMessage[k].length)
           .length !== 0 ? (
           <Button type="danger" className="button" to="">
             {validationMessage.title?.map(e => (
@@ -514,15 +536,18 @@ const Submit: FC<Props> = () => {
             ))}
           </Button>
         ) : (
-          <Button
-            type="primary"
-            className={"button"}
-            isLoading={isLoadingSubmit}
-            onClick={e => handleSubmit(e)}
-            to="/add"
-          >
-            Post
-          </Button>
+          !isFormEmpty &&
+          hasRequiredFieldMissing && (
+            <Button
+              type="primary"
+              className={"button"}
+              isLoading={isLoadingSubmit}
+              onClick={e => handleSubmit(e)}
+              to="/add"
+            >
+              Post
+            </Button>
+          )
         )}
       </StyledSubmit>
     </Box>
