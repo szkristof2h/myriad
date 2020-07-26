@@ -17,7 +17,8 @@ export interface APIPostRequestInteface<T> {
 const siteUrl = config.url
 const get = <T = any, R = AxiosResponse<T & APIResponseError>>(
   url: string,
-  handleErrors
+  handleErrors,
+  params?
 ) => {
   let hasFailed
   const getHasFailed = () => hasFailed
@@ -25,9 +26,13 @@ const get = <T = any, R = AxiosResponse<T & APIResponseError>>(
   const cancel = () => source.cancel()
   const data = async () => {
     try {
-      const getData: Promise<R> = axios.get(`${siteUrl}/get/${url}`, {
-        cancelToken: source.token,
-      })
+      const getData: Promise<R> = params
+        ? axios.post(`${siteUrl}/get/${url}`, params, {
+            cancelToken: source.token,
+          })
+        : axios.get(`${siteUrl}/get/${url}`, {
+            cancelToken: source.token,
+          })
 
       return await getData
     } catch (e) {

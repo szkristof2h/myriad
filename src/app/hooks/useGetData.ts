@@ -10,7 +10,7 @@ export interface GetData<T> {
   refetch: () => void
 }
 
-const useGetData = <T = any>(url: string): GetData<T> => {
+const useGetData = <T = any>(url: string, params?): GetData<T> => {
   const [data, setData] = useState<T | undefined>()
   const [isLoading, setIsLoading] = useState(false)
   const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {})
@@ -26,7 +26,8 @@ const useGetData = <T = any>(url: string): GetData<T> => {
 
       const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<T>(
         url,
-        addError
+        addError,
+        params
       )
 
       setCancel(() => cancel)
