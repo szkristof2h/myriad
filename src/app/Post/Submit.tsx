@@ -86,7 +86,7 @@ const reducer = (state: SubmitFields, action: ActionType) => {
     case "changeTag":
       return { ...state, fieldTag: action.payload }
     case "changeSelectedImages":
-      return { ...state, newTag: action.payload }
+      return { ...state, fieldSelectedImages: action.payload }
     case "changeTags":
       return { ...state, tags: action.payload }
     case "changeTitle":
@@ -328,9 +328,9 @@ const Submit: FC<Props> = () => {
     else {
       dispatch({
         type: "changeSelectedImages",
-        payload: images.includes(clickedImage)
-          ? images.filter(image => image !== clickedImage)
-          : [...images, clickedImage],
+        payload: fieldSelectedImages.includes(clickedImage)
+          ? fieldSelectedImages.filter(image => image !== clickedImage)
+          : [...fieldSelectedImages, clickedImage],
       })
     }
   }
@@ -346,7 +346,7 @@ const Submit: FC<Props> = () => {
       })
       dispatch({
         type: "changeSelectedImages",
-        payload: images.filter((img, i) => i !== index),
+        payload: fieldSelectedImages.filter((img, i) => i !== index),
       })
     }
   }
@@ -392,7 +392,7 @@ const Submit: FC<Props> = () => {
     })
     dispatch({
       type: "changeSelectedImages",
-      payload: images.filter(img => img !== image),
+      payload: fieldSelectedImages.filter(img => img !== image),
     })
   }
 
