@@ -2,7 +2,7 @@ import React, { FC, useContext, useEffect, useState, useReducer } from "react"
 import { Link, useHistory } from "react-router-dom"
 import isURL from "validator/lib/isURL"
 import { ErrorContext } from "../contexts/ErrorContext"
-import StyledSubmit from "./Submit.style"
+import StyledSubmit, { TagList, ImageContainer } from "./Submit.style"
 import { Box } from "../components/Box.style"
 import { Input, Button } from "../components"
 import { Header, Error, Warning } from "../Typography/Typography.style"
@@ -399,104 +399,91 @@ const Submit: FC<Props> = () => {
   return (
     <Box style={{ width: "100%" }}>
       <StyledSubmit>
-        <Header className="header" size={2} centered>
+        <Header size={2} centered>
           Submit a post!
         </Header>
-        <Header className="label" size={1} centered>
+        <Header size={1} centered>
           Title
         </Header>
         <Input
-          className="input input--text"
           onChange={e => handleInput(e, "changeTitle", "title")}
           value={fieldTitle}
         />
-        <Header className="label" size={1} centered>
+        <Header size={1} centered>
           Description
         </Header>
         <Input
-          className="input input--text"
           onChange={e => handleInput(e, "changeDescription", "description")}
           value={fieldDescription}
         />
-        <Header className="label" size={1} centered>
+        <Header size={1} centered>
           Link (to the original post)
         </Header>
         <Input
-          className="input input--text"
           onChange={e => handleInput(e, "changeUrl", "url")}
           placeholder="Will automatically load images from the url to choose from"
           value={fieldUrl}
         />
         {images.length !== 0 && (
-          <Header className="label" size={1} centered>
+          <Header size={1} centered>
             Choose an image
           </Header>
         )}
         {images.length === 0 && fieldUrl && !isMediaLoading && (
-          <Error className="image-text">
+          <Error>
             Couldn't find any images on the url (you can instead add your own
             choice of url below).
             <br /> Only images bigger than 500*500 px are valid.
           </Error>
         )}
         {isMediaLoading && (
-          <Warning className="label" size={1} centered>
+          <Warning size={1} centered>
             Loading images from {fieldUrl}...
           </Warning>
         )}
         {images.map((image, i) => (
-          <Link
+          <ImageContainer
+            isActive={!!fieldSelectedImages.includes(image)}
+            as={Link}
             key={image}
-            className={`image-container ${
-              fieldSelectedImages.includes(image)
-                ? "image-container--active"
-                : ""
-            }`}
             onClick={e => handleSelect(e, image)}
             to=""
           >
             <img
               onError={() => handleOnImageError(image)}
               onLoad={e => handleOnImageLoad(e, i)}
-              className="image"
               src={image}
             />
-          </Link>
+          </ImageContainer>
         ))}
         {fieldUrl && (
-          <Header className="label" size={1} centered>
+          <Header size={1} centered>
             Image (url)
           </Header>
         )}
         {fieldUrl && (
           <Input
-            className="input input--text"
             onChange={e => handleImageInput(e)}
             placeholder="Add a custom image or choose from above (after filling link)"
             value={fieldCustomImage}
           />
         )}
-        <Header className="label" size={1} centered>
+        <Header size={1} centered>
           Tags
         </Header>
         {(fieldTag || tags) && (
-          <ul className="input input--text tag-list">
+          <TagList>
             {tags
               .split(",")
               .filter(tag => tag)
               .map(tag => (
-                <li
-                  key={tag}
-                  className="tag"
-                  onClick={() => handleTagRemove(tag)}
-                >
+                <li key={tag} onClick={() => handleTagRemove(tag)}>
                   {tag}
                 </li>
               ))}
-          </ul>
+          </TagList>
         )}
         <Input
-          className="input input--text input--tags"
           onChange={e =>
             e.currentTarget.value.slice(-1) !== "," &&
             handleInput(e, "changeTag", "tag")
@@ -507,32 +494,20 @@ const Submit: FC<Props> = () => {
         {!isFormEmpty &&
         Object.keys(validationMessage).filter(k => validationMessage[k].length)
           .length !== 0 ? (
-          <Button type="danger" className="button" to="">
+          <Button type="danger" to="">
             {validationMessage.title?.map(e => (
-              <li key={e} className="error">
-                {e}
-              </li>
+              <li key={e}>{e}</li>
             ))}
             {validationMessage.description.map(e => (
-              <li key={e} className="error">
-                {e}
-              </li>
+              <li key={e}>{e}</li>
             ))}
             {fieldUrl &&
-              validationMessage.images.map(e => (
-                <li key={e} className="error">
-                  {e}
-                </li>
-              ))}
+              validationMessage.images.map(e => <li key={e}>{e}</li>)}
             {validationMessage.url.map(e => (
-              <li key={e} className="error">
-                {e}
-              </li>
+              <li key={e}>{e}</li>
             ))}
             {validationMessage.tags.map(e => (
-              <li key={e} className="error">
-                {e}
-              </li>
+              <li key={e}>{e}</li>
             ))}
           </Button>
         ) : (
@@ -540,7 +515,6 @@ const Submit: FC<Props> = () => {
           hasRequiredFieldMissing && (
             <Button
               type="primary"
-              className={"button"}
               isLoading={isLoadingSubmit}
               onClick={e => handleSubmit(e)}
               to="/add"
