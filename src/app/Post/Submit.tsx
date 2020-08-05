@@ -2,7 +2,7 @@ import React, { FC, useContext, useEffect, useState, useReducer } from "react"
 import { Link, useHistory } from "react-router-dom"
 import isURL from "validator/lib/isURL"
 import { ErrorContext } from "../contexts/ErrorContext"
-import StyledSubmit, { TagList, ImageContainer } from "./Submit.style"
+import * as Styled from "./Submit.style"
 import { Box } from "../components/Box.style"
 import { Input, Button } from "../components"
 import { Header, Error, Warning } from "../Typography/Typography.style"
@@ -398,7 +398,7 @@ const Submit: FC<Props> = () => {
 
   return (
     <Box style={{ width: "100%" }}>
-      <StyledSubmit>
+      <Styled.Submit>
         <Header size={2} centered>
           Submit a post!
         </Header>
@@ -442,7 +442,7 @@ const Submit: FC<Props> = () => {
           </Warning>
         )}
         {images.map((image, i) => (
-          <ImageContainer
+          <Styled.ImageContainer
             isActive={!!fieldSelectedImages.includes(image)}
             as={Link}
             key={image}
@@ -454,7 +454,7 @@ const Submit: FC<Props> = () => {
               onLoad={e => handleOnImageLoad(e, i)}
               src={image}
             />
-          </ImageContainer>
+          </Styled.ImageContainer>
         ))}
         {fieldUrl && (
           <Header size={1} centered>
@@ -472,7 +472,7 @@ const Submit: FC<Props> = () => {
           Tags
         </Header>
         {(fieldTag || tags) && (
-          <TagList>
+          <Styled.TagList>
             {tags
               .split(",")
               .filter(tag => tag)
@@ -481,7 +481,7 @@ const Submit: FC<Props> = () => {
                   {tag}
                 </li>
               ))}
-          </TagList>
+          </Styled.TagList>
         )}
         <Input
           onChange={e =>
@@ -523,7 +523,7 @@ const Submit: FC<Props> = () => {
             </Button>
           )
         )}
-      </StyledSubmit>
+      </Styled.Submit>
     </Box>
   )
 }

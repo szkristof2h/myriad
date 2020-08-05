@@ -1,9 +1,10 @@
 import styled from "styled-components"
 import theme from "../theme"
 import { Header, Error } from "../Typography/Typography.style"
-import { Button } from "../components"
+import Button from "../components/Button/styles"
+import Input from "../components/Input/styles"
 
-const TagList = styled.div({
+export const TagList = styled.div({
   display: "flex",
   flexWrap: "wrap",
   margin: `-${theme.base.gutter / 2}px -${theme.base.gutter / 2}px
@@ -20,7 +21,7 @@ const TagList = styled.div({
   },
 })
 
-const ImageContainer = styled.div(({ isActive }) => ({
+export const ImageContainer = styled.div(({ isActive }) => ({
   maxWidth: "100%",
   height: "fit-content",
   border: isActive ? "3px solid black" : "",
@@ -30,12 +31,12 @@ const ImageContainer = styled.div(({ isActive }) => ({
   },
 }))
 
-const StyledSubmit = styled.div({
+export const Submit = styled.div({
   display: "grid",
   fontSize: "1rem",
   gridColumnGap: `${theme.base.gutter / 2}px`,
   gridTemplateColumns: "repeat(3, 1fr)",
-  [`${Header},${Error}`]: {
+  [`${Header}, ${Error}, ${Input}`]: {
     gridColumn: "span 3",
   },
   [`${Button}`]: {
@@ -47,5 +48,3 @@ const StyledSubmit = styled.div({
     },
   },
 })
-
-export { ImageContainer, StyledSubmit, TagList }
