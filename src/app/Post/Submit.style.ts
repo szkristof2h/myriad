@@ -2,6 +2,7 @@ import styled from "styled-components"
 import theme from "../theme"
 import { Header, Error } from "../Typography/Typography.style"
 import Button from "../components/Button/styles"
+import SubmitButton from "../components/Button/Submit/styles"
 import Input from "../components/Input/styles"
 
 export const TagList = styled.div({
@@ -32,19 +33,29 @@ export const ImageContainer = styled.div(({ isActive }) => ({
 }))
 
 export const Submit = styled.div({
-  display: "grid",
   fontSize: "1rem",
-  gridColumnGap: `${theme.base.gutter / 2}px`,
-  gridTemplateColumns: "repeat(3, 1fr)",
+  form: {
+    display: "grid",
+    gridColumnGap: `${theme.base.gutter / 2}px`,
+    gridTemplateColumns: "repeat(3, 1fr)",
+    [`${SubmitButton}`]: {
+      gridColumn: "span 3",
+      width: "100%",
+      li: {
+        textAlign: "center",
+        fontFamily: "Artifika",
+      },
+    },
+  },
   [`${Header}, ${Error}, ${Input}`]: {
     gridColumn: "span 3",
   },
-  [`${Button}`]: {
-    gridColumn: "span 3",
-    width: "100%",
-    li: {
-      textAlign: "center",
-      fontFamily: "Artifika",
-    },
-  },
+  // [`${Button}, ${SubmitButton}`]: {
+  //   gridColumn: "span 3",
+  //   width: "100%",
+  //   li: {
+  //     textAlign: "center",
+  //     fontFamily: "Artifika",
+  //   },
+  // },
 })

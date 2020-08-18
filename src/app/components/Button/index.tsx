@@ -29,13 +29,13 @@ export interface Props {
 }
 
 const Button: FC<Props> = props => {
-  const { isDisabled, isLoading, onClick } = props
+  const { isDisabled, isLoading, onClick, ...rest } = props
   const handleOnClick = (e: React.MouseEvent) => {
     if (isLoading || isDisabled) e.preventDefault()
     if (!isLoading && !isDisabled) onClick?.(e)
   }
 
-  return <StyledButton {...props} onClick={handleOnClick} />
+  return <StyledButton onClick={handleOnClick} {...rest} />
 }
 
 export default Button
