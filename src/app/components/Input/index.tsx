@@ -26,13 +26,20 @@ const Input: FC<Props> = props => {
 
   return (
     <>
-      register ? (
-      <StyledInput
-        ref={register({ required: isRequired, maxLength, minLength, validate })}
-        {...rest}
-      />
+      {register ? (
+        <StyledInput
+          ref={register({
+            required: isRequired,
+            maxLength,
+            minLength,
+            validate,
+          })}
+          {...rest}
+        />
       ) : (
-      <StyledInput {...props} />){hasError && <Error>{message}</Error>}
+        <StyledInput {...props} />
+      )}
+      {hasError && <Error>{message}</Error>}
     </>
   )
 }
