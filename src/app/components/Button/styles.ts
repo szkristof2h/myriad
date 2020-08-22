@@ -8,11 +8,9 @@ interface ButtonProps extends Props {}
 
 const Button = styled(Link).withConfig({
   shouldForwardProp: prop =>
-    !["buttonType", "isActive", "isLoading", "isDisabled", "isRated"].includes(
-      prop
-    ),
+    !["type", "isActive", "isLoading", "isDisabled", "isRated"].includes(prop),
 })((props: ButtonProps) => {
-  const { isActive, isLoading, isRated, buttonType } = props
+  const { isActive, isLoading, isRated, type } = props
 
   const primaryStyle = {
     padding: `${theme.base.gutter / 2}px`,
@@ -88,11 +86,11 @@ const Button = styled(Link).withConfig({
     alignItems: "center",
     height: "26px",
     padding: "1px 2px",
-    background: isRated ? theme.color.rateActive : theme.color[buttonType],
+    background: isRated ? theme.color.rateActive : theme.color[type],
     ["&:hover"]: {
       background: isRated
         ? theme.color.rateActiveHover
-        : theme.color[buttonType + "Hover"],
+        : theme.color[type + "Hover"],
     },
     ["> .icon"]: {
       width: "20px",
@@ -129,14 +127,10 @@ const Button = styled(Link).withConfig({
       ["& > .icon"]: {
         stroke: isRated
           ? "gray"
-          : buttonType === "impressedBig"
+          : type === "impressedBig"
           ? "yellow"
           : theme.color.black,
-        fill: isRated
-          ? "none"
-          : buttonType === "impressedBig"
-          ? "yellow"
-          : "none",
+        fill: isRated ? "none" : type === "impressedBig" ? "yellow" : "none",
       },
     },
   }
@@ -160,7 +154,7 @@ const Button = styled(Link).withConfig({
   }
 
   return {
-    ...styles[buttonType],
+    ...styles[type],
     ...(isLoading ? loadingStyle : {}),
   }
 })
