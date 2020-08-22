@@ -8,7 +8,7 @@ const Button = styled("button").withConfig({
   shouldForwardProp: prop =>
     !["buttonType", "isActive", "isLoading", "isDisabled"].includes(prop),
 })((props: ButtonProps) => {
-  const { isActive, isLoading, buttonType } = props
+  const { isActive, isDisabled, isLoading, buttonType } = props
 
   const primaryStyle = {
     padding: `${theme.base.gutter / 2}px`,
@@ -39,7 +39,10 @@ const Button = styled("button").withConfig({
   }
 
   const loadingStyle = {
-    background: "gray",
+    background: "lightgray",
+    ":hover": {
+      background: "gray",
+    },
   }
 
   const styles = {
@@ -55,7 +58,7 @@ const Button = styled("button").withConfig({
       outline: 0,
     },
     ...styles[buttonType],
-    ...(isLoading ? loadingStyle : {}),
+    ...(isLoading || isDisabled ? loadingStyle : {}),
   }
 })
 
