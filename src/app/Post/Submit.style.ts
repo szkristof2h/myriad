@@ -1,11 +1,11 @@
 import styled from "styled-components"
 import theme from "../theme"
 import { Header, Error } from "../Typography/Typography.style"
-import Button from "../components/Button/styles"
 import SubmitButton from "../components/Button/Submit/styles"
 import Input from "../components/Input/styles"
 
 export const TagList = styled.div({
+  gridColumn: "span 3",
   display: "flex",
   flexWrap: "wrap",
   margin: `-${theme.base.gutter / 2}px -${theme.base.gutter / 2}px
@@ -22,7 +22,9 @@ export const TagList = styled.div({
   },
 })
 
-export const ImageContainer = styled.div(({ isActive }) => ({
+export const ImageContainer = styled.div.withConfig({
+  shouldForwardProp: prop => !["isActive"].includes(prop),
+})(({ isActive }) => ({
   maxWidth: "100%",
   height: "fit-content",
   border: isActive ? "3px solid black" : "",
@@ -50,12 +52,4 @@ export const Submit = styled.div({
   [`${Header}, ${Error}, ${Input}`]: {
     gridColumn: "span 3",
   },
-  // [`${Button}, ${SubmitButton}`]: {
-  //   gridColumn: "span 3",
-  //   width: "100%",
-  //   li: {
-  //     textAlign: "center",
-  //     fontFamily: "Artifika",
-  //   },
-  // },
 })
