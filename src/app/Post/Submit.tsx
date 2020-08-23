@@ -29,12 +29,32 @@ interface PostSubmitVariables {
 
 interface Props {}
 
+const FIELDS = [
+  "fieldCustomImage",
+  "fieldDescription",
+  "fieldTag",
+  "fieldSelectedImages",
+  "fieldTitle",
+  "fieldUrl",
+]
+const FIELD_NAMES = ["customImage", "description", "tag", "title", "url"]
+
 const Submit: FC<Props> = () => {
   let history = useHistory()
   const { addError } = useContext(ErrorContext)
-  const { errors, getValues, handleSubmit, register, setValue } = useForm()
-  const { url: fieldUrl } = getValues()
+  const {
+    errors,
+    formState,
+    getValues,
+    handleSubmit,
+    register,
+    setValue,
+    trigger,
+  } = useForm({ mode: "all", reValidateMode: "onChange" })
+  const { touched: isTouched } = formState
+  const { url: fieldUrl = "" } = getValues()
   const [fieldTag, setFieldTag] = useState("")
+  const [fieldCustomImage, setFieldCustomImage] = useState("")
   const [images, setImages] = useState<string[]>([])
   const [selectedImages, setSelectedImages] = useState<string[]>([])
   const [tags, setTags] = useState("")
@@ -54,20 +74,28 @@ const Submit: FC<Props> = () => {
     isLoading: isLoadingSubmit,
     startPost: startPostRequest,
   } = usePostData<PostSubmitData, PostSubmitVariables>(`submit`)
-
-  const fields = [
-    "fieldCustomImage",
-    "fieldDescription",
-    "fieldTag",
-    "fieldSelectedImages",
-    "fieldTitle",
-    "fieldUrl",
-  ]
-  const isFormEmpty = fields.map(field => !getValues()[field]).length !== 0
+  const isFormEmpty = FIELD_NAMES.filter(field => getValues(field)).length === 0
   const hasRequiredFieldMissing =
-    fields.map(field => errors[field].type === "required").length !== 0 &&
-    !selectedImages.length &&
+    FIELD_NAMES.filter(field => errors[field]?.type === "required").length !==
+      0 ||
+    !selectedImages.length ||
     !tags
+  const getCustomImageError = () => {
+    if (!fieldCustomImage) return
+
+    const type = !isURL(fieldCustomImage)
+      ? "isUrl"
+      : images.includes(fieldCustomImage)
+      ? "isOnTheList"
+      : selectedImages.length < 10
+      ? "isImageLimitReached"
+      : ""
+
+    if (!type) return
+
+    return { type }
+  }
+
   const getTagsValidationError = () => {
     if (
       !tags ||
@@ -86,20 +114,30 @@ const Submit: FC<Props> = () => {
 
     if (hasRequiredFieldMissing) return "There are missing required fields."
 
-    const tagsError = getTagsValidationError()
-
-    if (tagsError) return tagsError
+    if (
+      Object.keys(errors).length > 0 &&
+      (Object.keys.length !== 1 || !errors.customImage)
+    )
+      return "Some fields are invalid."
 
     return
   }
 
   useEffect(() => {
-    if (!isMediaLoading && fieldUrl) {
-      handleMediaChange(fieldUrl)
-    }
+    if (!isMediaLoading && fieldUrl) handleMediaChange()
   }, [isMediaLoading, fieldUrl])
 
-  const handleMediaChange = (url: string) => {
+  // TODO: do it without useeffect
+  useEffect(() => {
+    trigger("url")
+  }, [images.length])
+
+  // TODO: do it without useeffect
+  useEffect(() => {
+    trigger()
+  }, [])
+
+  const handleMediaChange = () => {
     const html = imageData?.html
     if (html && !idYoutube) {
       const parser = new DOMParser()
@@ -134,6 +172,7 @@ const Submit: FC<Props> = () => {
     //   tags,
     // }
 
+    console.log("SUBMITTING")
     console.log(data)
 
     // await startPostRequest(data)
@@ -177,31 +216,21 @@ const Submit: FC<Props> = () => {
 
   const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "," || e.key === "Enter") {
-      const newTags = `${tags ? `${tags},` : ""}${fieldTag}`
-
       if (fieldTag.length < 3)
         // move to validation?
         addError("submitTags", "All tags should be at least 3 character long")
-      else {
-        if (fieldTag && !tags.split(",").includes(fieldTag)) setTags(newTags)
-
-        setValue("tag", "")
-      }
+      else if (fieldTag)
+        setTags(
+          [...new Set([...tags.split(","), ...fieldTag.split(",")])].join(",")
+        )
     }
   }
 
   const handleOnImageError = (image: string) => {
-    dispatch({
-      type: "changeImages",
-      payload: images.filter(img => img !== image),
-    })
-    dispatch({
-      type: "changeSelectedImages",
-      payload: fieldSelectedImages.filter(img => img !== image),
-    })
+    setImages(images.filter(img => img !== image))
+    setSelectedImages(selectedImages.filter(img => img !== image))
   }
 
-  console.log(errors)
   return (
     <Box style={{ width: "100%" }}>
       <Styled.Submit>
@@ -213,14 +242,14 @@ const Submit: FC<Props> = () => {
             Title
           </Header>
           <Input
-            hasError={errors.title}
+            hasError={isTouched.title && errors.title}
             isRequired
             maxLength={50}
             message={
               errors.title
-                ? errors.title.type === "required"
+                ? errors.title?.type === "required"
                   ? "This field is required"
-                  : errors.title.type === "minLength"
+                  : errors.title?.type === "minLength"
                   ? "Title should be at least 3 characters long."
                   : "Title should be no more than 50 characters long."
                 : ""
@@ -234,14 +263,14 @@ const Submit: FC<Props> = () => {
           </Header>
           <Input
             name="description"
-            hasError={errors.description}
+            hasError={isTouched.description && errors.description}
             isRequired
             maxLength={300}
             message={
               errors.description
-                ? errors.description.type === "required"
+                ? errors.description?.type === "required"
                   ? "This field is required"
-                  : errors.description.type === "minLength"
+                  : errors.description?.type === "minLength"
                   ? "Description should be at least 10 characters long."
                   : "Description should be no more than 300 characters long."
                 : ""
@@ -253,13 +282,13 @@ const Submit: FC<Props> = () => {
             Link (to the original post)
           </Header>
           <Input
-            hasError={errors.url}
+            hasError={isTouched.url && errors.url}
             isRequired
             message={
-              errors.description
-                ? errors.description.type === "required"
+              errors.url
+                ? errors.url?.type === "required"
                   ? "This field is required."
-                  : errors.description.type === "isUrl"
+                  : errors.url?.type === "isUrl"
                   ? "This URL is not valid."
                   : "This URL doesn't have any valid images."
                 : ""
@@ -270,7 +299,7 @@ const Submit: FC<Props> = () => {
             validate={{
               isUrl: value => isURL(value),
               hasNoValidImage: value =>
-                value && images.length === 0 && !isMediaLoading,
+                value && images.length !== 0 && !isMediaLoading,
             }}
           />
           {images.length !== 0 && (
@@ -278,7 +307,7 @@ const Submit: FC<Props> = () => {
               Choose an image
             </Header>
           )}
-          {errors.url.type === "hasNoValidImage" && (
+          {errors.url?.type === "hasNoValidImage" && (
             <Error>
               Couldn't find any images on the url (you can instead add your own
               choice of url below).
@@ -305,6 +334,9 @@ const Submit: FC<Props> = () => {
               />
             </Styled.ImageContainer>
           ))}
+          {images.length > 0 && selectedImages.length === 0 && fieldUrl && (
+            <Error>You should select at least 1 image.</Error>
+          )}
           {fieldUrl && (
             <Header size={1} centered>
               Image (url)
@@ -312,33 +344,29 @@ const Submit: FC<Props> = () => {
           )}
           {fieldUrl && (
             <Input
-              hasError={errors.customImage}
+              hasError={!!fieldCustomImage && !!getCustomImageError()}
               message={
-                errors.customImage.type === "isUrl"
+                getCustomImageError()?.type === "isUrl"
                   ? "This URL is not valid."
-                  : errors.customImage.type === "isOnTheList"
+                  : getCustomImageError()?.type === "isOnTheList"
                   ? "This image is already in the list."
-                  : errors.customImage.type === "isImageLimitReached"
+                  : getCustomImageError()?.type === "isImageLimitReached"
                   ? "You can't have more than 10 selected images."
                   : ""
               }
-              name="customImage"
               onChange={e => {
-                if (!errors.customImage) {
+                setFieldCustomImage(e.currentTarget.value)
+
+                if (!getCustomImageError()) {
                   setImages([...images, e.currentTarget.value])
                   setSelectedImages([...selectedImages, e.currentTarget.value])
-                  setValue("customImage", "")
                 }
 
-                if (errors.customImage.type === "isImageLimitNotReached")
+                if (getCustomImageError()?.type === "isImageLimitNotReached")
                   addError("image", "You can't select more than 10 images!")
               }}
               placeholder="Add a custom image or choose from above"
-              validate={{
-                isUrl: value => isURL(value),
-                isOnTheList: value => !images.includes(value),
-                isImageLimitReached: () => selectedImages.length < 10,
-              }}
+              value={fieldCustomImage}
             />
           )}
           <Header size={1} centered>
@@ -367,14 +395,16 @@ const Submit: FC<Props> = () => {
             </Styled.TagList>
           )}
           <Input
-            hasError={!!getTagsValidationError()}
+            hasError={isTouched.tag && !!getTagsValidationError()}
             message={getTagsValidationError()}
-            onChange={e =>
-              e.currentTarget.value.slice(-1) !== "," &&
-              setFieldTag(e.currentTarget.value)
-            }
+            name="tag"
+            onChange={e => {
+              if (e.currentTarget.value.slice(-1) !== ",")
+                setFieldTag(e.currentTarget.value)
+              else setValue("tag", "")
+            }}
             onKeyPress={e => handleTagInput(e)}
-            value={fieldTag}
+            register={register}
           />
           <SubmitButton
             buttonType="primary"
