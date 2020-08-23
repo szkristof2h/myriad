@@ -64,7 +64,7 @@ const Submit: FC<Props> = () => {
     data: submitData,
     isLoading: isLoadingSubmit,
     startPost: startPostRequest,
-  } = usePostData<PostSubmitData, PostSubmitVariables>(`submit`)
+  } = usePostData<PostSubmitData, PostSubmitVariables>(`addPost`)
   const isFormEmpty = FIELD_NAMES.filter(field => getValues(field)).length === 0
   const hasRequiredFieldMissing =
     FIELD_NAMES.filter(field => errors[field]?.type === "required").length !==
@@ -128,38 +128,30 @@ const Submit: FC<Props> = () => {
   }
 
   const onSubmit = async data => {
-    // e.preventDefault()
+    const { description, title, url } = data
 
-    // const isValid =
-    //   Object.keys(validationMessage).filter(key => validationMessage[key].length)
-    //     .length === 0
+    const variables = {
+      description,
+      images: selectedImages,
+      link: url,
+      title,
+      tags,
+    }
 
-    // if (!isValid) return addError("Some fields aren't valid", "Add post")
+    await startPostRequest(variables)
 
-    // const data = {
-    //   description: fieldDescription,
-    //   images: fieldSelectedImages,
-    //   link: fieldUrl,
-    //   title: fieldTitle,
-    //   tags,
-    // }
-
-    console.log("SUBMITTING")
-    console.log(data)
-
-    // await startPostRequest(data)
-
-    // history.push(`/submit/${submitData?.post.id}`)
+    history.push(`/submit/${submitData?.post.id}`)
   }
 
+  // TODO: figure out the point of this function
   const removeNotExistingSelectedImages = () => {
-    const notExistingimages = selectedImages.filter(
+    const notExistingImages = selectedImages.filter(
       image => !images.includes(image)
     )
 
-    if (notExistingimages.length > 0)
+    if (notExistingImages.length > 0)
       setImages(
-        selectedImages.filter(image => notExistingimages.includes(image))
+        selectedImages.filter(image => notExistingImages.includes(image))
       )
   }
 

@@ -71,7 +71,7 @@ export const init = app => {
   app.getAsync("/get/posts/:tags", getPosts)
   app.getAsync("/get/posts", getPosts)
   app.getAsync("/get/post/:id", getPost)
-  app.postAsync("/post/post", authenticate, postPost)
+  app.postAsync("/post/addPost", authenticate, postPost)
   app.postAsync("/post/post/rating", authenticate, postRating)
 
   app.getAsync("/get/profile", getUser)
