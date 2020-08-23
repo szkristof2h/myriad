@@ -29,15 +29,7 @@ interface PostSubmitVariables {
 
 interface Props {}
 
-const FIELDS = [
-  "fieldCustomImage",
-  "fieldDescription",
-  "fieldTag",
-  "fieldSelectedImages",
-  "fieldTitle",
-  "fieldUrl",
-]
-const FIELD_NAMES = ["customImage", "description", "tag", "title", "url"]
+const FIELD_NAMES = ["description", "tag", "title", "url"]
 
 const Submit: FC<Props> = () => {
   let history = useHistory()
@@ -54,7 +46,6 @@ const Submit: FC<Props> = () => {
   const { touched: isTouched } = formState
   const { url: fieldUrl = "" } = getValues()
   const [fieldTag, setFieldTag] = useState("")
-  const [fieldCustomImage, setFieldCustomImage] = useState("")
   const [images, setImages] = useState<string[]>([])
   const [selectedImages, setSelectedImages] = useState<string[]>([])
   const [tags, setTags] = useState("")
@@ -80,21 +71,6 @@ const Submit: FC<Props> = () => {
       0 ||
     !selectedImages.length ||
     !tags
-  const getCustomImageError = () => {
-    if (!fieldCustomImage) return
-
-    const type = !isURL(fieldCustomImage)
-      ? "isUrl"
-      : images.includes(fieldCustomImage)
-      ? "isOnTheList"
-      : selectedImages.length < 10
-      ? "isImageLimitReached"
-      : ""
-
-    if (!type) return
-
-    return { type }
-  }
 
   const getTagsValidationError = () => {
     if (
@@ -114,11 +90,7 @@ const Submit: FC<Props> = () => {
 
     if (hasRequiredFieldMissing) return "There are missing required fields."
 
-    if (
-      Object.keys(errors).length > 0 &&
-      (Object.keys.length !== 1 || !errors.customImage)
-    )
-      return "Some fields are invalid."
+    if (Object.keys(errors).length > 0) return "Some fields are invalid."
 
     return
   }
@@ -336,38 +308,6 @@ const Submit: FC<Props> = () => {
           ))}
           {images.length > 0 && selectedImages.length === 0 && fieldUrl && (
             <Error>You should select at least 1 image.</Error>
-          )}
-          {fieldUrl && (
-            <Header size={1} centered>
-              Image (url)
-            </Header>
-          )}
-          {fieldUrl && (
-            <Input
-              hasError={!!fieldCustomImage && !!getCustomImageError()}
-              message={
-                getCustomImageError()?.type === "isUrl"
-                  ? "This URL is not valid."
-                  : getCustomImageError()?.type === "isOnTheList"
-                  ? "This image is already in the list."
-                  : getCustomImageError()?.type === "isImageLimitReached"
-                  ? "You can't have more than 10 selected images."
-                  : ""
-              }
-              onChange={e => {
-                setFieldCustomImage(e.currentTarget.value)
-
-                if (!getCustomImageError()) {
-                  setImages([...images, e.currentTarget.value])
-                  setSelectedImages([...selectedImages, e.currentTarget.value])
-                }
-
-                if (getCustomImageError()?.type === "isImageLimitNotReached")
-                  addError("image", "You can't select more than 10 images!")
-              }}
-              placeholder="Add a custom image or choose from above"
-              value={fieldCustomImage}
-            />
           )}
           <Header size={1} centered>
             Tags
