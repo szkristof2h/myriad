@@ -48,6 +48,7 @@ export function handleErrors(
   const publicError = {
     error: {
       message: error.message,
+      shouldShow: true,
       type,
     },
   }
