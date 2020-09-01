@@ -43,7 +43,7 @@ interface Props {
 
 const Post: FC<Props> = ({ id, dismiss }) => {
   const [imageIndex, setImageIndex] = useState(0)
-  const [idVideo, setIdVideo] = useState("")
+  const [idVideo, setIdVideo] = useState<string | false>("")
   const [videoSize, setVideoSize] = useState({ width: 0, height: 0 })
   const { refetchPosts } = useContext(PostsContext)
   const ref = useRef(null)
