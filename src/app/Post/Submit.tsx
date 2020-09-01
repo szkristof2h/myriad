@@ -8,7 +8,6 @@ import { Box } from "../components/Box.style"
 import { Input, SubmitButton } from "../components"
 import { Header, Error, Warning } from "../Typography/Typography.style"
 import getYoutubeId from "../../util/getYoutubeId"
-import { PostData } from "../contexts/PostsContext"
 import useGetData from "../hooks/useGetData"
 import usePostData from "../hooks/usePostData"
 
@@ -16,7 +15,7 @@ export interface PostGetMediaData {
   html: string
 }
 export interface PostSubmitData {
-  post: PostData
+  id: string
 }
 
 interface PostSubmitVariables {
@@ -61,7 +60,6 @@ const Submit: FC<Props> = () => {
     { url: `${idYoutube ? idYoutube : fieldUrl}` }
   )
   const {
-    data: submitData,
     isLoading: isLoadingSubmit,
     startPost: startPostRequest,
   } = usePostData<PostSubmitData, PostSubmitVariables>(`addPost`)
@@ -71,7 +69,6 @@ const Submit: FC<Props> = () => {
       0 ||
     !selectedImages.length ||
     !tags
-
   const getTagsValidationError = () => {
     if (
       !tags ||
@@ -127,8 +124,8 @@ const Submit: FC<Props> = () => {
     setSelectedImages([])
   }
 
-  const onSubmit = async data => {
-    const { description, title, url } = data
+  const onSubmit = async formData => {
+    const { description, title, url } = formData
 
     const variables = {
       description,
@@ -138,9 +135,9 @@ const Submit: FC<Props> = () => {
       tags,
     }
 
-    await startPostRequest(variables)
+    const data = await startPostRequest(variables)
 
-    history.push(`/submit/${submitData?.post.id}`)
+    history.push(`/post/${data?.id}`)
   }
 
   // TODO: figure out the point of this function
@@ -185,7 +182,9 @@ const Submit: FC<Props> = () => {
         addError("submitTags", "All tags should be at least 3 character long")
       else if (fieldTag)
         setTags(
-          [...new Set([...tags.split(","), ...fieldTag.split(",")])].join(",")
+          [...new Set([...tags.split(","), ...fieldTag.split(",")])]
+            .filter(tag => tag)
+            .join(",")
         )
     }
   }
