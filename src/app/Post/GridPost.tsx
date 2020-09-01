@@ -56,7 +56,7 @@ const GridPost: FC<Props> = ({
   const { startPost, isLoading: isLoadingRating } = usePostData<
     PostRateData,
     PostRateVariables
-  >(`logout`)
+  >(`rate`)
   const rate = async (rating: number, e: React.MouseEvent) => {
     e.preventDefault()
     await startPost({ id, rating })
