@@ -14,6 +14,7 @@ import {
 import { Rating, RatingType } from "../models/Rating"
 import FollowList, { FollowListModel } from "../models/FollowList"
 import { GetPostsData, GetPostData } from "../../../app/contexts/PostsContext"
+import { PostSubmitData } from "src/app/Post/Submit"
 
 const tiers = [0.7, 0.4, -1]
 const limits = [1, 16, 28]
@@ -255,17 +256,19 @@ const getTags = async (req: Request, res: Response) => {
   setResponseData(res, { tags })
 }
 
-const postPost = (req: Request, res: Response) => {
+const postPost = async (req: Request, res: Response, next: NextFunction) => {
+  setErrorType(res, "POST_POST_ERROR")
   const tags =
-    !req.body.tags ||
-    !req.body.tags.includes(",") ||
-    req.body.tags.split(",").filter(t => t.replace(/\//g, "")).length < 3
-      ? "You should give the post at least 3 tags (seperated by commas)!"
+    req.body.tags?.split(",").filter(tag => tag.replace(/\//g, "")).length < 3
+      ? false
       : req.body.tags
           .split(",")
-          .map(t => t.toLowerCase().trim().replace(/\//g, ""))
+          .map(tag => tag.toLowerCase().trim().replace(/\//g, ""))
+
+  if (!tags) throw Error("TAGS_COUNT_NOT_REACHED")
+
   const idUser = req.user?.id
-  const displayName = res.locals.user.displayName
+  const displayName = req.user?.displayName
   const link = `http${
     req.body.link.includes("https://") ? "s" : ""
   }://www.${req.body.link
@@ -277,18 +280,20 @@ const postPost = (req: Request, res: Response) => {
     description: req.body.description,
     comments: 0,
     downs: 0,
-    link: link,
+    link,
     images: req.body.images,
     idUser,
     postedByName: displayName,
     ratio: getRating(0, 0),
-    tags: tags,
+    tags,
     title: req.body.title,
     ups: 0,
   })
 
-  newPost.save().then(r => res.json(r))
-  // .catch(e => res.json(handleErrors(POST_POST_ERROR, e)));
+  await newPost.save()
+
+  const responseData: PostSubmitData = { id: newPost._id }
+  setResponseData(res, responseData)
 }
 
 // Node.js implementation of Evan Miller's algorithm for ranking stuff based on upvotes:

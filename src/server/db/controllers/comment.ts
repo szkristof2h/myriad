@@ -227,7 +227,6 @@ const postMessage = async (req: Request, res: Response, next: NextFunction) => {
       idUsers: [targetUser[0]._id, idUser],
     }).save()
 
-    console.log(newConversation)
     idConversation = newConversation._id
   } else {
     await Conversation.findByIdAndUpdate(conversations[0]._id, {
