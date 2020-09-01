@@ -3,20 +3,18 @@ import { post, APIPostRequestInteface } from "../requests/api"
 import { ErrorContext } from "../contexts/ErrorContext"
 import { Canceler } from "axios"
 
-export interface PostData<T, V> {
+export interface PostRequestData<T, V> {
   cancel: Canceler
-  data: T | undefined
   isLoading: boolean
-  startPost: (variables: V) => Promise<void>
+  startPost: (variables: V) => Promise<T | undefined>
 }
 
-const usePostData = <T = any, V = any>(url: string): PostData<T, V> => {
-  const [data, setData] = useState<T>()
+const usePostData = <T = any, V = any>(url: string): PostRequestData<T, V> => {
   const [isLoading, setIsLoading] = useState(false)
   const [cancel, setCancel] = useState<Canceler>(() => (message: string) => {})
   const { addError } = useContext(ErrorContext)
 
-  const startPost = async (variables: V) => {
+  const startPost = async (variables: V): Promise<T | undefined> => {
     setIsLoading(true)
 
     const { postData, cancel, getHasFailed }: APIPostRequestInteface<T> = post<
@@ -28,14 +26,14 @@ const usePostData = <T = any, V = any>(url: string): PostData<T, V> => {
 
     const response = await postData()
 
-    setData(response?.data)
-
     if (response?.data?.error?.shouldShow)
       addError(response.data.error.message, response.data.error.type)
 
     if (getHasFailed()) addError({ request: [`post request failed`] })
 
     setIsLoading(false)
+
+    return response?.data
   }
 
   useEffect(() => {
@@ -47,7 +45,6 @@ const usePostData = <T = any, V = any>(url: string): PostData<T, V> => {
 
   return {
     cancel,
-    data,
     isLoading,
     startPost,
   }
