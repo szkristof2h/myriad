@@ -2,6 +2,8 @@ import mongoose from "mongoose"
 import isURL from "validator/lib/isURL"
 import { sanitize } from "../../utils"
 import { MongooseModel } from "./utils"
+import { getRating } from "../controllers/utils"
+import { NextFunction } from "express"
 
 const { ObjectId, Schema } = mongoose
 
@@ -64,5 +66,18 @@ const postSchema = new Schema({
   ups: { type: Number, index: true, default: 0 },
 })
 
+postSchema.pre("save", function (next: NextFunction) {
+  // @ts-ignore
+  const ups = this.ups
+  // @ts-ignore
+  const downs = this.downs
+
+  // @ts-ignore
+  this.ratio = getRating(ups, ups + downs)
+
+  next()
+})
+
 const Post = mongoose.model("Post", postSchema)
+
 export default Post
