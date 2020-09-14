@@ -32,17 +32,18 @@ This means that, although each of the more popular posts fill up a larger area b
 I started working on this project to learn, experiment and practice with new features of various frameworks, libraries, etc., I use. I felt that I have neglected actual practice with some of them --like React-- so I decided to create a smaller project where practice is a lot easier. This also means that I might use alpha or beta versions of dependencies.
 
 ## Roadmap (mostly in order of importance, finished ones at the end of the list)
- 1. Make tags better and creating some kind of browsing component (*on hold until **#2** finishes*)
- 1. Convert js -> ts on the backend (*in progress*)
+ 1. Test & fix bugs before re-deployment
+ 1. Make tags better and creating some kind of browsing component (*on hold until **#1** finishes*)
  1. Implement facebook and twitter social login
  1. Improve Profile page
  2. Create better loader component(s) to use with suspense
- 6. Try coming up with a better solution for handling requests (*partially done, testing*)
-    1. ~~*Backend*: Create error handler for each request~~ (*testing*)
-    1. *Frontend*: Come up with a better way to handle `IsLoading` and `cancel()` (`axios`)
- 4. Experiment with webpack for better performance
  3. Implement unit testing
  1. Fix the css mess ~~(currently in the process of refactoring components to use CSS-in-JS) (2020)~~
+ 4. Experiment with webpack for better performance
+ 1. ~~Convert js -> ts on the backend (*in progress*)~~ (2020. 09. 14.)
+ 6. ~~Try coming up with a better solution for handling requests~~
+    1. ~~*Backend*: Create error handler for each request~~ 
+    1. ~~*Frontend*: Come up with a better way to handle `isLoading` and `cancel()` (`axios`)~~
  1. ~~Convert js(x) -> ts(x) on the frontend~~ (2020. 01. 19.)
  8. ~~Fix eslint config~~ (2019)
  2. ~~Add option to embed youtube videos~~ (2019)

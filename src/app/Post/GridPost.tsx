@@ -13,14 +13,16 @@ import {
 } from "./Post.style"
 import Loader from "../Loader.style"
 import usePostData from "../hooks/usePostData"
-import { APIRequestInteface } from "../requests/api"
 
-export interface PostRateData
-  extends APIRequestInteface<{ success: boolean }> {}
+export interface PostRateData {
+  success: boolean
+}
+
 export interface PostRateVariables {
   id: string
-  rating: number
+  value: number
 }
+
 interface Props {
   id: string
   col?: number
@@ -59,7 +61,7 @@ const GridPost: FC<Props> = ({
   >(`rate`)
   const rate = async (rating: number, e: React.MouseEvent) => {
     e.preventDefault()
-    await startPost({ id, rating })
+    await startPost({ id, value: rating })
     refetchPosts() // TODO: shouldn't refetch all post just because the rating changes on a single one
   }
 

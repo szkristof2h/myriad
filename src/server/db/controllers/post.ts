@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { isArray } from "util"
 import Post, { PostModel } from "../models/Post"
-import { toObject, setErrorType, setResponseData } from "../../utils"
+import { setErrorType, setResponseData } from "../../utils"
 import {
   GET_POST_ERROR,
   POST_NOT_FOUND,
@@ -11,10 +11,11 @@ import {
   GET_TAGS_ERROR,
   GET_NOTIFICATIONS_ERROR,
 } from "../types"
-import { Rating, RatingType } from "../models/Rating"
+import { Rating, RatingType, RatingModel } from "../models/Rating"
 import FollowList, { FollowListModel } from "../models/FollowList"
 import { GetPostsData, GetPostData } from "../../../app/contexts/PostsContext"
 import { PostSubmitData } from "src/app/Post/Submit"
+import { PostRateData } from "src/app/Post/GridPost"
 
 const tiers = [0.7, 0.4, -1]
 const limits = [1, 16, 28]
@@ -194,53 +195,45 @@ const getNotifications = async (
   setResponseData(res, responseData)
 }
 
-const postRating = (req, res) => {
-  const { _id, rating } = req.body
-  const userId = res.locals.user.id
-  let increment = 1
-  let post = {}
+const postRating = async (req: Request, res: Response) => {
+  setErrorType(res, "POST_RATING")
+  const { id, value } = req.body
+  const idUser = req.user?.id
 
-  // if (![-1, 1].includes(rating))
-  //   return res.json(
-  //     handleErrors(INVALID_RATING, {
-  //       errors: { message: "ratings should be 1 or -1 not " + rating }
-  //     })
-  //   );
+  if (![-1, 1].includes(value)) throw Error("INVALID_RATING")
 
-  Post.findById(_id)
+  const post: PostModel | undefined = await Post.findById(id).exec()
+
+  if (!post) throw Error("POST_NOT_FOUND")
+
+  const rating: RatingModel | undefined = await Rating.findOne({
+    idPost: id,
+    idUser,
+  })
+    .select("value")
     .exec()
-    .then(p => {
-      if (!p)
-        return Promise.reject({
-          errors: { message: { id: "No post with this id!" } },
-        })
-      post = p
-      return Rating.findOne({ post: _id, user: userId }).select("value").exec()
-    })
-    .then(r => {
-      if (r) {
-        if (r.value === rating) {
-          increment = -1
-          return Rating.deleteOne({ _id: r._id }).exec()
-        } else if (r.value !== rating) {
-          post[rating > 0 ? "downs" : "ups"]--
-          r.value *= -1
 
-          return r.save()
-        }
-      }
+  if (rating) {
+    post[rating.value > 0 ? "ups" : "downs"]--
 
-      const newRating = new Rating({ post: _id, user: userId, value: rating })
+    if (rating.value === value) Rating.deleteOne({ _id: rating._id }).exec()
+    else if (rating.value !== value) {
+      post[value < 0 ? "downs" : "ups"]++
+      rating.value = value
 
-      return newRating.save()
-    })
-    .then(() => {
-      // post[rating < 0 ? "downs" : "ups"] += increment;
-      // post.ratio = getRating(post.ups, post.ups + post.downs);
-      // return post.save();
-    })
-    .then(() => res.json({ status: "Success!" }))
-  // .catch(e => res.json(handleErrors(POST_NOT_FOUND, e)));
+      await rating.save()
+    }
+  } else {
+    const newRating = new Rating({ idPost: id, idUser, value })
+
+    await newRating.save()
+    post[value < 0 ? "downs" : "ups"]++
+  }
+
+  await post.save()
+
+  const responseData: PostRateData = { success: true }
+  setResponseData(res, responseData)
 }
 
 // Maybe randomize them? Or select them according to some ranking? Both?
@@ -284,7 +277,6 @@ const postPost = async (req: Request, res: Response, next: NextFunction) => {
     images: req.body.images,
     idUser,
     postedByName: displayName,
-    ratio: getRating(0, 0),
     tags,
     title: req.body.title,
     ups: 0,
@@ -295,35 +287,5 @@ const postPost = async (req: Request, res: Response, next: NextFunction) => {
   const responseData: PostSubmitData = { id: newPost._id }
   setResponseData(res, responseData)
 }
-
-// Node.js implementation of Evan Miller's algorithm for ranking stuff based on upvotes:
-// http://www.evanmiller.org/how-not-to-sort-by-average-rating.html
-// https://medium.com/@gattermeier/calculating-better-rating-scores-for-things-voted-on-7fa3f632c79d
-const getRating = (upvotes, n = 0, confidence = 0.95) => {
-  if (n === 0) return 0
-
-  const z = 1.96 // probit(1 - (1 - confidence) / 2)
-  const phat = (1.0 * upvotes) / n
-
-  return (
-    (phat +
-      (z * z) / (2 * n) -
-      z * Math.sqrt((phat * (1 - phat) + (z * z) / (4 * n)) / n)) /
-    (1 + (z * z) / n)
-  )
-}
-
-// interface EResponse extends Response {
-//   locals?: {
-//     user: {
-//       id: string
-//     }
-//   }
-// }
-// Pick<T, Diff<keyof T, keyof U>>
-// type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
-// interface PostModel extends Omit<PostData, "id"> {
-//   _id: string
-// }
 
 export { getPost, getPosts, getNotifications, getTags, postPost, postRating }

@@ -54,7 +54,7 @@ const Post: FC<Props> = ({ id, dismiss }) => {
   >(`logout`)
   const rate = async (rating: number, e: React.MouseEvent) => {
     e.preventDefault()
-    await startPost({ id, rating })
+    await startPost({ id, value: rating })
     refetch()
     refetchPosts() // TODO: shouldn't refetch all post just because the rating changes on a single one
   }
