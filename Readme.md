@@ -23,7 +23,6 @@ This means that, although each of the more popular posts fill up a larger area b
  - Node.js
  - Express
  - MongoDB
- - Passport for authentication (currently only for google)
  - Webpack 4
  - React
  - CSS-in-JS (styled-components)
