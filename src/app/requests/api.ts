@@ -15,12 +15,12 @@ export interface APIPostRequestInteface<T> {
 }
 
 const siteUrl = config.url
-const get = <T = any, R = AxiosResponse<T & APIResponseError>>(
+const get = <T = any, V = any, R = AxiosResponse<T & APIResponseError>>(
   url: string,
   handleErrors,
-  params?
+  params?: V
 ) => {
-  let hasFailed
+  let hasFailed: boolean
   const getHasFailed = () => hasFailed
   const source = axios.CancelToken.source()
   const cancel = () => source.cancel()
