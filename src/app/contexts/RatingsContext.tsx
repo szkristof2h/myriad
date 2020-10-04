@@ -1,14 +1,12 @@
 import React, { createContext, useState } from "react"
-import { APIRequestInteface } from "../requests/api"
 
-export interface GetRatingData extends APIRequestInteface<GetRating> {}
-export interface PostRatingData extends GetRating {}
+export interface PostRatingData extends GetRatingData {}
 export interface PostRatingVariables {
   idPost: string
   value: number
 }
 
-export interface GetRating {
+export interface GetRatingData {
   rating: Rating
 }
 
