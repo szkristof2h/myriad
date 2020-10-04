@@ -1,7 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
 
-const Meh = (props) => {
+const Meh = props => {
   const { color, size, ...otherProps } = props
   return (
     <svg
@@ -25,6 +25,7 @@ const Meh = (props) => {
 }
 
 Meh.propTypes = {
+  alt: PropTypes.string,
   className: PropTypes.string,
   strokeWidth: PropTypes.string,
   color: PropTypes.string,
