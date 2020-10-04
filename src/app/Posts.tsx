@@ -14,6 +14,7 @@ import StyledPosts from "./Posts.style"
 import Tags from "./Tags"
 import GridPost from "./Post/GridPost"
 import Loader from "./Loader"
+import { makeId } from "./utils"
 
 const Post = lazy(() =>
   import(
@@ -85,17 +86,6 @@ interface Props extends RouteComponentProps {
   userName: string
 }
 
-const makeId = () => {
-  var text = ""
-  var possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-
-  for (var i = 0; i < 20; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length))
-
-  return text
-}
-
 const Posts: FC<Props> = ({ fullUrl, history, tag, userName }) => {
   const limits = [1, 16, 28] // use some kind of constant for this... env?
   const { currentUser } = useContext(UserContext)
@@ -158,7 +148,7 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, userName }) => {
     <>
       <StyledPosts width={width} height={height}>
         {postsFilledToLimit.map((post, i) => {
-          const { id, downs, images, postedByName, rating, title, ups } = post
+          const { id, downs, images, postedByName, title, ups } = post
 
           return (
             positions?.[i] && (
@@ -173,7 +163,6 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, userName }) => {
                   openPost(post.id)
                 }}
                 postedByName={postedByName}
-                rating={rating}
                 row={positions[i][1] + 1 + offset}
                 size={positions[i][2]}
                 title={title}

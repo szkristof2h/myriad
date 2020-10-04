@@ -19,7 +19,7 @@ export interface Rating {
   idPost: string
   downs: number
   ups: number
-  value: number
+  value?: number
 }
 
 // Should find a better & easier way to provide an initial state to react contexts

@@ -1,10 +1,6 @@
 import React, { createContext, useState } from "react"
-import { APIRequestInteface } from "../requests/api"
 import { PostType } from "src/server/db/models/Post"
 import useGetData from "../hooks/useGetData"
-
-export interface GetPostsInterface extends APIRequestInteface<GetPostsData> {}
-export interface GetPostInterface extends APIRequestInteface<GetPostData> {}
 
 export interface GetPostsData {
   posts: PostData[]
@@ -16,7 +12,6 @@ export interface GetPostData {
 
 export interface PostData extends PostType {
   id: string
-  rating: number
 }
 
 export interface Post extends PostData {
@@ -68,7 +63,6 @@ export const samplePost: PostData = {
   images: ["sample"],
   link: "",
   postedByName: "",
-  rating: 0,
   ratio: 0,
   tags: [],
   title: "Submit a post!",
