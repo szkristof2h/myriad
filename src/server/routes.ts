@@ -3,10 +3,10 @@ import sanitizeHtml from "sanitize-html"
 import axios from "axios"
 import { setErrorType, setResponseData } from "./utils"
 import {
+  addRating,
   getPosts,
   getPost,
   getTags,
-  postRating,
   postPost,
   getNotifications,
 } from "./db/controllers/post"
@@ -72,7 +72,7 @@ export const init = app => {
   app.getAsync("/get/posts", getPosts)
   app.getAsync("/get/post/:id", getPost)
   app.postAsync("/post/addPost", authenticate, postPost)
-  app.postAsync("/post/rate", authenticate, postRating)
+  app.postAsync("/post/addRating", authenticate, addRating)
 
   app.getAsync("/get/profile", getUser)
   app.getAsync("/get/user/:name", getUser)

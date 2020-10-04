@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express"
-import { isArray } from "util"
 import Post, { PostModel } from "../models/Post"
 import { setErrorType, setResponseData } from "../../utils"
 import {
@@ -13,9 +12,9 @@ import {
 } from "../types"
 import { Rating, RatingType, RatingModel } from "../models/Rating"
 import FollowList, { FollowListModel } from "../models/FollowList"
-import { GetPostsData, GetPostData } from "../../../app/contexts/PostsContext"
+import { GetPostsData, GetPostData } from "src/app/contexts/PostsContext"
+import { GetRatingData, PostRatingData } from "src/app/contexts/RatingsContext"
 import { PostSubmitData } from "src/app/Post/Submit"
-import { PostRateData } from "src/app/Post/GridPost"
 
 const tiers = [0.7, 0.4, -1]
 const limits = [1, 16, 28]
@@ -65,7 +64,7 @@ const getCriteria = (params: {
     : tags
     ? {
         tags: {
-          $in: isArray(tags) ? tags : [tags],
+          $in: Array.isArray(tags) ? tags : [tags],
         },
       }
     : undefined
@@ -175,39 +174,65 @@ const getNotifications = async (
     next()
   }
 
-  const ratings: RatingType[] = await Rating.find({ idUser })
-    .in(
-      "idPost",
-      posts.map(post => post._id)
-    )
-    .lean()
-    .exec()
-  const postsWithRatings = posts.map(post => {
-    const rating = ratings?.find(rating => rating.idPost === post._id)
-    const { _id, _v, ...postWithout_id } = post
-
-    return { ...postWithout_id, rating: rating?.value ?? 0, id: _id }
-  })
   const responseData: GetPostsData = {
-    posts: postsWithRatings,
+    posts: posts.map(post => {
+      const { _id, _v, ...postWithout_id } = post
+
+      return { ...postWithout_id, id: _id }
+    }),
   }
 
   setResponseData(res, responseData)
 }
 
-const postRating = async (req: Request, res: Response) => {
-  setErrorType(res, "POST_RATING")
-  const { id, value } = req.body
+const getRating = async (req: Request, res: Response) => {
+  setErrorType(res, "GET_RATING")
+
+  const { idPost } = req.params
+  const idUser = req.user?.id
+
+  const userRating: RatingModel | undefined = await Rating.findOne({
+    idPost,
+    idUser,
+  })
+    .lean()
+    .exec()
+
+  const postRatings:
+    | Pick<PostModel, "downs" | "ups">
+    | undefined = await Post.findOneById(idPost)
+    .select("downs ups")
+    .lean()
+    .exec()
+
+  if (!postRatings) throw Error("POST_NOT_FOUND")
+
+  const responseData: GetRatingData = {
+    rating: {
+      downs: postRatings.downs,
+      idPost,
+      ups: postRatings.ups,
+      value: userRating?.value,
+    },
+  }
+
+  setResponseData(res, responseData)
+}
+
+const addRating = async (req: Request, res: Response) => {
+  setErrorType(res, "ADD_RATING")
+
+  const { idPost, value } = req.body
   const idUser = req.user?.id
 
   if (![-1, 1].includes(value)) throw Error("INVALID_RATING")
 
-  const post: PostModel | undefined = await Post.findById(id).exec()
+  const post: PostModel | undefined = await Post.findById(idPost).exec()
 
   if (!post) throw Error("POST_NOT_FOUND")
 
   const rating: RatingModel | undefined = await Rating.findOne({
-    idPost: id,
+    idPost,
     idUser,
   })
     .select("value")
@@ -224,7 +249,7 @@ const postRating = async (req: Request, res: Response) => {
       await rating.save()
     }
   } else {
-    const newRating = new Rating({ idPost: id, idUser, value })
+    const newRating = new Rating({ idPost, idUser, value })
 
     await newRating.save()
     post[value < 0 ? "downs" : "ups"]++
@@ -232,7 +257,14 @@ const postRating = async (req: Request, res: Response) => {
 
   await post.save()
 
-  const responseData: PostRateData = { success: true }
+  const responseData: PostRatingData = {
+    rating: {
+      downs: post.downs,
+      idPost,
+      ups: post.ups,
+      value,
+    },
+  }
   setResponseData(res, responseData)
 }
 
@@ -251,8 +283,9 @@ const getTags = async (req: Request, res: Response) => {
 
 const postPost = async (req: Request, res: Response, next: NextFunction) => {
   setErrorType(res, "POST_POST_ERROR")
-  const tags =
-    req.body.tags?.split(",").filter(tag => tag.replace(/\//g, "")).length < 3
+  const tags: string | undefined =
+    req.body.tags?.split(",").filter((tag: string) => tag.replace(/\//g, ""))
+      .length < 3
       ? false
       : req.body.tags
           .split(",")
@@ -288,4 +321,12 @@ const postPost = async (req: Request, res: Response, next: NextFunction) => {
   setResponseData(res, responseData)
 }
 
-export { getPost, getPosts, getNotifications, getTags, postPost, postRating }
+export {
+  getPost,
+  getPosts,
+  getNotifications,
+  getRating,
+  getTags,
+  postPost,
+  addRating,
+}
