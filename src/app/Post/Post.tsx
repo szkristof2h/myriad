@@ -1,19 +1,8 @@
-import React, {
-  FC,
-  lazy,
-  Suspense,
-  useContext,
-  useEffect,
-  useState,
-  useRef,
-} from "react"
-import Star from "react-feather/dist/icons/star"
+import React, { FC, lazy, Suspense, useEffect, useState, useRef } from "react"
 import { Facebook, Twitter } from "react-feather"
-import { PostsContext, GetPostData, samplePost } from "../contexts/PostsContext"
+import { GetPostData, samplePost } from "../contexts/PostsContext"
 import config from "../config"
-import Meh from "../images/Meh.jsx"
 import Popup from "../Popup"
-import { Button } from "../components"
 import { Header, UserHeader } from "../Typography/Typography.style"
 import {
   StyledNavigationButton,
@@ -27,9 +16,8 @@ import {
 import getYoutubeId from "../../util/getYoutubeId"
 import theme from "../theme"
 import useGetData from "../hooks/useGetData"
-import usePostData from "../hooks/usePostData"
-import { PostRateData, PostRateVariables } from "./GridPost"
 import Loader from "../Loader.style"
+import Rater from "./Rater"
 
 const Comments = lazy(() =>
   import("../Comments/Comments" /* webpackChunkName: "Comments" */)
@@ -45,19 +33,8 @@ const Post: FC<Props> = ({ id, dismiss }) => {
   const [imageIndex, setImageIndex] = useState(0)
   const [idVideo, setIdVideo] = useState<string | false>("")
   const [videoSize, setVideoSize] = useState({ width: 0, height: 0 })
-  const { refetchPosts } = useContext(PostsContext)
   const ref = useRef(null)
-  const { data, isLoading, refetch } = useGetData<GetPostData>(`post/${id}`)
-  const { startPost, isLoading: isLoadingRating } = usePostData<
-    PostRateData,
-    PostRateVariables
-  >(`logout`)
-  const rate = async (rating: number, e: React.MouseEvent) => {
-    e.preventDefault()
-    await startPost({ id, value: rating })
-    refetch()
-    refetchPosts() // TODO: shouldn't refetch all post just because the rating changes on a single one
-  }
+  const { data, isLoading } = useGetData<GetPostData>(`post/${id}`)
   const handleImageStep = (e: React.MouseEvent, step: number) => {
     e.preventDefault()
     setImageIndex(index => index + step)
@@ -67,14 +44,11 @@ const Post: FC<Props> = ({ id, dismiss }) => {
     comments: commentCount,
     createdAt,
     description,
-    downs,
     link,
     images,
     postedByName,
-    rating,
     tags,
     title,
-    ups,
   } = data?.post ?? samplePost
 
   useEffect(() => {
@@ -145,43 +119,7 @@ const Post: FC<Props> = ({ id, dismiss }) => {
         </UserHeader>
         <StyledSummary>{description}</StyledSummary>
         <StyledButtonContainer>
-          <Button
-            isLoading={isLoadingRating}
-            onClick={e => rate(1, e)}
-            isRated={rating === 1}
-            to={"impressed"}
-            type={"impressedBig"}
-          >
-            <Star
-              // @ts-ignore
-              alt="Impressed!"
-              className="icon impressed"
-              fill={rating > 0 ? "yellow" : "none"}
-              placeholder="Impressed!"
-              size="40"
-              strokeWidth="1.5px"
-              color={rating > 0 ? "yellow" : "gray"}
-            />
-            <Header size={2}>{ups}</Header>
-          </Button>
-          <Button
-            isLoading={isLoadingRating}
-            onClick={e => rate(-1, e)}
-            isRated={rating === -1}
-            to={"meh"}
-            type={"mehBig"}
-          >
-            <Meh
-              // @ts-ignore
-              alt="Meh..."
-              className="icon meh"
-              color={rating < 0 ? "black" : "gray"}
-              placeholder="Meh..."
-              size="40"
-              strokeWidth="1.5px"
-            />
-            <Header size={2}>{downs}</Header>
-          </Button>
+          <Rater idPost={id} headerSize={2} size="big" />
           <div />
           <a
             href={`http://www.facebook.com/sharer.php?u=${url}[title]=${title}`}

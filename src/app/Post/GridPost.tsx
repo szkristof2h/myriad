@@ -1,10 +1,6 @@
-import React, { FC, useContext } from "react"
-import Star from "react-feather/dist/icons/star"
-import { PostsContext } from "../contexts/PostsContext"
-import Meh from "../images/Meh.jsx"
+import React, { FC } from "react"
 // @ts-ignore
 import sample from "../images/add.svg"
-import { Button } from "../components"
 import { Header, UserHeader } from "../Typography/Typography.style"
 import {
   StyledPost,
@@ -12,16 +8,7 @@ import {
   StyledHeaderContainer,
 } from "./Post.style"
 import Loader from "../Loader.style"
-import usePostData from "../hooks/usePostData"
-
-export interface PostRateData {
-  success: boolean
-}
-
-export interface PostRateVariables {
-  id: string
-  value: number
-}
+import Rater from "./Rater"
 
 interface Props {
   id: string
@@ -39,49 +26,25 @@ interface Props {
   type?: string
   ups: number
 }
-const GridPost: FC<Props> = ({
-  id,
-  col,
-  downs,
-  images,
-  isLoading,
-  openPost,
-  postedByName,
-  rating = 0,
-  row,
-  size = 0,
-  title,
-  type,
-  ups,
-}) => {
-  const { refetchPosts } = useContext(PostsContext)
-  const { startPost, isLoading: isLoadingRating } = usePostData<
-    PostRateData,
-    PostRateVariables
-  >(`rate`)
-  const rate = async (rating: number, e: React.MouseEvent) => {
-    e.preventDefault()
-    await startPost({ id, value: rating })
-    refetchPosts() // TODO: shouldn't refetch all post just because the rating changes on a single one
+const GridPost: FC<Props> = props => {
+  const {
+    id,
+    col,
+    images,
+    isLoading,
+    openPost,
+    postedByName,
+    row,
+    size = 0,
+    title,
+    type,
+  } = props
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.target === e.currentTarget && openPost?.()
   }
 
-  const handleClick = (e: React.MouseEvent) =>
-    e.target === e.currentTarget && openPost?.()
-  const classType = `post ${
-    type && type !== "notification"
-      ? "stand-alone"
-      : size < 6
-      ? "sub2"
-      : size < 18
-      ? "sub1"
-      : "main"
-  }`
-
-  const styleSize = classType.includes("main")
-    ? 2
-    : classType.includes("sub2")
-    ? -1
-    : 1
+  const headerSize = size < 6 ? -1 : 1
 
   return (
     <StyledPost
@@ -102,7 +65,7 @@ const GridPost: FC<Props> = ({
       ) : (
         <StyledDetailsContainer>
           <StyledHeaderContainer>
-            <Header centered size={styleSize} onClick={handleClick}>
+            <Header centered size={headerSize} onClick={handleClick}>
               {title}
             </Header>
             {postedByName && (
@@ -112,33 +75,7 @@ const GridPost: FC<Props> = ({
             )}
           </StyledHeaderContainer>
           {title !== "Submit a post!" && type !== "notification" && (
-            <Button
-              isActive={rating === 1}
-              isLoading={isLoadingRating}
-              type={"impressed"}
-              onClick={e => rate(1, e)}
-              to={"impressed"}
-            >
-              <Star
-                className={"icon"}
-                strokeWidth="1.5px"
-                color="white"
-                fill={rating > 0 ? "white" : "none"}
-              />
-              <Header size={styleSize}>{ups}</Header>
-            </Button>
-          )}
-          {title !== "Submit a post!" && type !== "notification" && (
-            <Button
-              isActive={rating === -1}
-              isLoading={isLoadingRating}
-              type={"meh"}
-              onClick={e => rate(-1, e)}
-              to={"meh"}
-            >
-              <Meh className={"icon"} strokeWidth="1.5px" color="white" />
-              <Header size={styleSize}>{downs}</Header>
-            </Button>
+            <Rater headerSize={headerSize} idPost={id} size="small" />
           )}
         </StyledDetailsContainer>
       )}
