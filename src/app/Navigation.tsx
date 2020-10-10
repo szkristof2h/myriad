@@ -7,18 +7,19 @@ import Message from "react-feather/dist/icons/message-circle"
 import Profile from "react-feather/dist/icons/user"
 import Refresh from "react-feather/dist/icons/refresh-cw"
 import Updates from "react-feather/dist/icons/bell"
-import { NavigationContext } from "./contexts/NavigationContext"
+import { PostsContext } from "./contexts/PostsContext"
 import { UserContext } from "./contexts/UserContext"
 import StyledNavigation from "./Navigation.style"
 import { Base } from "./Typography/Typography.style"
+import { Button } from "./components"
 
 const Navigation: FC = () => {
-  const { setRefresh } = useContext(NavigationContext)
-  const { currentUser } = useContext(UserContext)
+  const { refetchPosts } = useContext(PostsContext)
+  const { currentUser, isLoading } = useContext(UserContext)
 
   const handleRefresh = (e: React.MouseEvent) => {
     e.preventDefault()
-    setRefresh(true)
+    refetchPosts()
   }
 
   return (
@@ -42,13 +43,15 @@ const Navigation: FC = () => {
         )}
         <Base>{currentUser?.id ? "Profile" : "Login"}</Base>
       </Link>
-      <Link
+      <Button
+        isLoading={isLoading}
+        type="transparent"
         className="button"
         to={`${currentUser?.id ? "/messages" : "/login"}`}
       >
         <Message className="icon" strokeWidth="1.5px" color="black" />
         <Base>Messages</Base>
-      </Link>
+      </Button>
       <Link
         className="button"
         to={`${currentUser?.id ? "/notifications" : "/login"}`}

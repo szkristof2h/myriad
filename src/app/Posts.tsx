@@ -97,7 +97,7 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, userName }) => {
   const { width, height } = useWindowSize()
   const missingPosts = limits.reduce((a, v) => a + v) - (posts?.length ?? 0)
   const postsFilledToLimit: PostData[] = [
-    ...(isLoadingPosts ? [] : posts),
+    ...(posts ?? []),
     ...new Array(missingPosts).fill({}).map(_ => ({
       ...samplePost,
       id: makeId(),
