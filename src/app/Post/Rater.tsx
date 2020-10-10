@@ -36,7 +36,7 @@ const Rater: FC<Props> = props => {
     e.preventDefault()
 
     const ratingData = await startPostRequest({ idPost, value })
-    const newRating = ratingData?.rating?.[0]
+    const newRating = ratingData?.rating
 
     if (newRating) refreshRatings(newRating)
   }

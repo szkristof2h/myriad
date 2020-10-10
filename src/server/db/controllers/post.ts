@@ -254,12 +254,20 @@ const addRating = async (req: Request, res: Response) => {
 
   await post.save()
 
+  const newRating: RatingModel | undefined = await Rating.findOne({
+    idPost,
+    idUser,
+  })
+    .select("value")
+    .lean()
+    .exec()
+
   const responseData: PostRatingData = {
     rating: {
       downs: post.downs,
       idPost,
       ups: post.ups,
-      value,
+      value: newRating?.value ?? 0,
     },
   }
   setResponseData(res, responseData)

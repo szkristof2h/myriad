@@ -25,7 +25,7 @@ export interface Rating {
 // Should find a better & easier way to provide an initial state to react contexts
 const initialState: RatingsContextInterface = {
   ratings: [],
-  refreshRatings: (ratinge: Rating) => {},
+  refreshRatings: (rating: Rating) => {},
 }
 const RatingsContext = createContext<RatingsContextInterface>(initialState)
 
