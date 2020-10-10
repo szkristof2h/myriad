@@ -76,7 +76,6 @@ const GridPost: FC<GridPostProps> = styled.div(props => {
     medium: "30px",
     big: "40px",
   }
-  console.log({ gridSize })
 
   return {
     background: `gray url('${!isSample ? image : sample}') no-repeat center`,
