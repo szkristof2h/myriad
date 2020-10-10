@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, Canceler } from "axios"
+import { APIResponseError } from "."
 import config from "../config"
-import { APIResponseError } from "../utils"
 
 export interface APIRequestInteface<T> {
   getData: () => Promise<AxiosResponse<T & APIResponseError> | undefined>

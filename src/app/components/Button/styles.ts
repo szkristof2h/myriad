@@ -147,6 +147,7 @@ const Button = styled(Link).withConfig({
     google: { ...primaryStyle, ...googleStyle },
     transparent: { ...primaryStyle, ...transparentStyle },
     active: { ...primaryStyle, ...activeStyle },
+    rate: {},
     impressed: { ...primaryStyle, ...rateStyle },
     meh: { ...primaryStyle, ...rateStyle },
     impressedBig: { ...primaryStyle, ...rateBigStyle },
@@ -154,7 +155,7 @@ const Button = styled(Link).withConfig({
   }
 
   return {
-    ...styles[type],
+    ...(styles[type] ?? {}),
     ...(isLoading ? loadingStyle : {}),
   }
 })

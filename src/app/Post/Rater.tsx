@@ -11,20 +11,20 @@ import {
   PostRatingData,
   PostRatingVariables,
   RatingsContext,
-  RatingsProvider,
 } from "../contexts/RatingsContext"
+import * as Styled from "./Rater.style"
 
 interface Props {
   headerSize: number
   idPost: string
-  size: string
+  size: "big" | "small"
 }
 
 const Rater: FC<Props> = props => {
   const { ratings, refreshRatings } = useContext(RatingsContext)
-  const { headerSize, idPost, size = 0 } = props
+  const { headerSize, idPost, size } = props
   const rating = ratings?.find(rating => rating.idPost === idPost)
-  const { data, isLoading } = useGetData<GetRatingData>(`rate/${idPost}`)
+  const { data, isLoading } = useGetData<GetRatingData>(`rating/${idPost}`)
   const {
     startPost: startPostRequest,
     isLoading: isLoadingPostRating,
@@ -32,7 +32,6 @@ const Rater: FC<Props> = props => {
   const downs = rating?.downs ?? 0
   const value = rating?.value ?? 0
   const ups = rating?.ups ?? 0
-
   const rate = async (value: number, e: React.MouseEvent) => {
     e.preventDefault()
 
@@ -46,52 +45,31 @@ const Rater: FC<Props> = props => {
     if (data?.rating) refreshRatings(data?.rating)
   }, [data])
 
-  const iconStyles = {
-    small: {
-      up: {
-        color: "white",
-      },
-      down: {
-        color: "white",
-      },
-    },
-    big: {
-      up: {
-        color: value < 0 ? "black" : "gray",
-        fill: value > 0 ? "yellow" : "none",
-        size: 40,
-      },
-      down: {
-        color: value > 0 ? "yellow" : "gray",
-        fill: value < 0 ? "black" : "gray",
-        size: 40,
-      },
-    },
-  }
-
   return (
-    <RatingsProvider>
-      <Button
-        isActive={value === 1}
-        isLoading={isLoading || isLoadingPostRating}
-        type="impressed"
-        onClick={e => rate(1, e)}
-        to="impressed"
-      >
-        <Star alt="Impressed!" strokeWidth="1.5px" {...iconStyles[size].up} />
-        <Header size={headerSize}>{ups}</Header>
-      </Button>
-      <Button
-        isActive={value === -1}
-        isLoading={isLoading || isLoadingPostRating}
-        type="meh"
-        onClick={e => rate(-1, e)}
-        to="meh"
-      >
-        <Meh alt="Meh..." strokeWidth="1.5px" {...iconStyles[size].down} />
-        <Header size={headerSize}>{downs}</Header>
-      </Button>
-    </RatingsProvider>
+    <>
+      <Styled.ButtonWrapper isActive={value === 1} type="impressed" size={size}>
+        <Button
+          isLoading={isLoading || isLoadingPostRating}
+          onClick={e => rate(1, e)}
+          to="impressed"
+          type="rate"
+        >
+          <Star alt="Impressed!" strokeWidth="1.5px" />
+          <Header size={headerSize}>{ups}</Header>
+        </Button>
+      </Styled.ButtonWrapper>
+      <Styled.ButtonWrapper isActive={value === -1} type="meh" size={size}>
+        <Button
+          isLoading={isLoading || isLoadingPostRating}
+          onClick={e => rate(-1, e)}
+          to="meh"
+          type="rate"
+        >
+          <Meh alt="Meh..." strokeWidth="1.5px" />
+          <Header size={headerSize}>{downs}</Header>
+        </Button>
+      </Styled.ButtonWrapper>
+    </>
   )
 }
 

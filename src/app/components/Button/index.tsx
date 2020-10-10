@@ -23,6 +23,7 @@ export interface Props {
     | "meh"
     | "mehBig"
     | "primary"
+    | "rate"
     | "transparent"
     | "warning"
   value?: string

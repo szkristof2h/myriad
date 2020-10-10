@@ -30,8 +30,9 @@ body {
 a {
   color: black;
   text-decoration: inherit;
-  &:visited, &:active {
-    color: black;
-    text-decoration: inherit;
-  }
+}
+
+a:visited, a:active {
+  color: black;
+  text-decoration: inherit;
 }

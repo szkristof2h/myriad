@@ -10,6 +10,7 @@ const color = {
   lightGray: "rgb(233, 228, 253)",
   gray: "rgba(128, 128, 128, 0.5)",
   grayer: "rgba(128, 128, 128, 0.7)",
+  darkGray: "darkGray",
   red: "red",
   redHigh: "rgb(206, 37, 37)",
   redHighHover: "rgb(236, 43, 43)",
@@ -18,12 +19,12 @@ const color = {
   yellow: "yellow",
   white: "#ffffff",
   black: "#000000",
-};
+}
 
 export default {
   base: {
     gutter: 8,
-    borderRadius: 20
+    borderRadius: 20,
   },
   font: {
     size: 16,
@@ -35,8 +36,8 @@ export default {
     header5: "2em",
     header6: "2.25em",
     style: {
-      button: "Artifika"
-    }
+      button: "Artifika",
+    },
   },
   color: {
     ...color,
@@ -54,6 +55,6 @@ export default {
     okHover: color.greenHighHover,
     okActive: color.greenHighHover,
     warn: color.yellow,
-    zebraRow: color.lightGray
-  }
-};
+    zebraRow: color.lightGray,
+  },
+}

@@ -25,7 +25,7 @@ export interface Rating {
 // Should find a better & easier way to provide an initial state to react contexts
 const initialState: RatingsContextInterface = {
   ratings: [],
-  refreshRatings: (rating: Rating) => {},
+  refreshRatings: (ratinge: Rating) => {},
 }
 const RatingsContext = createContext<RatingsContextInterface>(initialState)
 
@@ -33,10 +33,8 @@ const RatingsProvider = ({ children }) => {
   const [ratings, setRatings] = useState<Rating[]>()
   const refreshRatings = (newRating: Rating) => {
     setRatings(ratings => [
-      ...ratings?.filter(
-        rating => rating.idPost !== newRating.idPost,
-        newRating
-      ),
+      ...(ratings?.filter(rating => rating.idPost !== newRating.idPost) ?? []),
+      newRating,
     ])
   }
 

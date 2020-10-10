@@ -200,10 +200,7 @@ const getRating = async (req: Request, res: Response) => {
 
   const postRatings:
     | Pick<PostModel, "downs" | "ups">
-    | undefined = await Post.findOneById(idPost)
-    .select("downs ups")
-    .lean()
-    .exec()
+    | undefined = await Post.findById(idPost).select("downs ups").lean().exec()
 
   if (!postRatings) throw Error("POST_NOT_FOUND")
 
