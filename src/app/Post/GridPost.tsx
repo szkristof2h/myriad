@@ -1,18 +1,13 @@
 import React, { FC } from "react"
 // @ts-ignore
-import sample from "../images/add.svg"
 import { Header, UserHeader } from "../Typography/Typography.style"
-import {
-  StyledPost,
-  StyledDetailsContainer,
-  StyledHeaderContainer,
-} from "./Post.style"
+import * as Styled from "./GridPost.style"
 import Loader from "../Loader.style"
 import Rater from "./Rater"
 
 interface Props {
   id: string
-  col?: number
+  column?: number
   dismiss?: () => void
   downs: number
   images: string | string[]
@@ -29,7 +24,7 @@ interface Props {
 const GridPost: FC<Props> = props => {
   const {
     id,
-    col,
+    column,
     images,
     isLoading,
     openPost,
@@ -45,26 +40,22 @@ const GridPost: FC<Props> = props => {
   }
 
   const headerSize = size < 6 ? -1 : 1
+  const gridSize = size === 5 ? "small" : size === 6 ? "medium" : "big"
 
   return (
-    <StyledPost
-      onClick={handleClick}
-      style={{
-        // add loader bg when isLoading === true
-        background: `gray url('${
-          id.length !== 20 ? images[0] : sample
-        }') no-repeat center`,
-        backgroundSize:
-          id.length === 20 ? `70px 70px` : !type ? "cover" : "auto auto",
-        gridColumn: `${!type ? "" + col + " / span " + size : "initial"}`,
-        gridRow: `${!type ? "" + row + " / span " + size : "initial"}`,
-      }}
+    <Styled.GridPost
+      column={column}
+      gridSize={gridSize}
+      image={images[0]}
+      isSample={id.length === 20}
+      row={row}
+      size={size}
     >
       {isLoading ? (
         <Loader />
       ) : (
-        <StyledDetailsContainer>
-          <StyledHeaderContainer>
+        <Styled.DetailsContainer onClick={handleClick}>
+          <Styled.HeaderContainer gridSize={gridSize}>
             <Header centered size={headerSize} onClick={handleClick}>
               {title}
             </Header>
@@ -73,14 +64,16 @@ const GridPost: FC<Props> = props => {
                 @ {postedByName}
               </UserHeader>
             )}
-          </StyledHeaderContainer>
+          </Styled.HeaderContainer>
           {title !== "Submit a post!" && type !== "notification" && (
             <Rater headerSize={headerSize} idPost={id} size="small" />
           )}
-        </StyledDetailsContainer>
+        </Styled.DetailsContainer>
       )}
-    </StyledPost>
+    </Styled.GridPost>
   )
 }
+
+GridPost.displayName = "GridPost"
 
 export default GridPost

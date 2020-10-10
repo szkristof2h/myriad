@@ -4,20 +4,13 @@ import { GetPostData, samplePost } from "../contexts/PostsContext"
 import config from "../config"
 import Popup from "../Popup"
 import { Header, UserHeader } from "../Typography/Typography.style"
-import {
-  StyledNavigationButton,
-  StyledPostOpen,
-  StyledImageContainer,
-  StyledMainImage,
-  StyledMainVideo,
-  StyledSummary,
-  StyledButtonContainer,
-} from "./Post.style"
+import * as Styled from "./Post.style"
 import getYoutubeId from "../../util/getYoutubeId"
 import theme from "../theme"
 import useGetData from "../hooks/useGetData"
 import Loader from "../Loader.style"
 import Rater from "./Rater"
+import { RatingsProvider } from "../contexts/RatingsContext"
 
 const Comments = lazy(() =>
   import("../Comments/Comments" /* webpackChunkName: "Comments" */)
@@ -29,7 +22,8 @@ interface Props {
   dismiss: () => void
 }
 
-const Post: FC<Props> = ({ id, dismiss }) => {
+const Post: FC<Props> = props => {
+  const { id, dismiss } = props
   const [imageIndex, setImageIndex] = useState(0)
   const [idVideo, setIdVideo] = useState<string | false>("")
   const [videoSize, setVideoSize] = useState({ width: 0, height: 0 })
@@ -68,7 +62,7 @@ const Post: FC<Props> = ({ id, dismiss }) => {
     return (
       <>
         {images && imageIndex > 0 && (
-          <StyledNavigationButton
+          <Styled.NavigationButton
             to="/"
             type="arrow"
             onClick={(e: React.MouseEvent) => handleImageStep(e, -1)}
@@ -77,10 +71,10 @@ const Post: FC<Props> = ({ id, dismiss }) => {
             }}
           >
             {"<"}
-          </StyledNavigationButton>
+          </Styled.NavigationButton>
         )}
         {idVideo ? (
-          <StyledMainVideo
+          <Styled.MainVideo
             width={videoSize.width}
             height={(videoSize.width / 16) * 9}
             src={`https://www.youtube.com/embed/${idVideo}`}
@@ -89,10 +83,10 @@ const Post: FC<Props> = ({ id, dismiss }) => {
             allowFullScreen
           />
         ) : (
-          <StyledMainImage src={images ? images[imageIndex] : ""} />
+          <Styled.MainImage src={images ? images[imageIndex] : ""} />
         )}
         {images && imageIndex < images.length - 1 && (
-          <StyledNavigationButton
+          <Styled.NavigationButton
             to="/"
             type="arrow"
             onClick={(e: React.MouseEvent) => handleImageStep(e, 1)}
@@ -101,7 +95,7 @@ const Post: FC<Props> = ({ id, dismiss }) => {
             }}
           >
             {">"}
-          </StyledNavigationButton>
+          </Styled.NavigationButton>
         )}
       </>
     )
@@ -109,16 +103,16 @@ const Post: FC<Props> = ({ id, dismiss }) => {
 
   return (
     <Popup show={true} dismiss={dismiss} dismissible={true} type="post">
-      <StyledPostOpen>
-        <StyledImageContainer ref={ref}>{renderMedia()}</StyledImageContainer>
+      <Styled.Post>
+        <Styled.ImageContainer ref={ref}>{renderMedia()}</Styled.ImageContainer>
         <Header centered size={3} as="a" href={link} target="_blank">
           {title}
         </Header>
         <UserHeader centered={1} size={1} to={`/user/${postedByName}`}>
           @{postedByName}
         </UserHeader>
-        <StyledSummary>{description}</StyledSummary>
-        <StyledButtonContainer>
+        <Styled.Summary>{description}</Styled.Summary>
+        <Styled.ButtonContainer>
           <Rater idPost={id} headerSize={2} size="big" />
           <div />
           <a
@@ -139,13 +133,15 @@ const Post: FC<Props> = ({ id, dismiss }) => {
               size="40"
             />
           </a>
-        </StyledButtonContainer>
+        </Styled.ButtonContainer>
         <Suspense fallback={<div>Loading comments...</div>}>
           <Comments idParent={id} type={"post"} commentCount={commentCount} />
         </Suspense>
-      </StyledPostOpen>
+      </Styled.Post>
     </Popup>
   )
 }
+
+Post.displayName = "Post"
 
 export default Post

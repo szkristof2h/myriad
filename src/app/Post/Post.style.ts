@@ -4,59 +4,13 @@ import { Header, UserHeader, Base } from "../Typography/Typography.style"
 import { Button } from "../components"
 import StyledComments from "../Comments/Comments.style"
 
-const StyledDetailsContainer = styled.div({
-  display: "none",
-  gridRow: 2,
-  "&:hover": {
-    cursor: "default",
-  },
-})
-
-const StyledHeaderContainer = styled.div({
-  gridColumn: "1 / span 2",
-  justifyItems: "center",
-  alignItems: "center",
-  background: "rgba(0, 0, 0, 0.4)",
-  [`${Header}, & > .user`]: {
-    overflow: "hidden",
-    maxWidth: "100%",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-  },
-  [`${Header}`]: {
-    gridRow: 1,
-    padding: `0 ${theme.base.gutter / 4}px`,
-    "&:hover": {
-      cursor: "pointer",
-    },
-  },
-  "> .user": {
-    gridRow: 2,
-  },
-})
-
-const StyledPost = styled.div({
-  border: "1px solid black",
-  display: "grid",
-  gridTemplateRows: "4fr 1fr",
-  fontSize: "1rem",
-  color: "white",
-  "&:hover": {
-    cursor: "pointer",
-    [`${StyledDetailsContainer}`]: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-    },
-  },
-})
-
-const StyledNavigationButton = styled(Button)({
+const NavigationButton = styled(Button)({
   position: "absolute",
   top: "50%",
   transform: "translate(0, -50%)",
 })
 
-const StyledMainImage = styled.img({
+const MainImage = styled.img({
   objectFit: "contain",
   minWidth: "1px",
   minHeight: "1px",
@@ -64,7 +18,7 @@ const StyledMainImage = styled.img({
   alignSelf: "stretch",
 })
 
-const StyledMainVideo = styled.iframe({
+const MainVideo = styled.iframe({
   objectFit: "contain",
   minWidth: "1px",
   minHeight: "1px",
@@ -72,7 +26,7 @@ const StyledMainVideo = styled.iframe({
   alignSelf: "stretch",
 })
 
-const StyledImageContainer = styled.div({
+const ImageContainer = styled.div({
   display: "grid",
   position: "relative",
   gridColumn: 1,
@@ -84,7 +38,7 @@ const StyledImageContainer = styled.div({
   background: "black",
 })
 
-const StyledSummary = styled(Base)({
+const Summary = styled(Base)({
   display: "initial",
   gridColumn: 2,
   gridRow: 3,
@@ -95,7 +49,7 @@ const StyledSummary = styled(Base)({
   marginBottom: `${theme.base.gutter / 2}px`,
 })
 
-const StyledButtonContainer = styled.div({
+const ButtonContainer = styled.div({
   display: "grid",
   gridColumn: 2,
   gridRow: 5,
@@ -112,7 +66,7 @@ const StyledButtonContainer = styled.div({
   },
 })
 
-const StyledPostOpen = styled.div({
+const Post = styled.div({
   display: "grid",
   background: "white",
   maxHeight: "calc(100% - 20px)",
@@ -144,14 +98,11 @@ const StyledPostOpen = styled.div({
 })
 
 export {
-  StyledButtonContainer,
-  StyledDetailsContainer,
-  StyledHeaderContainer,
-  StyledImageContainer,
-  StyledMainImage,
-  StyledMainVideo,
-  StyledNavigationButton,
-  StyledPost,
-  StyledPostOpen,
-  StyledSummary,
+  ButtonContainer,
+  ImageContainer,
+  MainImage,
+  MainVideo,
+  NavigationButton,
+  Post,
+  Summary,
 }

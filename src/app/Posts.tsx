@@ -154,7 +154,7 @@ const Posts: FC<Props> = ({ fullUrl, history, tag, userName }) => {
             positions?.[i] && (
               <GridPost
                 key={post.id}
-                col={positions[i][0] + 1 + offset}
+                column={positions[i][0] + 1 + offset}
                 downs={downs}
                 id={id}
                 images={images}

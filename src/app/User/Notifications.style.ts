@@ -3,11 +3,7 @@ import theme from "../theme"
 import { Box } from "../components/Box.style"
 import Button from "../components/Button/styles"
 import { Header, Error, UserHeader } from "../Typography/Typography.style"
-import {
-  StyledPost,
-  StyledDetailsContainer,
-  StyledHeaderContainer,
-} from "../Post/Post.style"
+import * as Styled from "../Post/GridPost.style"
 
 const StyledNotifications = styled(Box)({
   display: "grid",
@@ -26,13 +22,13 @@ const StyledNotifications = styled(Box)({
     gridColumn: "1 / span 3",
     marginTop: `${theme.base.gutter}px`,
   },
-  [`${StyledPost}`]: {
+  [`${Styled.GridPost}`]: {
     gridColumn: "auto",
     gridRow: "auto",
     height: "120px",
-    [`${StyledDetailsContainer}`]: {
+    [`${Styled.DetailsContainer}`]: {
       gridTemplateColumns: "1fr",
-      [`${StyledHeaderContainer}`]: {
+      [`${Styled.HeaderContainer}`]: {
         gridTemplateColumns: "1fr",
         [`${UserHeader}`]: {
           gridRow: 2,
