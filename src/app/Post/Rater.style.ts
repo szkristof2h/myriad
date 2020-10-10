@@ -32,14 +32,14 @@ const ButtonWrapper: FC<Props> = styled.div(({ isActive, size, type }) => {
       ["svg"]: {
         width: "40px",
         height: "40px",
-        stroke: isActive ? theme.color.black : theme.color.darkGray,
+        stroke: isActive ? theme.color.red : theme.color.darkGray,
         fill: "none",
       },
       [`${Header}`]: {
         padding: `0 ${theme.base.gutter / 2}px 0 0`,
         alignSelf: "center",
         color: `${
-          isActive ? theme.color.black : theme.color.darkGray
+          isActive ? theme.color.red : theme.color.darkGray
         } !important`,
       },
     },
