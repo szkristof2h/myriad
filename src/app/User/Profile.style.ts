@@ -12,8 +12,8 @@ export const AvatarWrapper = styled.div({
   height: "150px",
   "> img": {
     maxWidth: "100%",
-    maxHeight: "100%",
-    justifySelf: "center",
+    height: "inherit",
+    justifySelf: "start",
     alignSelf: "center",
   },
 })
