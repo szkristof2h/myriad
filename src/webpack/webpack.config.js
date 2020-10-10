@@ -2,6 +2,9 @@ const path = require("path")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const webpack = require("webpack")
+const dotenv = require("dotenv").config({
+  path: path.join(__dirname + "../../../" + ".env"),
+})
 
 module.exports = devMode => {
   return {
@@ -44,14 +47,14 @@ module.exports = devMode => {
         chunkFilename: devMode ? "[id].css" : "[id].[hash].css",
       }),
       new webpack.DefinePlugin({
-        "process.env.SITE_URL": JSON.stringify(process.env.SITE_URL),
-        "process.env.PORT": JSON.stringify(process.env.PORT),
+        "process.env.SITE_URL": JSON.stringify(dotenv.parsed.SITE_URL),
+        "process.env.PORT": JSON.stringify(dotenv.parsed.PORT),
       }),
     ],
     output: {
       filename: "[name].bundle.js",
       chunkFilename: "[name].bundle.js",
-      path: path.resolve(__dirname, "../dist/app"),
+      path: path.resolve(__dirname, "../dist/bundles"),
       publicPath: "/",
     },
     stats: {
