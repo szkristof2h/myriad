@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react"
+import React, { createContext, useEffect, useState } from "react"
 import { PostType } from "src/server/db/models/Post"
 import useGetData from "../hooks/useGetData"
 
@@ -27,6 +27,7 @@ export interface Post extends PostData {
 interface PostContextInterface {
   focused: string
   getPosts: (url: string) => void
+  idPosts: string[]
   isLoadingPosts: boolean
   notifications: PostData[]
   posts: PostData[] | undefined
@@ -41,6 +42,7 @@ interface PostContextInterface {
 const initialState: PostContextInterface = {
   focused: "",
   getPosts: (url: string) => {},
+  idPosts: [],
   isLoadingPosts: true,
   notifications: [],
   posts: [],
@@ -70,6 +72,7 @@ export const samplePost: PostData = {
 }
 
 const PostsProvider = ({ children }) => {
+  const [idPosts, setIdPosts] = useState<string[]>([])
   const [focused, setFocused] = useState("")
   const [previousUrl, setPreviousUrl] = useState("")
   const [url, setUrl] = useState("posts")
@@ -84,11 +87,18 @@ const PostsProvider = ({ children }) => {
     setUrl(url)
   }
 
+  useEffect(() => {
+    const ids = postsData?.posts?.map(post => post.id)
+
+    if (ids && ids?.some(id => !idPosts.includes(id))) setIdPosts(ids)
+  }, [postsData])
+
   return (
     <PostsContext.Provider
       value={{
         focused,
         getPosts,
+        idPosts,
         isLoadingPosts,
         notifications,
         posts: postsData?.posts,

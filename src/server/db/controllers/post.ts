@@ -13,7 +13,11 @@ import {
 import { Rating, RatingType, RatingModel } from "../models/Rating"
 import FollowList, { FollowListModel } from "../models/FollowList"
 import { GetPostsData, GetPostData } from "src/app/contexts/PostsContext"
-import { GetRatingData, PostRatingData } from "src/app/contexts/RatingsContext"
+import {
+  GetRatingData,
+  GetRatingsData,
+  PostRatingData,
+} from "src/app/contexts/RatingsContext"
 import { PostSubmitData } from "src/app/Post/Submit"
 
 const tiers = [0.7, 0.4, -1]
@@ -216,6 +220,62 @@ const getRating = async (req: Request, res: Response) => {
   setResponseData(res, responseData)
 }
 
+const getRatings = async (req: Request, res: Response, next: NextFunction) => {
+  setErrorType(res, "GET_RATINGS")
+
+  const idPosts: string[] = req.body.idPosts
+  const idUser = req.user?.id
+
+  if (!idPosts.length) {
+    setResponseData(res, {
+      error: {
+        shouldShow: false,
+        type: "ratings",
+        message: "No post ids!",
+      },
+    })
+
+    return next()
+  }
+
+  const userRatings: RatingModel[] | [] = await Rating.find({ idUser })
+    .where("idPost")
+    .in(idPosts)
+    .lean()
+    .exec()
+
+  const postRatings:
+    | Pick<PostModel, "downs" | "_id" | "ups">[]
+    | [] = await Post.find()
+    .where("_id")
+    .in(idPosts)
+    .select("downs idPost ups")
+    .lean()
+    .exec()
+
+  if (!postRatings) throw Error("POST_NOT_FOUND")
+
+  const responseData: GetRatingsData = {
+    ratings: idPosts.map(id => {
+      const postRating = postRatings.find(
+        postRating => postRating._id.toString() === id
+      )
+      const userRating = userRatings.find(
+        userRating => userRating.idPost.toString() === id
+      )
+
+      return {
+        downs: postRating?.downs ?? 0,
+        idPost: id,
+        ups: postRating?.ups ?? 0,
+        value: userRating?.value ?? 0,
+      }
+    }),
+  }
+
+  setResponseData(res, responseData)
+}
+
 const addRating = async (req: Request, res: Response) => {
   setErrorType(res, "ADD_RATING")
 
@@ -331,6 +391,7 @@ export {
   getPosts,
   getNotifications,
   getRating,
+  getRatings,
   getTags,
   postPost,
   addRating,

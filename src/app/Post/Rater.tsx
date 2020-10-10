@@ -21,10 +21,9 @@ interface Props {
 }
 
 const Rater: FC<Props> = props => {
-  const { ratings, refreshRatings } = useContext(RatingsContext)
+  const { isLoading, ratings, refreshRatings } = useContext(RatingsContext)
   const { headerSize, idPost, size } = props
   const rating = ratings?.find(rating => rating.idPost === idPost)
-  const { data, isLoading } = useGetData<GetRatingData>(`rating/${idPost}`)
   const {
     startPost: startPostRequest,
     isLoading: isLoadingPostRating,
@@ -38,12 +37,8 @@ const Rater: FC<Props> = props => {
     const ratingData = await startPostRequest({ idPost, value })
     const newRating = ratingData?.rating
 
-    if (newRating) refreshRatings(newRating)
+    if (newRating) refreshRatings()
   }
-
-  useEffect(() => {
-    if (data?.rating) refreshRatings(data?.rating)
-  }, [data])
 
   return (
     <>

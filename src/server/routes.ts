@@ -10,6 +10,7 @@ import {
   postPost,
   getNotifications,
   getRating,
+  getRatings,
 } from "./db/controllers/post"
 import {
   getComments,
@@ -73,6 +74,7 @@ export const init = app => {
   app.getAsync("/get/posts", getPosts)
   app.getAsync("/get/post/:id", getPost)
   app.getAsync("/get/rating/:idPost", getRating)
+  app.postAsync("/get/ratings", getRatings)
   app.postAsync("/post/addPost", authenticate, postPost)
   app.postAsync("/post/addRating", authenticate, addRating)
 

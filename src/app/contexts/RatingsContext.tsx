@@ -1,4 +1,6 @@
-import React, { createContext, useState } from "react"
+import React, { createContext, useContext, useEffect, useRef } from "react"
+import useGetData from "../hooks/useGetData"
+import { PostsContext } from "./PostsContext"
 
 export interface PostRatingData extends GetRatingData {}
 export interface PostRatingVariables {
@@ -10,9 +12,18 @@ export interface GetRatingData {
   rating: Rating
 }
 
+export interface GetRatingsData {
+  ratings: Rating[]
+}
+
+export interface GetRatingsVariables {
+  idPosts: string[]
+}
+
 interface RatingsContextInterface {
+  isLoading: boolean
   ratings: Rating[] | undefined
-  refreshRatings: (rating: Rating) => void
+  refreshRatings: () => void
 }
 
 export interface Rating {
@@ -24,24 +35,40 @@ export interface Rating {
 
 // Should find a better & easier way to provide an initial state to react contexts
 const initialState: RatingsContextInterface = {
+  isLoading: false,
   ratings: [],
-  refreshRatings: (rating: Rating) => {},
+  refreshRatings: () => {},
 }
 const RatingsContext = createContext<RatingsContextInterface>(initialState)
 
 const RatingsProvider = ({ children }) => {
-  const [ratings, setRatings] = useState<Rating[]>()
-  const refreshRatings = (newRating: Rating) => {
-    setRatings(ratings => [
-      ...(ratings?.filter(rating => rating.idPost !== newRating.idPost) ?? []),
-      newRating,
-    ])
-  }
+  const idPostsPrevious = useRef<string[]>([])
+  const { idPosts } = useContext(PostsContext)
+  const { data, isLoading, refetch } = useGetData<
+    GetRatingsData,
+    GetRatingsVariables
+  >("ratings", { idPosts })
+  // TODO: probably should combine this & current, so it's possible to refetch a single rating
+  // const refreshRating = (idPost: string) => {
+  //   setRatings(ratings => [
+  //     ...(ratings?.filter(rating => rating.idPost !== newRating.idPost) ?? []),
+  //     newRating,
+  //   ])
+  // }
+  const refreshRatings = refetch
+
+  useEffect(() => {
+    if (idPosts && idPosts?.some(id => !idPostsPrevious.current.includes(id))) {
+      idPostsPrevious.current = [...idPosts]
+      refetch()
+    }
+  }, [idPosts])
 
   return (
     <RatingsContext.Provider
       value={{
-        ratings,
+        isLoading,
+        ratings: data?.ratings,
         refreshRatings,
       }}
     >
