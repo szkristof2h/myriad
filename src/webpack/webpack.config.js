@@ -47,8 +47,12 @@ module.exports = devMode => {
         chunkFilename: devMode ? "[id].css" : "[id].[hash].css",
       }),
       new webpack.DefinePlugin({
-        "process.env.SITE_URL": JSON.stringify(dotenv.parsed.SITE_URL),
-        "process.env.PORT": JSON.stringify(dotenv.parsed.PORT),
+        "process.env.SITE_URL": JSON.stringify(
+          dotenv.parsed ? dotenv.parsed.SITE_URL : process.env.SITE_URL
+        ),
+        "process.env.PORT": JSON.stringify(
+          dotenv.parsed ? dotenv.parsed.PORT : process.env.PORT
+        ),
       }),
     ],
     output: {
