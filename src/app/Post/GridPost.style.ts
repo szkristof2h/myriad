@@ -76,6 +76,7 @@ const GridPost: FC<GridPostProps> = styled.div(props => {
     medium: "30px",
     big: "40px",
   }
+  console.log({ gridSize })
 
   return {
     background: `gray url('${!isSample ? image : sample}') no-repeat center`,
@@ -97,7 +98,7 @@ const GridPost: FC<GridPostProps> = styled.div(props => {
       alignSelf: "end",
       justifySelf: "center",
       padding: `${theme.base.gutter}px 0`,
-      ".icon": {
+      svg: {
         width: iconSize[gridSize],
         height: iconSize[gridSize],
       },
