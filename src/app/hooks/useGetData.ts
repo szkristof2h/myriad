@@ -21,7 +21,7 @@ const useGetData = <T = any, V = any>(url: string, params?: V): GetData<T> => {
   useEffect(() => {
     let didCancel = false
 
-    if (previousUrl !== url || shouldRefetch) {
+    if (url && (previousUrl !== url || shouldRefetch)) {
       setIsLoading(true)
 
       const { getData, cancel, getHasFailed }: APIRequestInteface<T> = get<
