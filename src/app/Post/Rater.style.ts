@@ -53,7 +53,7 @@ const ButtonWrapper: FC<Props> = styled.div(({ isActive, size, type }) => {
       },
       [`${Header}`]: {
         color: `${
-          isActive ? theme.color.black : theme.color.darkGray
+          isActive ? theme.color.black : theme.color.yellow
         } !important`,
         padding: `0 ${theme.base.gutter / 2}px 0 0`,
       },
