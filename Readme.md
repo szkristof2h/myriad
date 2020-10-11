@@ -31,7 +31,7 @@ This means that, although each of the more popular posts fill up a larger area b
 I started working on this project to learn, experiment and practice with new features of various frameworks, libraries, etc., I use. I felt that I have neglected actual practice with some of them --like React-- so I decided to create a smaller project where practice is a lot easier. This also means that I might use alpha or beta versions of dependencies.
 
 ## Roadmap (mostly in order of importance, finished ones at the end of the list)
- 1. Test & fix bugs after re-deployment
+ 1. Test & fix bugs after re-deployment (the site is up at heroku once again mostly functional, but there're still some issues to work out)
  1. Make tags better and creating some kind of browsing component (*on hold until **#1** finishes*)
  1. Implement facebook and twitter social login
  1. Improve Profile page
