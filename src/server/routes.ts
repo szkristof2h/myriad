@@ -43,7 +43,7 @@ export const init = app => {
     if (!req.body.url || !isURL(req.body.url)) {
       setResponseData(res, {
         error: {
-          shouldShow: true,
+          shouldShow: !!req.body.url,
           type: "submit",
           message: "The url you provided isn't valid!",
         },
