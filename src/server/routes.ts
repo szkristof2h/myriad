@@ -83,6 +83,7 @@ export const init = app => {
 
   // Routes
   app.postAsync("/get/media/:url", authenticate, getSiteImages)
+  app.postAsync("/get/media/", authenticate, getSiteImages)
 
   app.getAsync("/get/tags", getTags)
 

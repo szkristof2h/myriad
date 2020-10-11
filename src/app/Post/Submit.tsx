@@ -93,9 +93,7 @@ const Submit: FC<Props> = () => {
     return
   }
 
-  console.log({ fieldUrl })
   useEffect(() => {
-    console.log("URL CHANGED")
     if (!isMediaLoading && fieldUrl) handleMediaChange()
   }, [isMediaLoading, fieldUrl])
 
