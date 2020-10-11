@@ -41,9 +41,10 @@ const Submit: FC<Props> = () => {
     register,
     setValue,
     trigger,
+    watch,
   } = useForm({ mode: "all", reValidateMode: "onChange" })
+  const fieldUrl = watch("url", "")
   const { touched: isTouched } = formState
-  const { url: fieldUrl = "" } = getValues()
   const [fieldTag, setFieldTag] = useState("")
   const [images, setImages] = useState<string[]>([])
   const [selectedImages, setSelectedImages] = useState<string[]>([])
@@ -92,7 +93,9 @@ const Submit: FC<Props> = () => {
     return
   }
 
+  console.log({ fieldUrl })
   useEffect(() => {
+    console.log("URL CHANGED")
     if (!isMediaLoading && fieldUrl) handleMediaChange()
   }, [isMediaLoading, fieldUrl])
 
