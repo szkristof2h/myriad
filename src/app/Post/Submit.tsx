@@ -128,6 +128,8 @@ const Submit: FC<Props> = () => {
   }
 
   const onSubmit = async formData => {
+    if (!!getValidationError() || isLoadingSubmit) return
+
     const { description, title, url } = formData
 
     const variables = {
