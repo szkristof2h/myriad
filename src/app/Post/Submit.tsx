@@ -54,11 +54,13 @@ const Submit: FC<Props> = () => {
   const { data: imageData, isLoading: isMediaLoading } = useGetData<
     PostGetMediaData
   >(
-    `media/${fieldUrl
-      .split("")
-      .map(ch => ch.charCodeAt(0))
-      .join("")}`,
-    { url: `${idYoutube ? idYoutube : fieldUrl}` }
+    isURL(fieldUrl)
+      ? `media/${fieldUrl
+          .split("")
+          .map(ch => ch.charCodeAt(0))
+          .join("")}`
+      : "",
+    { url: fieldUrl }
   )
   const {
     isLoading: isLoadingSubmit,
