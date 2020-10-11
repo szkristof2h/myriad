@@ -320,7 +320,7 @@ const Submit: FC<Props> = () => {
                       setTags(
                         tags
                           .split(",")
-                          .filter(tag => tag !== tag)
+                          .filter(filteredTag => tag !== filteredTag)
                           .join(",")
                       )
                     }
