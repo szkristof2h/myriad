@@ -10,11 +10,16 @@ const Button = styled(Link).withConfig({
   shouldForwardProp: prop =>
     !["type", "isActive", "isLoading", "isDisabled", "isRated"].includes(prop),
 })((props: ButtonProps) => {
-  const { isActive, isLoading, isRated, type } = props
+  const { isActive, isDisabled, isLoading, isRated, type } = props
 
   const primaryStyle = {
     padding: `${theme.base.gutter / 2}px`,
-    backgroundColor: !isActive ? theme.color.brown : theme.color.brownLight,
+    backgroundColor:
+      isDisabled || isLoading
+        ? theme.color.gray
+        : !isActive
+        ? theme.color.brown
+        : theme.color.brownLight,
     textAlign: "center",
     color: theme.color.white,
     fontFamily: theme.font.style.button,
@@ -22,7 +27,8 @@ const Button = styled(Link).withConfig({
       color: theme.color.white,
     },
     ["&:hover"]: {
-      background: theme.color.brownLight,
+      background:
+        isDisabled || isLoading ? theme.color.gray : theme.color.brownLight,
     },
   }
 

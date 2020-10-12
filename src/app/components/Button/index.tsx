@@ -36,7 +36,14 @@ const Button: FC<Props> = props => {
     if (!isLoading && !isDisabled) onClick?.(e)
   }
 
-  return <StyledButton onClick={handleOnClick} {...rest} />
+  return (
+    <StyledButton
+      isDisabled={isDisabled}
+      isLoading={isLoading}
+      onClick={handleOnClick}
+      {...rest}
+    />
+  )
 }
 
 export default Button
