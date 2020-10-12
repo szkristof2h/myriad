@@ -34,8 +34,8 @@ const useGetData = <T = any, V = any>(url: string, params?: V): GetData<T> => {
         const response = await getData()
 
         if (response?.data?.error?.shouldShow)
-          addError(response.data.error.type, response.data.error.message)
-        if (getHasFailed()) addError({ request: [`get request failed`] })
+          addError(response.data.error.message, response.data.error.type)
+        if (getHasFailed()) addError(`get request failed`, "request")
 
         if (!didCancel) {
           setData(response?.data)

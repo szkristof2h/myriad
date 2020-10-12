@@ -29,7 +29,7 @@ const usePostData = <T = any, V = any>(url: string): PostRequestData<T, V> => {
     if (response?.data?.error?.shouldShow)
       addError(response.data.error.message, response.data.error.type)
 
-    if (getHasFailed()) addError({ request: [`post request failed`] })
+    if (getHasFailed()) addError(`post request failed`, "request")
 
     setIsLoading(false)
 
