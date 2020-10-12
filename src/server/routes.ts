@@ -67,15 +67,11 @@ export const init = app => {
 
   const authenticate = (req: Request, res: Response, next: NextFunction) => {
     if (req.user)
-      if (!req.user.displayName) throw Error("NO_DISPLAYNAME")
+      if (!req.user.displayName && req.path !== "/post/user/profile")
+        throw Error("NO_DISPLAYNAME")
       else next()
     else throw Error("NOT_LOGGED_IN")
   }
-  app.get("/check", (req: Request, res: Response) => {
-    console.log(req.session)
-
-    res.json(req.user)
-  })
 
   app.get("/auth/google", google.redirect)
   app.get("/auth/google/callback", google.callback)
