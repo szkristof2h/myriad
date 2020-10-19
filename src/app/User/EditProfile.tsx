@@ -1,5 +1,5 @@
 import React, { FC, useState, useContext, useEffect } from "react"
-import { Link, Redirect } from "react-router-dom"
+import { Redirect } from "react-router-dom"
 import * as Styled from "./EditProfile.style"
 import { Button, Input, TextArea } from "../components"
 import { Header } from "../Typography/Typography.style"
@@ -7,6 +7,7 @@ import useGetData from "../hooks/useGetData"
 import { UserContext } from "../contexts/UserContext"
 import Loader from "../Loader"
 import usePostData from "../hooks/usePostData"
+import { ErrorContext } from "../contexts/ErrorContext"
 
 export interface UpdateProfileData {
   isUpdateSuccessful: boolean
@@ -32,6 +33,7 @@ const EditProfile: FC = () => {
   const { currentUser, isLoading: isLoadingCurrentUser, refetch } = useContext(
     UserContext
   )
+  const { addError } = useContext(ErrorContext)
   const [newProfile, setNewProfile] = useState({
     avatar: "",
     bio: "",
@@ -43,10 +45,11 @@ const EditProfile: FC = () => {
     bio: newBio,
     displayName: newDisplayName,
   } = newProfile
-
-  // TODO: add some kind of throttling
+  const [isNameCheckBlocked, setIsNameCheckBlocked] = useState(false)
   const { data, isLoading } = useGetData<IsNameAvailableData>(
-    !!newDisplayName ? `user/displayName/${newDisplayName}` : ""
+    !!newDisplayName && !isNameCheckBlocked
+      ? `user/displayName/${newDisplayName}`
+      : ""
   )
   const {
     isLoading: isLoadingUpdate,
@@ -64,12 +67,7 @@ const EditProfile: FC = () => {
   }, [currentUser])
 
   const isNameAvailable = data?.isNameAvailable
-  const checkButtonType = !displayName
-    ? "primary"
-    : !isNameAvailable
-    ? "danger"
-    : "confirm"
-
+  const hasError = (!displayName && !newDisplayName) || !isNameAvailable
   const handleInput = (value: inputFieldTypes) => {
     if (!isLoading) setNewProfile({ ...newProfile, ...value })
   }
@@ -77,11 +75,15 @@ const EditProfile: FC = () => {
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault()
 
-    await startPostRequest(newProfile)
+    if (!displayName && !newDisplayName)
+      addError("You should first set a displayname", "editProfile")
+    else {
+      await startPostRequest(newProfile)
 
-    // redirect?
-    setNewProfile({ avatar: "", bio: "", displayName: "" })
-    refetch()
+      // redirect?
+      setNewProfile({ avatar: "", bio: "", displayName: "" })
+      refetch()
+    }
   }
 
   if (isLoadingCurrentUser) return <Loader /> // integrate loading into box
@@ -96,14 +98,18 @@ const EditProfile: FC = () => {
         Display Name (can only be set once)*
       </Header>
       <Input
-        onChange={e =>
+        hasError={!displayName && !!newDisplayName && isNameAvailable === false}
+        message={"Name is unavailable."}
+        onBlur={() => setIsNameCheckBlocked(false)}
+        onChange={e => {
+          setIsNameCheckBlocked(true)
           handleInput({ displayName: e.currentTarget.value ?? "" })
-        }
+        }}
         value={newDisplayName}
         disabled={!!displayName}
       />
       <Header centered>Avatar</Header>
-      <img className="avatar" src={newAvatar} />
+      {newAvatar && <img className="avatar" src={newAvatar} />}
       <Input
         onChange={e => handleInput({ avatar: e.currentTarget.value })}
         value={newAvatar}
@@ -118,6 +124,7 @@ const EditProfile: FC = () => {
       />
       <Button
         type="primary"
+        isDisabled={hasError}
         isLoading={isLoadingUpdate}
         onClick={async e => await handleSubmit(e)}
         to="profile/update"
