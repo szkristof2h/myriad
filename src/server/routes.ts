@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express"
+import isURL from "validator/lib/isURL"
 import sanitizeHtml from "sanitize-html"
 import axios from "axios"
 import { setErrorType, setResponseData } from "./utils"
@@ -32,28 +33,45 @@ import {
 import { google, logout } from "./authenticate"
 
 export const init = app => {
-  const getSiteImages = async (req: Request, res: Response) => {
+  const getSiteImages = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     setErrorType(res, "GET_SITE_IMAGES")
 
-    const response = await axios.get(req.body.url)
-    const cleanHTML = sanitizeHtml(response.data, {
-      allowedTags: ["img"],
-    })
+    if (!req.body.url || !isURL(req.body.url)) {
+      setResponseData(res, {
+        error: {
+          shouldShow: !!req.body.url,
+          type: "submit",
+          message: "The url you provided isn't valid!",
+        },
+      })
 
-    setResponseData(res, { html: cleanHTML })
+      return next()
+    }
+
+    // TODO: make this work not just for urls that end with file extensions; this method is prone to errors
+    if (req.body.url.match(/\.(jpeg|jpg|gif|png)$/) != null)
+      setResponseData(res, { html: `<img src="${req.body.url}" />` })
+    else {
+      const response = await axios.get(req.body.url)
+      const cleanHTML = sanitizeHtml(response.data, {
+        allowedTags: ["img"],
+      })
+
+      setResponseData(res, { html: cleanHTML })
+    }
   }
 
   const authenticate = (req: Request, res: Response, next: NextFunction) => {
     if (req.user)
-      if (!req.user.displayName) throw Error("NO_DISPLAYNAME")
+      if (!req.user.displayName && req.path !== "/post/user/profile")
+        throw Error("NO_DISPLAYNAME")
       else next()
     else throw Error("NOT_LOGGED_IN")
   }
-  app.get("/check", (req: Request, res: Response) => {
-    console.log(req.session)
-
-    res.json(req.user)
-  })
 
   app.get("/auth/google", google.redirect)
   app.get("/auth/google/callback", google.callback)
@@ -61,6 +79,7 @@ export const init = app => {
 
   // Routes
   app.postAsync("/get/media/:url", authenticate, getSiteImages)
+  app.postAsync("/get/media/", authenticate, getSiteImages)
 
   app.getAsync("/get/tags", getTags)
 

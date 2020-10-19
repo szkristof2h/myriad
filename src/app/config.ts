@@ -1,5 +1,5 @@
 export default {
   url: `${process.env.SITE_URL}${
-    process.env.NODE_ENV !== "production" ? ":" + process.env.PORT : ""
-  }`
-};
+    process.env.SITE_URL?.includes("localhost") ? ":" + process.env.PORT : ""
+  }`,
+}

@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import theme from "../theme"
-import { Header, Error } from "../Typography/Typography.style"
+import { Header, Error, Warning } from "../Typography/Typography.style"
 import SubmitButton from "../components/Button/Submit/styles"
 import Input from "../components/Input/styles"
 
@@ -51,5 +51,8 @@ export const Submit = styled.div({
   },
   [`${Header}, ${Error}, ${Input}`]: {
     gridColumn: "span 3",
+  },
+  [`${Warning}`]: {
+    wordBreak: "break-all",
   },
 })

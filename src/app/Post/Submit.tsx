@@ -41,9 +41,10 @@ const Submit: FC<Props> = () => {
     register,
     setValue,
     trigger,
+    watch,
   } = useForm({ mode: "all", reValidateMode: "onChange" })
+  const fieldUrl = watch("url", "")
   const { touched: isTouched } = formState
-  const { url: fieldUrl = "" } = getValues()
   const [fieldTag, setFieldTag] = useState("")
   const [images, setImages] = useState<string[]>([])
   const [selectedImages, setSelectedImages] = useState<string[]>([])
@@ -53,11 +54,13 @@ const Submit: FC<Props> = () => {
   const { data: imageData, isLoading: isMediaLoading } = useGetData<
     PostGetMediaData
   >(
-    `media/${fieldUrl
-      .split("")
-      .map(ch => ch.charCodeAt(0))
-      .join("")}`,
-    { url: `${idYoutube ? idYoutube : fieldUrl}` }
+    isURL(fieldUrl)
+      ? `media/${fieldUrl
+          .split("")
+          .map(ch => ch.charCodeAt(0))
+          .join("")}`
+      : "",
+    { url: fieldUrl }
   )
   const {
     isLoading: isLoadingSubmit,
@@ -125,6 +128,8 @@ const Submit: FC<Props> = () => {
   }
 
   const onSubmit = async formData => {
+    if (!!getValidationError() || isLoadingSubmit) return
+
     const { description, title, url } = formData
 
     const variables = {
@@ -315,7 +320,7 @@ const Submit: FC<Props> = () => {
                       setTags(
                         tags
                           .split(",")
-                          .filter(tag => tag !== tag)
+                          .filter(filteredTag => tag !== filteredTag)
                           .join(",")
                       )
                     }
