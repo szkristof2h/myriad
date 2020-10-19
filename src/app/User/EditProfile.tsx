@@ -1,5 +1,6 @@
 import React, { FC, useState, useContext, useEffect } from "react"
 import { Redirect } from "react-router-dom"
+import isURL from "validator/lib/isURL"
 import * as Styled from "./EditProfile.style"
 import { Button, Input, TextArea } from "../components"
 import { Header } from "../Typography/Typography.style"
@@ -67,11 +68,12 @@ const EditProfile: FC = () => {
   }, [currentUser])
 
   const isNameAvailable = data?.isNameAvailable
-  const hasError = (!displayName && !newDisplayName) || !isNameAvailable
+  const isAvatarValid = !newAvatar || isURL(newAvatar)
+  const hasError =
+    (!displayName && !newDisplayName) || !isNameAvailable || !isAvatarValid
   const handleInput = (value: inputFieldTypes) => {
     if (!isLoading) setNewProfile({ ...newProfile, ...value })
   }
-
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault()
 
@@ -109,8 +111,10 @@ const EditProfile: FC = () => {
         disabled={!!displayName}
       />
       <Header centered>Avatar</Header>
-      {newAvatar && <img className="avatar" src={newAvatar} />}
+      {isAvatarValid && newAvatar && <img className="avatar" src={newAvatar} />}
       <Input
+        hasError={!isAvatarValid}
+        message={"Your avatar isn't a valid url."}
         onChange={e => handleInput({ avatar: e.currentTarget.value })}
         value={newAvatar}
       />
