@@ -38,6 +38,7 @@ I started working on this project to learn, experiment and practice with new fea
  2. Create better loader component(s) to use with suspense
  3. Implement unit testing
  1. Fix the css mess ~~(currently in the process of refactoring components to use CSS-in-JS) (2020)~~
+ 1. Fix the monster `Submit.tsx`
  4. Experiment with webpack for better performance
  1. ~~Convert js -> ts on the backend (*in progress*)~~ (2020. 09. 14.)
  6. ~~Try coming up with a better solution for handling requests~~
