@@ -62,13 +62,32 @@ const getConversations = async (req: Request, res: Response) => {
     .skip(Number(skip))
     .lean()
     .exec()
-  const messages: CommentModel[] = await Comment.where("idParent")
-    .in(conversations.map(conversation => conversation._id))
-    .sort({ updatedAt: -1 })
-    .limit(1)
-    .select("idParent text idUser")
-    .lean()
+  const messages: {
+    _id: string
+    lastMessage: {
+      idParent: string
+      text: string
+      idUser: string
+      createdAt: string
+    }[]
+  }[] = await Comment.aggregate()
+    .match({
+      idParent: { $in: conversations.map(conversation => conversation._id) },
+    })
+    .sort("-updatedAt")
+    .group({
+      _id: "$idParent",
+      conversations: {
+        $push: {
+          text: "$text",
+          idUser: "idUser",
+          createdAt: "$createdAt",
+        },
+      },
+    })
+    .project({ lastMessage: { $slice: ["$conversations", 1] } })
     .exec()
+
   const userNames: { _id: string; displayName: string }[] = await User.where(
     "_id"
   )
@@ -80,14 +99,16 @@ const getConversations = async (req: Request, res: Response) => {
     .exec()
   const messagessWithUserNames = messages.map(message => ({
     ...message,
-    userName: userNames.find(userName => userName._id === message.idUser)
-      ?.displayName,
+    userName: userNames.find(
+      userName => userName._id === message.lastMessage[0].idUser
+    )?.displayName,
   }))
   const conversationsWithMessages = conversations.map(conversation => {
     const { _id, _v, ...conversationWithout_id } = conversation
     const message = messagessWithUserNames.find(
-      message => message.idParent.toString() === _id.toString()
+      message => message._id.toString() === _id.toString()
     )
+
     const conversationPartner =
       userNames.find(userName =>
         conversation.idUsers
@@ -101,7 +122,7 @@ const getConversations = async (req: Request, res: Response) => {
       conversationPartner,
       id: _id,
       displayName: message?.userName ?? "",
-      text: message?.text ?? "",
+      text: message?.lastMessage[0].text ?? "",
     }
   })
 
