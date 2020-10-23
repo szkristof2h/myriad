@@ -26,6 +26,13 @@ interface PostSubmitVariables {
   tags: string
 }
 
+interface FormData {
+  description: string
+  link: string
+  title: string
+  url: string
+}
+
 interface Props {}
 
 const FIELD_NAMES = ["description", "tag", "title", "url"]
@@ -127,7 +134,7 @@ const Submit: FC<Props> = () => {
     setSelectedImages([])
   }
 
-  const onSubmit = async formData => {
+  const onSubmit = async (formData: FormData) => {
     if (!!getValidationError() || isLoadingSubmit) return
 
     const { description, title, url } = formData
@@ -202,7 +209,10 @@ const Submit: FC<Props> = () => {
   return (
     <Box style={{ width: "100%" }}>
       <Styled.Submit>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          onKeyPress={e => e.key === "Enter" && e.preventDefault()}
+        >
           <Header size={2} centered>
             Submit a post!
           </Header>
