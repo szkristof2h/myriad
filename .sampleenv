@@ -1,4 +1,4 @@
-PORT=8080
+PORT=3000
 SITE_URL=http://localhost
 MONGO=
 SESSION_SECRET=
