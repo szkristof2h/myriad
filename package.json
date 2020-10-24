@@ -1,6 +1,6 @@
 {
   "name": "myriad",
-  "version": "3.68.2",
+  "version": "3.69.0",
   "description": "-",
   "author": "Kristof Szöllösi",
   "license": "ISC",
@@ -9,7 +9,7 @@
     "build": "webpack --config src/webpack/webpack.prod.js",
     "clean": "rimraf src/dist",
     "precommit": "set NODE_ENV=production",
-    "dev": "set NODE_ENV=development&& npm run clean && npm run tsc && node -r esm -r dotenv/config src/dist/server/server.js",
+    "dev": "set NODE_ENV=development&& npm run clean && npm run tsc && nodemon --config nodemon.json -r esm -r dotenv/config src/dist/server/server.js",
     "start": "set NODE_ENV=production&& npm run clean && npm run tsc && npm run build && node -r esm -r dotenv/config src/dist/server/server.js",
     "tsc": "tsc",
     "type-check": "tsc --noEmit"
@@ -33,6 +33,7 @@
     "express-session": "^1.17.0",
     "google-auth-library": "^6.0.2",
     "mongoose": "^5.9.5",
+    "nodemon": "^2.0.6",
     "pretty-quick": "^2.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
