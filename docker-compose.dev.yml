@@ -1,0 +1,6 @@
+version: "3.8"
+services:
+  main:
+    environment:
+      - NODE_ENV=development
+    command: bash -c 'npm run dev'
