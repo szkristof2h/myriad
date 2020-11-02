@@ -46,7 +46,6 @@ if (process.env.NODE_ENV !== "production") {
 
   app.use(
     require("webpack-dev-middleware")(compiler, {
-      noInfo: true,
       publicPath: "/",
     })
   )
