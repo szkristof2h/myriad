@@ -1,7 +1,9 @@
 .PHONY: logs # ignore existing files and directories
 
 build:
-	docker-compose -f docker-compose.yml run
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
+build-prod:
+	docker-compose -f docker-compose.yml build --no-cache
 
 up:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
