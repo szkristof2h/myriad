@@ -2,16 +2,16 @@ import mongoose from "mongoose"
 import session from "express-session"
 
 const MongoStore = require("connect-mongo")(session)
+const url =
+  process.env.NODE_ENV === "production"
+    ? process.env.MONGO
+    : process.env.MONGO_DEV
 
 export default app => {
-  mongoose.connect(
-    `${process.env.MONGO}`,
-    { useNewUrlParser: true, dbName: "myriad" },
-    e => {
-      if (e) console.log("Error connecting mongo database:" + e)
-      else console.log("Connected to mongo database")
-    }
-  )
+  mongoose.connect(`${url}`, { useNewUrlParser: true, dbName: "myriad" }, e => {
+    if (e) console.log("Error connecting mongo database:" + e)
+    else console.log("Connected to mongo database")
+  })
 
   app.use(
     session({

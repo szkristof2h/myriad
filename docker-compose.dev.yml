@@ -4,3 +4,11 @@ services:
     environment:
       - NODE_ENV=development
     command: bash -c 'npm run dev'
+  mongo:
+    container_name: mongo
+    image: mongo
+    env_file: .env
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27017:27017"
