@@ -15,4 +15,5 @@ down:
 logs:
 	docker-compose logs -f main
 
-install: down build up
+install:
+	docker-compose run --rm main npm install
