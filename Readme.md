@@ -34,9 +34,9 @@ I started working on this project to learn, experiment and practice with new fea
 ## Roadmap (mostly in order of importance, finished ones at the end of the list)
  1. Test & fix bugs after re-deployment (the site is up at heroku once again mostly functional, but there're still some issues to work out)
  3. Implement unit testing
-   1. Add MongoDB container *in progress*
-   2. Generate mock data for DB *in progress*
-   3. Write tests for controllers
+    1. Add MongoDB container *in progress*
+    2. Generate mock data for DB *in progress*
+    3. Write tests for controllers
  1. Make tags better and creating some kind of browsing component (*on hold until **#1** finishes*)
  1. Implement facebook and twitter social login
  1. Improve Profile page
