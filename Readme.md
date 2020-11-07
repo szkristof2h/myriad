@@ -19,6 +19,7 @@
 This means that, although each of the more popular posts fill up a larger area by themselves, the overall number of less popular posts will always be higher. This hopefully creates better balance between the tiers.
 
 ## Frameworks, libraries, etc
+ - Docker
  - Typescript
  - Node.js
  - Express
@@ -32,15 +33,18 @@ I started working on this project to learn, experiment and practice with new fea
 
 ## Roadmap (mostly in order of importance, finished ones at the end of the list)
  1. Test & fix bugs after re-deployment (the site is up at heroku once again mostly functional, but there're still some issues to work out)
+ 3. Implement unit testing
+   1. Add MongoDB container *in progress*
+   2. Generate mock data for DB *in progress*
+   3. Write tests for controllers
  1. Make tags better and creating some kind of browsing component (*on hold until **#1** finishes*)
  1. Implement facebook and twitter social login
  1. Improve Profile page
  2. Create better loader component(s) to use with suspense
- 3. Implement unit testing
  1. Fix the css mess ~~(currently in the process of refactoring components to use CSS-in-JS) (2020)~~
  1. Fix the monster `Submit.tsx`
  4. Experiment with webpack for better performance
- 1. ~~Convert js -> ts on the backend (*in progress*)~~ (2020. 09. 14.)
+ 1. ~~Convert js -> ts on the backend~~ (2020. 09. 14.)
  6. ~~Try coming up with a better solution for handling requests~~
     1. ~~*Backend*: Create error handler for each request~~ 
     1. ~~*Frontend*: Come up with a better way to handle `isLoading` and `cancel()` (`axios`)~~
@@ -49,6 +53,7 @@ I started working on this project to learn, experiment and practice with new fea
  2. ~~Add option to embed youtube videos~~ (2019)
 
 ## Known issues
+ 1. I've finally introduced Docker to the repo, but there's still a lot learning ahead of me so there's bound to be issues with the current setup
  1. I'm still very much in the process of learning typescript, so types, interfaces, etc might not be consistent & they might have issues
  1. Some pages are really slow to load: investigate what causes the performance issues
  2. Opened youtube video posts' main area isn't responsive
