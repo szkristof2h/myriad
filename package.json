@@ -1,6 +1,6 @@
 {
   "name": "myriad",
-  "version": "4.5.2",
+  "version": "4.5.3",
   "description": "-",
   "author": "Kristof Szöllösi",
   "license": "ISC",
@@ -9,8 +9,8 @@
     "build": "webpack --config src/webpack/webpack.prod.js",
     "clean": "rimraf src/dist",
     "precommit": "set NODE_ENV=production",
-    "dev": "set NODE_ENV=development && npm run clean && npm run tsc && nodemon -L --config nodemon.json -r esm -r dotenv/config src/dist/server/server.js",
-    "start": "npm run clean && npm run tsc && npm run build && node -r esm -r dotenv/config src/dist/server/server.js",
+    "dev": "set NODE_ENV=development && npm run clean && nodemon --config nodemon.json",
+    "start": "npm run clean && npm run build && ts-node -r esm -r dotenv/config src/server/server.ts",
     "tsc": "tsc",
     "type-check": "tsc --noEmit"
   },
@@ -44,6 +44,7 @@
     "rimraf": "^3.0.2",
     "sanitize-html": "^2.1.1",
     "styled-components": "^5.1.1",
+    "ts-node": "^9.0.0",
     "validator": "^13.0.0"
   },
   "devDependencies": {

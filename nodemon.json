@@ -3,5 +3,7 @@
       "src/server",
       ".env"
     ],
-    "ext": "js,ts,tsx,json"
+    "ext": "js,ts,tsx,json",
+    "exec": "ts-node -r esm -r dotenv/config src/server/server.ts",
+    "legacyWatch": true
   }

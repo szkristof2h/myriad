@@ -59,5 +59,8 @@
     "**/*.ts",
     "**/*.tsx",
     "custom.d.ts"
-  ]
+  ],
+  "ts-node": {
+    "files": true
+  },
 }

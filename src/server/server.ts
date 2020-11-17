@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 if (process.env.NODE_ENV !== "production") {
   // Use webpack-dev-middleware if in development mode
   const webpack = require("webpack")
-  const webpackConfig = require("../../webpack/webpack.dev")
+  const webpackConfig = require("../webpack/webpack.dev")
 
   const compiler = webpack(webpackConfig)
 
@@ -67,7 +67,7 @@ if (process.env.NODE_ENV !== "production") {
   console.log(`Using webpack! (${process.env.NODE_ENV})`)
 }
 
-const DIST_DIR = path.join(__dirname, "../bundles")
+const DIST_DIR = path.join(__dirname, "..", "dist")
 const HTML_FILE = path.join(DIST_DIR, "index.html")
 const PORT = process.env.PORT || 3000
 

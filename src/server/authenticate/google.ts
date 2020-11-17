@@ -1,8 +1,8 @@
 import { Request, Response } from "express"
 import { OAuth2Client } from "google-auth-library"
 import url from "url"
-import User from "../db/models/User.js"
-import config from "../../app/config.js"
+import User from "../db/models/User"
+import config from "../../app/config"
 
 const siteUrl = config.url
 const idClient = process.env.GOOGLE_CLIENT_ID
